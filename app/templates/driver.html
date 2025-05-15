@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced Dashboard</title>
+  <title>Drivers Management</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
@@ -15,9 +17,7 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 <div class="flex flex-col md:flex-row h-screen overflow-hidden">
     <!-- Sidebar -->
-    <!-- Add Lucide Icons CDN in <head> if not already -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
 
     <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
       <div class="text-xl font-bold flex items-center space-x-2">
@@ -66,37 +66,39 @@
 
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
-    <!-- Users Table Section -->
-    <section id="users" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+    <!-- Drivers Table Section -->
+    <section id="drivers" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
-        <h3 class="text-xl font-bold">Users Management</h3>
+        <h3 class="text-xl font-bold">Drivers Management</h3>
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="openAddUserModal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-1">
-            <i data-lucide="plus" class="w-4 h-4"></i> Add User
+          <button onclick="openAddDriverModal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-1">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Driver
           </button>
-          <input type="text" id="userSearch" placeholder="Search users..." class="border rounded px-2 py-1 text-sm text-black">
-          <button onclick="exportUsersExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
-          <button onclick="exportUsersPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+          <input type="text" id="driverSearch" placeholder="Search drivers..." class="border rounded px-2 py-1 text-sm text-black">
+          <button onclick="exportDriversExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
+          <button onclick="exportDriversPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table id="usersTable" class="w-full text-left text-sm">
+        <table id="driversTable" class="w-full text-left text-sm">
           <thead>
             <tr class="border-b dark:border-gray-700">
               <th class="py-2">ID</th>
+              <th>Last Name</th>
+              <th>First Name</th>
+              <th>CNI</th>
               <th>Email</th>
-              <th>Username</th>
-              <th>Status</th>
+              <th>Matricule</th>
               <th>Created At</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="usersBody"></tbody>
+          <tbody id="driversBody"></tbody>
         </table>
       </div>
       <div class="mt-4 flex justify-between items-center">
-        <div class="text-sm text-gray-500 dark:text-gray-400" id="usersCount"></div>
-        <div class="flex space-x-2" id="usersPagination"></div>
+        <div class="text-sm text-gray-500 dark:text-gray-400" id="driversCount"></div>
+        <div class="flex space-x-2" id="driversPagination"></div>
       </div>
     </section>
 
@@ -105,11 +107,11 @@
       <h3 class="text-xl font-bold mb-2">Statistics</h3>
       <div class="flex flex-col md:flex-row md:space-x-4">
         <div class="w-full md:w-1/2">
-          <h4 class="text-md font-semibold mb-1">User Growth</h4>
+          <h4 class="text-md font-semibold mb-1">Driver Growth</h4>
           <canvas id="lineChart" class="w-full h-64"></canvas>
         </div>
         <div class="w-full md:w-1/2 mt-4 md:mt-0">
-          <h4 class="text-md font-semibold mb-1">Status Distribution</h4>
+          <h4 class="text-md font-semibold mb-1">Driver Distribution</h4>
           <canvas id="pieChart" class="mx-auto" style="width: 200px; height: 300px;"></canvas>
         </div>
       </div>
@@ -135,7 +137,7 @@
             <div class="flex items-start space-x-4 relative">
             <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
             <div class="ml-2">
-                <p class="font-medium">New user registered</p>
+                <p class="font-medium">New driver registered</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
             </div>
             </div>
@@ -164,7 +166,7 @@
         <div class="grid grid-cols-2 gap-2">
             <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
             <i data-lucide="user-plus" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs">Add User</span>
+            <span class="text-xs">Add Driver</span>
             </button>
             <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
             <i data-lucide="settings" class="w-5 h-5 mb-1"></i>
@@ -183,59 +185,65 @@
     </aside>
 </div>
 
-<!-- Add User Modal -->
-<div id="addUserModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+<!-- Add Driver Modal -->
+<div id="addDriverModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
   <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New User</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the user details below</p>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New Driver</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the driver details below</p>
         </div>
-        <button onclick="closeAddUserModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button onclick="closeAddDriverModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
       
-      <form id="addUserForm" class="space-y-4">
+      <form id="addDriverForm" class="space-y-4">
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+          <label for="nom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+          <input type="text" id="nom" required 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="Doe">
+        </div>
+        
+        <div>
+          <label for="prenom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+          <input type="text" id="prenom" required 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="John">
+        </div>
+        
+        <div>
+          <label for="cni" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CNI Number</label>
+          <input type="text" id="cni" required 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="1234567890">
+        </div>
+        
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
           <input type="email" id="email" required 
                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="user@example.com">
+                 placeholder="driver@example.com">
         </div>
         
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
-          <input type="text" id="username" 
+          <label for="matricule" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Matricule</label>
+          <input type="text" id="matricule" required 
                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="username">
-        </div>
-        
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <input type="password" id="password" required 
-                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="••••••••">
-        </div>
-        
-        <div>
-          <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-          <select id="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700">
-            <option value="active">Active</option>
-            <option value="disabled">Disabled</option>
-          </select>
+                 placeholder="DRV001">
         </div>
         
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" onclick="closeAddUserModal()" 
+          <button type="button" onclick="closeAddDriverModal()" 
                   class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
             Cancel
           </button>
           <button type="submit" 
                   class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
             <i data-lucide="user-plus" class="w-4 h-4"></i>
-            Add User
+            Add Driver
           </button>
         </div>
       </form>
@@ -250,7 +258,7 @@
       <div class="flex justify-between items-center mb-6">
         <div>
           <h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this user?</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this driver?</p>
         </div>
         <button onclick="closeConfirmDeleteModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
@@ -273,11 +281,11 @@
 </div>
 
 <script>
-  // Global variables for users table
-  let allUsers = [];
-  const usersPerPage = 5;
-  let currentUsersPage = 1;
-  let userToDelete = null;
+  // Global variables for drivers table
+  let allDrivers = [];
+  const driversPerPage = 5;
+  let currentDriversPage = 1;
+  let driverToDelete = null;
   
   // Check authentication on page load
   document.addEventListener('DOMContentLoaded', () => {
@@ -286,15 +294,15 @@
           window.location.href = '/login';
           return;
       }
-      fetchUsers();
+      fetchDrivers();
       initCharts();
   });
   
-  // Fetch users from API
-  async function fetchUsers() {
+  // Fetch drivers from API
+  async function fetchDrivers() {
       try {
           const token = localStorage.getItem('access_token');
-          const response = await fetch('/user/', {
+          const response = await fetch('/driver/', {
               headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
@@ -308,71 +316,63 @@
           }
   
           if (!response.ok) {
-              throw new Error('Failed to fetch users');
+              throw new Error('Failed to fetch drivers');
           }
   
-          allUsers = await response.json();
-          // Add status to users (assuming your API doesn't return this)
-          allUsers = allUsers.map(user => ({
-              ...user,
-              status: Math.random() > 0.3 ? 'active' : 'disabled'
-          }));
-          renderUsersTable();
+          allDrivers = await response.json();
+          renderDriversTable();
       } catch (error) {
           console.error('Error:', error);
-          alert('Error loading users. Please try again.');
+          alert('Error loading drivers. Please try again.');
       }
   }
   
-  // Render users table
-  function renderUsersTable() {
-      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-      const filteredUsers = allUsers.filter(user => 
-          user.email.toLowerCase().includes(searchTerm) || 
-          (user.username && user.username.toLowerCase().includes(searchTerm))
+  // Render drivers table
+  function renderDriversTable() {
+      const searchTerm = document.getElementById('driverSearch').value.toLowerCase();
+      const filteredDrivers = allDrivers.filter(driver => 
+          driver.nom.toLowerCase().includes(searchTerm) || 
+          driver.prenom.toLowerCase().includes(searchTerm) ||
+          driver.cni.toLowerCase().includes(searchTerm) ||
+          driver.email.toLowerCase().includes(searchTerm) ||
+          driver.matricule.toLowerCase().includes(searchTerm)
       );
   
-      const start = (currentUsersPage - 1) * usersPerPage;
-      const paginatedUsers = filteredUsers.slice(start, start + usersPerPage);
+      const start = (currentDriversPage - 1) * driversPerPage;
+      const paginatedDrivers = filteredDrivers.slice(start, start + driversPerPage);
   
-      const usersBody = document.getElementById('usersBody');
-      usersBody.innerHTML = paginatedUsers.length > 0 ? 
-          paginatedUsers.map(user => `
-              <tr class="border-b dark:border-gray-700" data-id="${user.id}">
-                  <td class="py-2">${user.id}</td>
-                  <td>${user.email}</td>
-                  <td>${user.username || 'N/A'}</td>
-                  <td>
-                    <span class="px-2 py-1 text-xs rounded-full ${
-                      user.status === 'active' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }">
-                      ${user.status}
-                    </span>
-                  </td>
-                  <td>${new Date(user.created_at).toLocaleString()}</td>
+      const driversBody = document.getElementById('driversBody');
+      driversBody.innerHTML = paginatedDrivers.length > 0 ? 
+          paginatedDrivers.map(driver => `
+              <tr class="border-b dark:border-gray-700" data-id="${driver.id}">
+                  <td class="py-2">${driver.id}</td>
+                  <td>${driver.nom}</td>
+                  <td>${driver.prenom}</td>
+                  <td>${driver.cni}</td>
+                  <td>${driver.email}</td>
+                  <td>${driver.matricule}</td>
+                  <td>${new Date(driver.created_at).toLocaleString()}</td>
                   <td>
                       <button class="text-blue-500 hover:underline mr-2">Edit</button>
-                      <button onclick="openConfirmDeleteModal(${user.id})" class="text-red-500 hover:underline">Delete</button>
+                      <button onclick="openConfirmDeleteModal(${driver.id})" class="text-red-500 hover:underline">Delete</button>
                   </td>
               </tr>
           `).join('') : 
-          `<tr><td colspan="6" class="text-center py-4">No users found</td></tr>`;
+          `<tr><td colspan="8" class="text-center py-4">No drivers found</td></tr>`;
   
       // Update count display
-      document.getElementById('usersCount').textContent = 
-          `Showing ${start + 1}-${Math.min(start + usersPerPage, filteredUsers.length)} of ${filteredUsers.length} users`;
+      document.getElementById('driversCount').textContent = 
+          `Showing ${start + 1}-${Math.min(start + driversPerPage, filteredDrivers.length)} of ${filteredDrivers.length} drivers`;
   
       // Render pagination
-      const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-      const paginationContainer = document.getElementById('usersPagination');
+      const totalPages = Math.ceil(filteredDrivers.length / driversPerPage);
+      const paginationContainer = document.getElementById('driversPagination');
       paginationContainer.innerHTML = '';
       
       // Previous button
-      if (currentUsersPage > 1) {
+      if (currentDriversPage > 1) {
           paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${currentUsersPage - 1};renderUsersTable();" 
+              <button onclick="currentDriversPage=${currentDriversPage - 1};renderDriversTable();" 
                       class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
                   Previous
               </button>
@@ -381,7 +381,7 @@
       
       // Page numbers
       const maxVisiblePages = 5;
-      let startPage = Math.max(1, currentUsersPage - Math.floor(maxVisiblePages / 2));
+      let startPage = Math.max(1, currentDriversPage - Math.floor(maxVisiblePages / 2));
       let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
       
       if (endPage - startPage + 1 < maxVisiblePages) {
@@ -390,17 +390,17 @@
       
       for (let i = startPage; i <= endPage; i++) {
           paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${i};renderUsersTable();" 
-                      class="px-3 py-1 rounded ${i === currentUsersPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">
+              <button onclick="currentDriversPage=${i};renderDriversTable();" 
+                      class="px-3 py-1 rounded ${i === currentDriversPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">
                   ${i}
               </button>
           `;
       }
       
       // Next button
-      if (currentUsersPage < totalPages) {
+      if (currentDriversPage < totalPages) {
           paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${currentUsersPage + 1};renderUsersTable();" 
+              <button onclick="currentDriversPage=${currentDriversPage + 1};renderDriversTable();" 
                       class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
                   Next
               </button>
@@ -408,35 +408,35 @@
       }
   }
   
-  // Search functionality for users
-  document.getElementById('userSearch').addEventListener('input', () => {
-      currentUsersPage = 1;
-      renderUsersTable();
+  // Search functionality for drivers
+  document.getElementById('driverSearch').addEventListener('input', () => {
+      currentDriversPage = 1;
+      renderDriversTable();
   });
 
   // Modal functions
-  function openAddUserModal() {
-    const modal = document.getElementById('addUserModal');
+  function openAddDriverModal() {
+    const modal = document.getElementById('addDriverModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
   
-  function closeAddUserModal() {
-    const modal = document.getElementById('addUserModal');
+  function closeAddDriverModal() {
+    const modal = document.getElementById('addDriverModal');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
   }
   
   // Delete confirmation modal functions
-  function openConfirmDeleteModal(userId) {
-    userToDelete = userId;
+  function openConfirmDeleteModal(driverId) {
+    driverToDelete = driverId;
     const modal = document.getElementById('confirmDeleteModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
   
   function closeConfirmDeleteModal() {
-    userToDelete = null;
+    driverToDelete = null;
     const modal = document.getElementById('confirmDeleteModal');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
@@ -444,11 +444,11 @@
   
   // Handle delete confirmation
   document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
-    if (!userToDelete) return;
+    if (!driverToDelete) return;
     
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/user/${userToDelete}`, {
+      const response = await fetch(`/driver/${driverToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -463,32 +463,32 @@
       }
       
       if (!response.ok) {
-        throw new Error('Failed to delete user');
+        throw new Error('Failed to delete driver');
       }
       
-      // Remove the user from the local array
-      allUsers = allUsers.filter(user => user.id !== userToDelete);
+      // Remove the driver from the local array
+      allDrivers = allDrivers.filter(driver => driver.id !== driverToDelete);
       
       // Close the modal
       closeConfirmDeleteModal();
       
       // Refresh the table
-      currentUsersPage = 1;
-      renderUsersTable();
+      currentDriversPage = 1;
+      renderDriversTable();
       
       // Show success message
-      alert('User deleted successfully!');
+      alert('Driver deleted successfully!');
       
     } catch (error) {
       console.error('Error:', error);
-      alert('Error deleting user. Please try again.');
+      alert('Error deleting driver. Please try again.');
     }
   });
 
   // Close modals when clicking outside
-  document.getElementById('addUserModal').addEventListener('click', function(e) {
+  document.getElementById('addDriverModal').addEventListener('click', function(e) {
     if (e.target === this) {
-      closeAddUserModal();
+      closeAddDriverModal();
     }
   });
 
@@ -499,98 +499,104 @@
   });
 
   // Form submission
-  document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+  document.getElementById('addDriverForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const nom = document.getElementById('nom').value;
+    const prenom = document.getElementById('prenom').value;
+    const cni = document.getElementById('cni').value;
     const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const status = document.getElementById('status').value;
+    const matricule = document.getElementById('matricule').value;
     
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/user/', {
+      const response = await fetch('/driver/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          nom,
+          prenom,
+          cni,
           email,
-          username,
-          password,
-          status
+          matricule
         })
       });
       
       if (!response.ok) {
-        throw new Error('Failed to add user');
+        throw new Error('Failed to add driver');
       }
       
-      const newUser = await response.json();
-      allUsers.unshift({
-        ...newUser,
-        status: status
-      });
+      const newDriver = await response.json();
+      allDrivers.unshift(newDriver);
       
       // Reset form and close modal
-      document.getElementById('addUserForm').reset();
-      closeAddUserModal();
+      document.getElementById('addDriverForm').reset();
+      closeAddDriverModal();
       
       // Refresh the table
-      currentUsersPage = 1;
-      renderUsersTable();
+      currentDriversPage = 1;
+      renderDriversTable();
       
       // Show success message
-      alert('User added successfully!');
+      alert('Driver added successfully!');
       
     } catch (error) {
       console.error('Error:', error);
-      alert('Error adding user. Please try again.');
+      alert('Error adding driver. Please try again.');
     }
   });
 
-  // Export functions for users
-  function exportUsersExcel() {
-      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-      const filteredUsers = allUsers.filter(user => 
-          user.email.toLowerCase().includes(searchTerm) || 
-          (user.username && user.username.toLowerCase().includes(searchTerm))
+  // Export functions for drivers
+  function exportDriversExcel() {
+      const searchTerm = document.getElementById('driverSearch').value.toLowerCase();
+      const filteredDrivers = allDrivers.filter(driver => 
+          driver.nom.toLowerCase().includes(searchTerm) || 
+          driver.prenom.toLowerCase().includes(searchTerm) ||
+          driver.cni.toLowerCase().includes(searchTerm) ||
+          driver.email.toLowerCase().includes(searchTerm) ||
+          driver.matricule.toLowerCase().includes(searchTerm)
       );
 
       // Create a worksheet
-      const ws = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-          ID: user.id,
-          Email: user.email,
-          Username: user.username || 'N/A',
-          Status: user.status,
-          'Created At': new Date(user.created_at).toLocaleString()
+      const ws = XLSX.utils.json_to_sheet(filteredDrivers.map(driver => ({
+          ID: driver.id,
+          'Last Name': driver.nom,
+          'First Name': driver.prenom,
+          'CNI': driver.cni,
+          'Email': driver.email,
+          'Matricule': driver.matricule,
+          'Created At': new Date(driver.created_at).toLocaleString()
       })));
 
       // Create a workbook
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Users");
+      XLSX.utils.book_append_sheet(wb, ws, "Drivers");
 
       // Export to Excel file
-      XLSX.writeFile(wb, "users_export.xlsx");
+      XLSX.writeFile(wb, "drivers_export.xlsx");
   }
 
-  function exportUsersPDF() {
+  function exportDriversPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
       // Title
       doc.setFontSize(18);
-      doc.text('Users List', 14, 15);
+      doc.text('Drivers List', 14, 15);
 
       // Table headers
-      const headers = [['ID', 'Email', 'Username', 'Status', 'Created At']];
-      const data = allUsers.map(user => [
-          user.id,
-          user.email,
-          user.username || 'N/A',
-          user.status,
-          new Date(user.created_at).toLocaleString()
+      const headers = [['ID', 'Last Name', 'First Name', 'CNI', 'Email', 'Matricule', 'Created At']];
+      const data = allDrivers.map(driver => [
+          driver.id,
+          driver.nom,
+          driver.prenom,
+          driver.cni,
+          driver.email,
+          driver.matricule,
+          new Date(driver.created_at).toLocaleString()
       ]);
 
       // Add table
@@ -605,7 +611,7 @@
           }
       });
 
-      doc.save('users_export.pdf');
+      doc.save('drivers_export.pdf');
   }
 
   // Initialize charts
@@ -615,11 +621,11 @@
     new Chart(lineCtx, {
       type: 'line',
       data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        labels: ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'september', 'October', 'November','December'],
         datasets: [
           {
-            label: 'New Users',
-            data: [5, 8, 12, 15, 18, 22],
+            label: 'New Drivers',
+            data: [2, 5, 8, 10, 12, 15],
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
             fill: true,
@@ -639,23 +645,23 @@
       }
     });
 
-    // Pie chart
+    // Pie chart - Example with some dummy data
     const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const activeCount = allUsers.filter(u => u.status === 'active').length;
-    const disabledCount = allUsers.filter(u => u.status === 'disabled').length;
     
     new Chart(pieCtx, {
       type: 'pie',
       data: {
-        labels: ['Active', 'Disabled'],
+        labels: ['Active', 'On Leave', 'Inactive'],
         datasets: [{
-          data: [activeCount, disabledCount],
+          data: [12, 3, 2],
           backgroundColor: [
             'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
             'rgba(239, 68, 68, 0.8)'
           ],
           borderColor: [
             'rgba(16, 185, 129, 1)',
+            'rgba(245, 158, 11, 1)',
             'rgba(239, 68, 68, 1)'
           ],
           borderWidth: 1
@@ -677,10 +683,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-

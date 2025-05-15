@@ -9,10 +9,9 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
-    full_name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    role = Column(String, nullable=False, default="driver")
+    status = Column(String, default="active")
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 ##################################################################################################################
 
@@ -79,6 +78,28 @@ class VehicleTransmission(Base):
     vehicle_transmission = Column(String, nullable=False)
 ##################################################################################################################
 
+""" class Vehicle(Base):
+    __tablename__ = "vehicle"
+    id = Column(Integer, primary_key=True, index=True)
+    make = Column(String, nullable=False)
+    model = Column(String, nullable=False)
+    year = Column(Integer)
+    plate_number = Column(String, unique=True, nullable=False)
+    mileage = Column(Float, default=0.0)
+    engine_size = Column(Float, default=0.0)
+    vehicle_type = Column(String, nullable=False)
+    vehicle_transmission = Column(String, nullable=False)
+    vehicle_fuel_type =  Column(String, nullable=False)
+    vin = Column(String, nullable=False)
+    color = Column(String, nullable=False)
+    purchase_price = Column(Float, default=0.0)
+    purchase_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    status = Column(String, default="available")
+    registration_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) """
+
+
+
+
 class Vehicle(Base):
     __tablename__ = "vehicle"
     id = Column(Integer, primary_key=True, index=True)
@@ -96,7 +117,7 @@ class Vehicle(Base):
     purchase_price = Column(Float, default=0.0)
     purchase_date = Column(Float, default=0.0)
     status = Column(String, default="available")
-    registration_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    registration_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) 
 ##################################################################################################################
 
 class CategoryDocument(Base):

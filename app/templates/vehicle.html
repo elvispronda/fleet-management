@@ -15,9 +15,7 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 <div class="flex flex-col md:flex-row h-screen overflow-hidden">
     <!-- Sidebar -->
-    <!-- Add Lucide Icons CDN in <head> if not already -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
 
     <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
       <div class="text-xl font-bold flex items-center space-x-2">
@@ -59,11 +57,9 @@
       </ul>
     </aside>
     
-    <!-- Call Lucide to load icons -->
     <script>
       lucide.createIcons();
     </script>
-
 
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
@@ -92,171 +88,343 @@
     </div>
 
     <!-- Reports Section -->
-   <!-- Inside the Reports Section -->
-<section id="reports" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
-      <!-- Replaced title with Add button -->
-      <button class="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 text-sm font-semibold">
-        ➕ Add
-      </button>
-      <div class="flex flex-wrap gap-2 items-center">
-        <label for="fromDate" class="text-sm">From:</label>
-        <input type="date" id="fromDate" class="border rounded px-2 py-1 text-sm text-black">
-        <label for="toDate" class="text-sm">To:</label>
-        <input type="date" id="toDate" class="border rounded px-2 py-1 text-sm text-black">
-        <input type="text" id="searchInput" placeholder="Search..." class="border rounded px-2 py-1 text-sm text-black">
-        <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
-        <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+    <section id="reports" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+        <button onclick="openAddVehicleModal()" class="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 text-sm font-semibold">
+          ➕ Add Vehicle
+        </button>
+        <div class="flex flex-wrap gap-2 items-center">
+          <label for="fromDate" class="text-sm">From:</label>
+          <input type="date" id="fromDate" class="border rounded px-2 py-1 text-sm text-black">
+          <label for="toDate" class="text-sm">To:</label>
+          <input type="date" id="toDate" class="border rounded px-2 py-1 text-sm text-black">
+          <input type="text" id="searchInput" placeholder="Search..." class="border rounded px-2 py-1 text-sm text-black">
+          <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
+          <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+        </div>
       </div>
-    </div>
-    <div class="overflow-x-auto">
-      <table id="reportTable" class="w-full text-left text-sm">
-        <thead>
-          <tr class="border-b dark:border-gray-700">
-            <th class="py-1">Date</th>
-            <th>Plate Number</th>
-            <th>Model</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="reportBody"></tbody>
-      </table>
-    </div>
-    <div class="mt-4 flex justify-center space-x-2" id="pagination"></div>
-  </section>
-  
+      <div class="overflow-x-auto">
+        <table id="reportTable" class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b dark:border-gray-700">
+              <th class="py-1">Date</th>
+              <th>Plate Number</th>
+              <th>Model</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reportBody"></tbody>
+        </table>
+      </div>
+      <div class="mt-4 flex justify-center space-x-2" id="pagination"></div>
+    </section>
   </main>
 
   <!-- Right Sidebar -->
-   <!-- Right Sidebar -->
-  <!-- Right sidebar -->
   <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
-      <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center">
       <button id="theme-toggle" class="text-xl">🌙</button>
       <div>
-          <div class="text-sm font-semibold">John Doe</div>
-          <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
+        <div class="text-sm font-semibold">John Doe</div>
+        <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
       </div>
-      </div>
-
-      <!-- Recent Updates with vertical line -->
-      <!-- Recent Updates with Dynamic Vertical Timeline -->
-  <div>
-  <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
-  <div class="flex flex-col space-y-6 relative">
-      <!-- Vertical Line -->
-      <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Order delivered</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
-      </div>
-      </div>
-
-  <!-- Timeline item -->
-  <div class="flex items-start space-x-4 relative">
-    <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-    <div class="ml-2">
-      <p class="font-medium">New user signed up</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p>
     </div>
-  </div>
 
-  <!-- Timeline item -->
-  <div class="flex items-start space-x-4 relative">
-    <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-    <div class="ml-2">
-      <p class="font-medium">Inventory updated</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
+    <!-- Recent Updates -->
+    <div>
+      <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
+      <div class="flex flex-col space-y-6 relative">
+        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">New vehicle was added</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">vehicle number was filled with 100l</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">45 minutes ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Vehicle no was reserved</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Vehicle no got panne</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Backup completed</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
+    <!-- Vehicle Analytics -->
+    <div class="mt-8">
+      <h4 class="font-bold mb-4 text-lg">Vehicle Analytics</h4>
+      <div class="flex flex-col space-y-6 relative">
+        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-green-500"></div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Fuel rate dropped by 12%</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">in the last 2 weeks</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Fuel rate increased by 7%</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">in the last 4 days</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">New vehicle was added</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">3 days ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Panne rate increased +5%</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">this week</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 relative">
+          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
+          <div class="ml-2">
+            <p class="font-medium">Vehicle expenses increased +20%</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">last 10 days</p>
+          </div>
+        </div>
       </div>
-      </div>
-  </div>
-  </div>
-
-
-      <!-- Expenses Analytics -->
-      <!-- Sales Analytics Timeline -->
-  <div class="mt-8">
-  <h4 class="font-bold mb-4 text-lg">Sales Analytics</h4>
-  <div class="flex flex-col space-y-6 relative">
-      <!-- Vertical Line -->
-      <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-green-500"></div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Sales dropped by 12%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">in the last 2 weeks</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Profit increased by 7%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">in the last 4 days</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">New revenue stream added</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">3 days ago</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Customer retention +5%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">this week</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Ad campaign ROI +20%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">last 10 days</p>
-      </div>
-      </div>
-  </div>
-  </div>
+    </div>
   </aside>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div id="addVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">Add New Vehicle</h3>
+        <button onclick="closeAddVehicleModal()" class="text-gray-500 hover:text-gray-700">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      
+      <form id="vehicleForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Basic Information -->
+        <div class="col-span-2">
+          <h4 class="font-semibold mb-2 border-b pb-1">Basic Information</h4>
+        </div>
+        
+        <div>
+          <label for="make" class="block text-sm font-medium mb-1">Make</label>
+          <select id="make" name="make" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="">Select Make</option>
+            <option value="Toyota">Toyota</option>
+            <option value="Ford">Ford</option>
+            <option value="BMW">BMW</option>
+            <option value="Mercedes">Mercedes</option>
+            <option value="Honda">Honda</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="model" class="block text-sm font-medium mb-1">Model</label>
+          <select id="model" name="model" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="">Select Model</option>
+            <option value="Camry">Camry</option>
+            <option value="F-150">F-150</option>
+            <option value="X5">X5</option>
+            <option value="C-Class">C-Class</option>
+            <option value="Accord">Accord</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="year" class="block text-sm font-medium mb-1">Year</label>
+          <input type="number" id="year" name="year" min="1900" max="2099" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="plate_number" class="block text-sm font-medium mb-1">Plate Number</label>
+          <input type="text" id="plate_number" name="plate_number" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="mileage" class="block text-sm font-medium mb-1">Mileage (km)</label>
+          <input type="number" id="mileage" name="mileage" step="0.1" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="engine_size" class="block text-sm font-medium mb-1">Engine Size (L)</label>
+          <input type="number" id="engine_size" name="engine_size" step="0.1" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <!-- Vehicle Specifications -->
+        <div class="col-span-2 mt-4">
+          <h4 class="font-semibold mb-2 border-b pb-1">Specifications</h4>
+        </div>
+        
+        <div>
+          <label for="vehicle_type" class="block text-sm font-medium mb-1">Vehicle Type</label>
+          <select id="vehicle_type" name="vehicle_type" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="">Select Type</option>
+            <option value="Sedan">Sedan</option>
+            <option value="SUV">SUV</option>
+            <option value="Truck">Truck</option>
+            <option value="Van">Van</option>
+            <option value="Coupe">Coupe</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="vehicle_transmission" class="block text-sm font-medium mb-1">Transmission</label>
+          <select id="vehicle_transmission" name="vehicle_transmission" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="">Select Transmission</option>
+            <option value="Automatic">Automatic</option>
+            <option value="Manual">Manual</option>
+            <option value="CVT">CVT</option>
+            <option value="Dual-Clutch">Dual-Clutch</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="vehicle_fuel_type" class="block text-sm font-medium mb-1">Fuel Type</label>
+          <select id="vehicle_fuel_type" name="vehicle_fuel_type" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="">Select Fuel Type</option>
+            <option value="Gasoline">Gasoline</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Electric">Electric</option>
+            <option value="Hybrid">Hybrid</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="color" class="block text-sm font-medium mb-1">Color</label>
+          <input type="text" id="color" name="color" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <!-- Purchase Information -->
+        <div class="col-span-2 mt-4">
+          <h4 class="font-semibold mb-2 border-b pb-1">Purchase Information</h4>
+        </div>
+        
+        <div>
+          <label for="vin" class="block text-sm font-medium mb-1">VIN</label>
+          <input type="text" id="vin" name="vin" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="purchase_price" class="block text-sm font-medium mb-1">Purchase Price ($)</label>
+          <input type="number" id="purchase_price" name="purchase_price" step="0.01" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="purchase_date" class="block text-sm font-medium mb-1">Purchase Date</label>
+          <input type="date" id="purchase_date" name="purchase_date" class="w-full px-3 py-2 border rounded-md text-black" required>
+        </div>
+        
+        <div>
+          <label for="status" class="block text-sm font-medium mb-1">Status</label>
+          <select id="status" name="status" class="w-full px-3 py-2 border rounded-md text-black" required>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="out_of_service">Out of Service</option>
+          </select>
+        </div>
+        
+        <div class="col-span-2 flex justify-end space-x-4 mt-6">
+          <button type="button" onclick="closeAddVehicleModal()" class="px-4 py-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Save Vehicle
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <!-- Scripts -->
 <script>
+  // Modal functions
+  function openAddVehicleModal() {
+    document.getElementById('addVehicleModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAddVehicleModal() {
+    document.getElementById('addVehicleModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
+  // Form submission
+  document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Collect form data
+    const formData = new FormData(this);
+    const vehicleData = {};
+    formData.forEach((value, key) => {
+      vehicleData[key] = value;
+    });
+    
+    try {
+      // Send data to your backend API
+      const response = await fetch('http://localhost/vehicle/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vehicleData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Close the modal and show success message
+      closeAddVehicleModal();
+      alert('Vehicle added successfully!');
+      
+      // Refresh the table to show the new vehicle
+      renderTable();
+      
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+      alert('Error saving vehicle. Please try again.');
+    }
+  });
+
+  // Table functionality
   const rowsPerPage = 5;
   let currentPage = 1;
   const data = [
-    { date: '2025-05-01', PateNumber: 'P0034A', MODEL: 'BMW', status: 'Available' },
-    { date: '2025-05-02', PateNumber: 'A00TB', MODEL: 'JEEP', status: 'Booked' },
-    { date: '2025-05-03', PateNumber: 'C0B50', MODEL: 'BENZ', status: 'Down' },
+    { date: '2025-05-01', plateNumber: 'P0034A', model: 'BMW', status: 'Available' },
+    { date: '2025-05-02', plateNumber: 'A00TB', model: 'JEEP', status: 'Booked' },
+    { date: '2025-05-03', plateNumber: 'C0B50', model: 'BENZ', status: 'Down' },
     ...Array.from({ length: 50 }, (_, i) => ({
       date: `2025-05-${(i + 4).toString().padStart(2, '0')}`,
-      item: `Product ${String.fromCharCode(65 + (i % 5))}`,
-      amount: `$${(400 + i * 10)}`,
-      status: ['Avaible', 'Booked', 'Down'][i % 3]
+      plateNumber: `P${String.fromCharCode(65 + (i % 5))}${1000 + i}`,
+      model: ['Toyota', 'Ford', 'BMW', 'Mercedes', 'Honda'][i % 5],
+      status: ['Available', 'Booked', 'Down'][i % 3]
     }))
   ];
 
@@ -269,7 +437,7 @@
     const filtered = data.filter(row => {
       const dateMatch = (!fromDate || row.date >= fromDate) && (!toDate || row.date <= toDate);
       const searchMatch = Object.values(row).some(val =>
-        val.toLowerCase().includes(searchText)
+        String(val).toLowerCase().includes(searchText)
       );
       return dateMatch && searchMatch;
     });
@@ -279,7 +447,7 @@
     tbody.innerHTML = paginated.map(row => `
       <tr class="border-b dark:border-gray-700">
         <td>${row.date}</td>
-        <td>${row.palenumber}</td>
+        <td>${row.plateNumber}</td>
         <td>${row.model}</td>
         <td><span class="${row.status === 'Available' ? 'text-green-500' : row.status === 'Booked' ? 'text-yellow-500' : 'text-red-500'}">${row.status}</span></td>
         <td class="space-x-1">
@@ -327,12 +495,17 @@
     doc.save("report.pdf");
   }
 
-   // Theme toggle
-   document.getElementById('theme-toggle').addEventListener('click', () => {
+  // Theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
   });
 
+  // Initialize
   renderTable();
+  lucide.createIcons();
 </script>
 </body>
 </html>
+
+
+

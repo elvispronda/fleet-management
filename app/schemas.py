@@ -5,10 +5,9 @@ from datetime import datetime
 ###################################################################################################################
 class UserBase(BaseModel):
     username: str
-    full_name: str
     email: EmailStr
     password: str
-    role: str
+    status: str
 
 class UserOut(UserBase):
     id: int
@@ -182,7 +181,23 @@ class VehicleBase(BaseModel):
     color: str
     purchase_price: float
     purchase_date: datetime
-    status: str = "available"
+    status: str = "available" 
+
+    """ make: str
+    model: str
+    year: int
+    plate_number: str
+    mileage: float = 0.0
+    engine_size: float
+    vehicle_type: str
+    vehicle_transmission: str
+    vehicle_fuel_type: str
+    vin: str
+    color: str
+    purchase_price: float
+    purchase_date: datetime
+    status: str = "available" 
+ """
 
 class VehicleCreate(VehicleBase):
     pass
