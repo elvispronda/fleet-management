@@ -3,336 +3,464 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced Dashboard</title>
+  <title>Dashboard - Fuel Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
+  <style>
+    .modal { transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+    .modal.hidden { visibility: hidden; opacity: 0; }
+    .modal:not(.hidden) { visibility: visible; opacity: 1; }
+    .dark .modal-content { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.2); }
+    .date-filter-btn.active { background-color: #3b82f6; color: white; }
+    .dark .date-filter-btn.active { background-color: #60a5fa; }
+    .view-detail-label { font-weight: 500; color: #4b5563; }
+    .dark .view-detail-label { color: #d1d5db; }
+    .view-detail-value { color: #1f2937; }
+    .dark .view-detail-value { color: #f9fafb; }
+  </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 <div class="flex flex-col md:flex-row h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <!-- Add Lucide Icons CDN in <head> if not already -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-
-    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
+    <!-- Sidebar (Left) -->
+    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block flex-shrink-0">
       <div class="text-xl font-bold flex items-center space-x-2">
         <i data-lucide="menu" class="w-5 h-5"></i><span>Menu</span>
       </div>
-      <ul class="space-y-4">
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-          <a href="dashboard.html">Dashboard</a>
+      <ul class="space-y-2">
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><a href="#">Dashboard</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-          <a href="analytics.html">Analytics</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i><a href="#">Analytics</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="car" class="w-5 h-5"></i>
-          <a href="vehicle.html">Vehicles</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="car" class="w-5 h-5"></i><a href="#">Vehicles</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="user" class="w-5 h-5"></i>
-          <a href="user.html">Drivers</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="user" class="w-5 h-5"></i><a href="#">Drivers</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="wrench" class="w-5 h-5"></i>
-          <a href="reparation.html">Reparation</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="wrench" class="w-5 h-5"></i><a href="#">Reparation</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="droplet" class="w-5 h-5"></i>
-          <a href="fuel.html">Fuel</a>
+        {/* Active Fuel Link */}
+        <li class="flex items-center space-x-3 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="droplet" class="w-5 h-5"></i><a href="#fuel-section">Fuel</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-          <a href="maintenance.html">Maintenance</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="settings" class="w-5 h-5"></i><a href="#">Maintenance</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="route" class="w-5 h-5"></i>
-          <a href="trip.html">Trip</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="route" class="w-5 h-5"></i><a href="#">Trip</a>
         </li>
       </ul>
     </aside>
     
-    <!-- Call Lucide to load icons -->
-    <script>
-      lucide.createIcons();
-    </script>
-
-
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Sales</h3>
-        <div class="text-2xl font-bold">$12,300</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
-          <span class="text-blue-600 dark:text-blue-300">+15%</span>
+    <!-- Fuel Table Section -->
+    <section id="fuel-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="openAddFuelModal()" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Fuel Record
+          </button>
+          <input type="text" id="fuelSearch" placeholder="Search fuel records..." class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="exportFuelRecordsExcel()" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
+          <button onclick="exportFuelRecordsPDF()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
         </div>
       </div>
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Income</h3>
-        <div class="text-2xl font-bold">$8,900</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
-          <span class="text-green-600 dark:text-green-300">+10%</span>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Expenses</h3>
-        <div class="text-2xl font-bold">$5,400</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-red-100 dark:bg-red-800 flex items-center justify-center">
-          <span class="text-red-600 dark:text-red-300">-5%</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Reports Section -->
-   <!-- Inside the Reports Section -->
-<section id="reports" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
-      <!-- Replaced title with Add button -->
-      <button class="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 text-sm font-semibold">
-        ➕ Add
-      </button>
-      <div class="flex flex-wrap gap-2 items-center">
-        <label for="fromDate" class="text-sm">From:</label>
-        <input type="date" id="fromDate" class="border rounded px-2 py-1 text-sm text-black">
-        <label for="toDate" class="text-sm">To:</label>
-        <input type="date" id="toDate" class="border rounded px-2 py-1 text-sm text-black">
-        <input type="text" id="searchInput" placeholder="Search..." class="border rounded px-2 py-1 text-sm text-black">
-        <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
-        <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium mr-2">Filter Fuel Records by Date:</span>
+        <button id="fuel-filter-today" onclick="applyFuelDateFilter('today')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
+        <button id="fuel-filter-last7" onclick="applyFuelDateFilter('last7days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
+        <button id="fuel-filter-last30" onclick="applyFuelDateFilter('last30days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
+        <button id="fuel-filter-all" onclick="applyFuelDateFilter('all')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
+        <button id="fuel-filter-custom-btn" onclick="toggleFuelCustomDateRange()" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
       </div>
-    </div>
-    <div class="overflow-x-auto">
-      <table id="reportTable" class="w-full text-left text-sm">
-        <thead>
-          <tr class="border-b dark:border-gray-700">
-            <th class="py-1">Date</th>
-            <th>Item</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="reportBody"></tbody>
-      </table>
-    </div>
-    <div class="mt-4 flex justify-center space-x-2" id="pagination"></div>
-  </section>
-  
+      <div id="fuelCustomDateRange" class="mb-4 hidden items-center gap-2 p-3 border dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
+        <input type="date" id="fuelCustomStartDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <span class="text-sm">to</span>
+        <input type="date" id="fuelCustomEndDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <button onclick="applyFuelCustomDateFilter()" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table id="fuelTable" class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b dark:border-gray-700">
+              <th class="py-3 px-2 font-semibold">ID</th>
+              <th class="px-2 font-semibold">Vehicle</th>
+              <th class="px-2 font-semibold">Fuel Type</th>
+              <th class="px-2 font-semibold">Quantity (L)</th>
+              <th class="px-2 font-semibold">Cost ($)</th>
+              <th class="px-2 font-semibold">Created At</th>
+              <th class="px-2 font-semibold text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fuelBody"></tbody>
+        </table>
+      </div>
+      <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+        <div class="text-sm text-gray-600 dark:text-gray-400" id="fuelCount"></div>
+        <div class="flex items-center space-x-1" id="fuelPagination"></div>
+      </div>
+    </section>
   </main>
 
-  <!-- Right Sidebar -->
-   <!-- Right Sidebar -->
-  <!-- Right sidebar -->
-  <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
-      <div class="flex justify-between items-center">
-      <button id="theme-toggle" class="text-xl">🌙</button>
-      <div>
-          <div class="text-sm font-semibold">John Doe</div>
-          <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
-      </div>
-      </div>
-
-      <!-- Recent Updates with vertical line -->
-      <!-- Recent Updates with Dynamic Vertical Timeline -->
-  <div>
-  <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
-  <div class="flex flex-col space-y-6 relative">
-      <!-- Vertical Line -->
-      <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Order delivered</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
-      </div>
-      </div>
-
-  <!-- Timeline item -->
-  <div class="flex items-start space-x-4 relative">
-    <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-    <div class="ml-2">
-      <p class="font-medium">New user signed up</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p>
-    </div>
-  </div>
-
-  <!-- Timeline item -->
-  <div class="flex items-start space-x-4 relative">
-    <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-    <div class="ml-2">
-      <p class="font-medium">Inventory updated</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
-    </div>
-  </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Backup completed</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
-      </div>
-      </div>
-  </div>
-  </div>
-
-
-      <!-- Expenses Analytics -->
-      <!-- Sales Analytics Timeline -->
-  <div class="mt-8">
-  <h4 class="font-bold mb-4 text-lg">Sales Analytics</h4>
-  <div class="flex flex-col space-y-6 relative">
-      <!-- Vertical Line -->
-      <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-green-500"></div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Sales dropped by 12%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">in the last 2 weeks</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Profit increased by 7%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">in the last 4 days</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">New revenue stream added</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">3 days ago</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Customer retention +5%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">this week</p>
-      </div>
-      </div>
-
-      <!-- Timeline item -->
-      <div class="flex items-start space-x-4 relative">
-      <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-      <div class="ml-2">
-          <p class="font-medium">Ad campaign ROI +20%</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">last 10 days</p>
-      </div>
-      </div>
-  </div>
-  </div>
-  </aside>
+    <!-- Right Sidebar -->
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
+        <div class="flex justify-between items-center">
+        <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
+        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
+        </div>
+        <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New fuel entry</p><p class="text-sm text-gray-500 dark:text-gray-400">Just now</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Fuel prices updated</p><p class="text-sm text-gray-500 dark:text-gray-400">10 minutes ago</p></div></div></div></div>
+        <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="file-plus-2" class="w-5 h-5 mb-1"></i><span class="text-xs">New Report</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="sliders-horizontal" class="w-5 h-5 mb-1"></i><span class="text-xs">Filters</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="help-circle" class="w-5 h-5 mb-1"></i><span class="text-xs">Help</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="log-out" class="w-5 h-5 mb-1"></i><span class="text-xs">Logout</span></button></div></div>
+    </aside>
 </div>
 
-<!-- Scripts -->
+<!-- Add/Edit Fuel Modal -->
+<div id="addFuelModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="fuelModalTitle">Add New Fuel Record</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the fuel details below</p>
+        </div>
+        <button onclick="closeAddFuelModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      <form id="addFuelForm" class="space-y-4">
+        <input type="hidden" id="fuelId_form"> 
+        <div>
+          <label for="fuel_vehicle_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle</label>
+          <select id="fuel_vehicle_id_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <option value="">Select Vehicle</option>
+          </select>
+        </div>
+        <div>
+          <label for="fuel_type_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fuel Type</label>
+          <select id="fuel_type_id_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <option value="">Select Fuel Type</option>
+          </select>
+        </div>
+        <div>
+          <label for="fuel_quantity_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity (e.g., Liters)</label>
+          <input type="number" step="0.01" id="fuel_quantity_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="0.00">
+        </div>
+        <div>
+          <label for="fuel_cost_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Cost</label>
+          <input type="number" step="0.01" id="fuel_cost_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="0.00">
+        </div>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeAddFuelModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+          <button type="submit" id="fuelSubmitButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Fuel Record
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- View Fuel Record Modal -->
+<div id="viewFuelModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Fuel Record Details</h3>
+        <button onclick="closeViewFuelModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      <div id="viewFuelDetails" class="space-y-3 text-sm">
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Record ID:</span><span id="view-fuel-id" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Vehicle:</span><span id="view-fuel-vehicle" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Fuel Type:</span><span id="view-fuel-type" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Quantity:</span><span id="view-fuel-quantity" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Cost:</span><span id="view-fuel-cost" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Recorded At:</span><span id="view-fuel-created_at" class="view-detail-value col-span-2"></span></div>
+      </div>
+      <div class="flex justify-end pt-6">
+          <button type="button" onclick="closeViewFuelModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal for Fuel Record Deletion -->
+<div id="confirmDeleteFuelModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this fuel record?</p></div>
+        <button onclick="closeConfirmDeleteFuelModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      </div>
+      <div class="flex justify-end gap-3 pt-4">
+        <button onclick="closeConfirmDeleteFuelModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+        <button id="confirmDeleteFuelBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
-  const rowsPerPage = 5;
-  let currentPage = 1;
-  const data = [
-    { date: '2025-05-01', item: 'Product A', amount: '$500', status: 'Completed' },
-    { date: '2025-05-02', item: 'Product B', amount: '$750', status: 'Pending' },
-    { date: '2025-05-03', item: 'Product C', amount: '$300', status: 'Failed' },
-    ...Array.from({ length: 50 }, (_, i) => ({
-      date: `2025-05-${(i + 4).toString().padStart(2, '0')}`,
-      item: `Product ${String.fromCharCode(65 + (i % 5))}`,
-      amount: `$${(400 + i * 10)}`,
-      status: ['Completed', 'Pending', 'Failed'][i % 3]
-    }))
-  ];
+  // --- Global Variables for Fuel ---
+  let allFuelRecords = []; const fuelRecordsPerPage = 5; let currentFuelPage = 1;
+  let fuelRecordToEditId = null; let fuelRecordToDeleteId = null;
+  let activeFuelDateFilter = 'all'; let customFuelFilterStartDate = null; let customFuelFilterEndDate = null;
+  
+  // Mock data 
+  const mockVehicles = [{id:1,plate:"XYZ-123"},{id:2,plate:"ABC-789"},{id:3,plate:"CAR-001"},{id:4,plate:"TRK-007"}]; // Reusable
+  const mockFuelTypes = [{id:1, name:"Diesel"}, {id:2, name:"Petrol (95 Octane)"}, {id:3, name:"Petrol (98 Octane)"}, {id:4, name:"Electric"}];
 
-  function renderTable() {
-    const start = (currentPage - 1) * rowsPerPage;
-    const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
 
-    const filtered = data.filter(row => {
-      const dateMatch = (!fromDate || row.date >= fromDate) && (!toDate || row.date <= toDate);
-      const searchMatch = Object.values(row).some(val =>
-        val.toLowerCase().includes(searchText)
-      );
-      return dateMatch && searchMatch;
+  // --- DOMContentLoaded ---
+  document.addEventListener('DOMContentLoaded', () => {
+      initializeFuelSection();
+      lucide.createIcons(); 
+      const themeToggleButton = document.getElementById('theme-toggle');
+      if (themeToggleButton) themeToggleButton.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+      
+      document.getElementById('addFuelModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddFuelModal(); });
+      document.getElementById('viewFuelModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewFuelModal(); });
+      document.getElementById('confirmDeleteFuelModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteFuelModal(); });
+  });
+
+  // --- Date Helper Functions (Generic) ---
+  function getISODateString(date) { return date.toISOString().split('T')[0]; }
+  function getDateRange(filterType) {
+    const today=new Date(); today.setHours(0,0,0,0); let sD=new Date(today); let eD=new Date(today); eD.setHours(23,59,59,999);
+    switch(filterType){ case 'today':break; case 'last7days':sD.setDate(today.getDate()-6);break; case 'last30days':sD.setDate(today.getDate()-29);break; case 'all':return{startDate:null,endDate:null}; default:return{startDate:null,endDate:null};}
+    return{startDate:getISODateString(sD),endDate:getISODateString(eD)};
+  }
+
+  // --- Fuel Section ---
+  function initializeFuelSection() {
+    fetchFuelRecords(); 
+    populateFuelDropdowns();
+    document.getElementById('fuelSearch').addEventListener('input', () => { currentFuelPage = 1; renderFuelTable(); });
+    document.getElementById('addFuelForm').addEventListener('submit', handleFuelFormSubmit);
+    document.getElementById('confirmDeleteFuelBtn').addEventListener('click', confirmDeleteFuelRecord);
+    setActiveFuelDateFilterButton('all');
+  }
+
+  function applyFuelDateFilter(filterType) {
+    activeFuelDateFilter = filterType; customFuelFilterStartDate = null; customFuelFilterEndDate = null;
+    document.getElementById('fuelCustomDateRange').classList.add('hidden');
+    setActiveFuelDateFilterButton(filterType); currentFuelPage = 1; renderFuelTable();
+  }
+  function toggleFuelCustomDateRange() {
+    document.getElementById('fuelCustomDateRange').classList.toggle('hidden');
+    if (!document.getElementById('fuelCustomDateRange').classList.contains('hidden')) setActiveFuelDateFilterButton('fuel-filter-custom-btn');
+    else if (activeFuelDateFilter === 'custom') applyFuelDateFilter('all');
+  }
+  function applyFuelCustomDateFilter() {
+    const sD = document.getElementById('fuelCustomStartDate').value, eD = document.getElementById('fuelCustomEndDate').value;
+    if (!sD || !eD) { alert("Please select dates for Fuel Records."); return; }
+    if (new Date(sD) > new Date(eD)) { alert("Start date > end date for Fuel Records."); return; }
+    activeFuelDateFilter = 'custom'; customFuelFilterStartDate = sD; customFuelFilterEndDate = eD;
+    setActiveFuelDateFilterButton('fuel-filter-custom-btn'); currentFuelPage = 1; renderFuelTable();
+  }
+  function setActiveFuelDateFilterButton(filterId) {
+    document.querySelectorAll('#fuel-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(filterId.startsWith('fuel-filter-') ? filterId : `fuel-filter-${filterId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    if (filterId === 'fuel-filter-custom-btn' || activeFuelDateFilter === 'custom') document.getElementById('fuel-filter-custom-btn').classList.add('active');
+  }
+
+  async function populateFuelDropdowns() {
+    const vehicleSelect = document.getElementById('fuel_vehicle_id_form');
+    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
+    mockVehicles.forEach(v => { const o=document.createElement('option'); o.value=v.id; o.textContent=v.plate; vehicleSelect.appendChild(o); });
+
+    const fuelTypeSelect = document.getElementById('fuel_type_id_form');
+    fuelTypeSelect.innerHTML = '<option value="">Select Fuel Type</option>';
+    mockFuelTypes.forEach(ft => { const o=document.createElement('option'); o.value=ft.id; o.textContent=ft.name; fuelTypeSelect.appendChild(o); });
+  }
+
+  async function fetchFuelRecords() {
+    return new Promise(res => {
+      setTimeout(() => {
+        if (allFuelRecords.length === 0) {
+          const baseTime = Date.now();
+          for (let i = 1; i <= 22; i++) { 
+            const daysAgo = Math.floor(Math.random() * 120); 
+            const createdAt = new Date(baseTime - daysAgo * 24 * 60 * 60 * 1000);
+            allFuelRecords.push({
+              id: i,
+              vehicle_id: mockVehicles[Math.floor(Math.random() * mockVehicles.length)].id,
+              fuel_type_id: mockFuelTypes[Math.floor(Math.random() * mockFuelTypes.length)].id,
+              quantity: parseFloat((Math.random() * 60 + 10).toFixed(2)), // e.g., 10-70 liters
+              cost: parseFloat((Math.random() * 100 + 20).toFixed(2)),     // e.g., $20-$120
+              created_at: createdAt.toISOString()
+            });
+          }
+        }
+        currentFuelPage = 1; renderFuelTable(); res();
+      }, 100);
     });
-
-    const paginated = filtered.slice(start, start + rowsPerPage);
-    const tbody = document.getElementById("reportBody");
-    tbody.innerHTML = paginated.map(row => `
-      <tr class="border-b dark:border-gray-700">
-        <td>${row.date}</td>
-        <td>${row.item}</td>
-        <td>${row.amount}</td>
-        <td><span class="${row.status === 'Completed' ? 'text-green-500' : row.status === 'Pending' ? 'text-yellow-500' : 'text-red-500'}">${row.status}</span></td>
-        <td class="space-x-1">
-          <a href="#" class="text-blue-500 hover:underline">View</a>
-          <a href="#" class="text-yellow-500 hover:underline">Update</a>
-          <a href="#" class="text-red-500 hover:underline">Delete</a>
-        </td>
-      </tr>
-    `).join('');
-
-    const totalPages = Math.ceil(filtered.length / rowsPerPage);
-    const pagination = document.getElementById("pagination");
-    pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => `
-      <button class="px-2 py-1 rounded ${i + 1 === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}"
-        onclick="currentPage=${i + 1};renderTable();">${i + 1}</button>
-    `).join('');
   }
 
-  document.getElementById('searchInput').addEventListener('input', () => {
-    currentPage = 1;
-    renderTable();
-  });
+  function renderFuelTable() {
+    let recordsToDisplay = [...allFuelRecords];
+    if (activeFuelDateFilter !== 'all') {
+      let range = (activeFuelDateFilter === 'custom' && customFuelFilterStartDate && customFuelFilterEndDate) ? 
+                  { startDate: customFuelFilterStartDate, endDate: customFuelFilterEndDate } : 
+                  getDateRange(activeFuelDateFilter);
+      if (range.startDate && range.endDate) {
+        recordsToDisplay = recordsToDisplay.filter(r => {
+          const recordDate = getISODateString(new Date(r.created_at)); // Filter by created_at
+          return recordDate >= range.startDate && recordDate <= range.endDate;
+        });
+      }
+    }
+    const searchTerm = document.getElementById('fuelSearch').value.toLowerCase();
+    if (searchTerm) {
+      recordsToDisplay = recordsToDisplay.filter(r =>
+        (r.id && r.id.toString().includes(searchTerm)) ||
+        (mockVehicles.find(v => v.id === r.vehicle_id)?.plate.toLowerCase().includes(searchTerm)) ||
+        (mockFuelTypes.find(ft => ft.id === r.fuel_type_id)?.name.toLowerCase().includes(searchTerm)) ||
+        (r.quantity && r.quantity.toString().includes(searchTerm)) ||
+        (r.cost && r.cost.toString().includes(searchTerm))
+      );
+    }
 
-  document.getElementById('fromDate').addEventListener('change', () => {
-    currentPage = 1;
-    renderTable();
-  });
-
-  document.getElementById('toDate').addEventListener('change', () => {
-    currentPage = 1;
-    renderTable();
-  });
-
-  function exportExcel() {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, 'Reports');
-    XLSX.writeFile(wb, 'report.xlsx');
+    const start = (currentFuelPage - 1) * fuelRecordsPerPage;
+    const paginatedRecords = recordsToDisplay.slice(start, start + fuelRecordsPerPage);
+    const fuelBody = document.getElementById('fuelBody');
+    fuelBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(r => {
+      const vehiclePlate = mockVehicles.find(v => v.id === r.vehicle_id)?.plate || r.vehicle_id;
+      const fuelTypeName = mockFuelTypes.find(ft => ft.id === r.fuel_type_id)?.name || r.fuel_type_id;
+      
+      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${r.id}">
+                <td class="py-3 px-2">${r.id}</td>
+                <td class="px-2">${vehiclePlate}</td>
+                <td class="px-2">${fuelTypeName}</td>
+                <td class="px-2">${r.quantity.toFixed(2)}</td>
+                <td class="px-2">${r.cost.toFixed(2)}</td>
+                <td class="px-2">${new Date(r.created_at).toLocaleString()}</td>
+                <td class="px-2 text-center whitespace-nowrap">
+                  <button onclick="openViewFuelModal(${r.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View Details"><i data-lucide="eye" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openEditFuelModal(${r.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit Record"><i data-lucide="edit-2" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openConfirmDeleteFuelModal(${r.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4 inline-block"></i></button>
+                </td></tr>`;
+    }).join('') : `<tr><td colspan="7" class="text-center py-8 text-gray-500">No fuel records found.</td></tr>`;
+    lucide.createIcons();
+    document.getElementById('fuelCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + fuelRecordsPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
+    renderFuelPagination(recordsToDisplay.length);
   }
 
-  async function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text("Report PDF Export", 10, 10);
-    doc.save("report.pdf");
+  function renderFuelPagination(totalRecords) { 
+    const tP=Math.ceil(totalRecords/fuelRecordsPerPage);const pC=document.getElementById('fuelPagination');pC.innerHTML='';if(tP<=1)return;
+    const bCls="px-3 py-1.5 text-sm rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500";const iCls="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";const aCls="bg-blue-500 text-white border border-blue-500 hover:bg-blue-600";const dCls="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
+    const pB=document.createElement('button');pB.innerHTML=`<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;pB.className=`${bCls} ${currentFuelPage===1?dCls:iCls}`;if(currentFuelPage>1)pB.onclick=()=>{currentFuelPage--;renderFuelTable();};else pB.disabled=true;pC.appendChild(pB);
+    const pgs=[];if(tP<=5){for(let i=1;i<=tP;i++)pgs.push(i);}else{pgs.push(1);if(currentFuelPage>3)pgs.push('...');for(let i=Math.max(2,currentFuelPage-1);i<=Math.min(tP-1,currentFuelPage+1);i++)if(!pgs.includes(i))pgs.push(i);if(currentFuelPage<tP-2)pgs.push('...');if(!pgs.includes(tP))pgs.push(tP);}
+    pgs.forEach(pN=>{if(pN==='...'){const el=document.createElement('span');el.textContent='...';el.className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";pC.appendChild(el);}else{const pBtn=document.createElement('button');pBtn.textContent=pN;pBtn.className=`${bCls} ${pN===currentFuelPage?aCls:iCls}`;pBtn.onclick=()=>{currentFuelPage=pN;renderFuelTable();};pC.appendChild(pBtn);}});
+    const nB=document.createElement('button');nB.innerHTML=`Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;nB.className=`${bCls} ${currentFuelPage===tP?dCls:iCls}`;if(currentFuelPage<tP)nB.onclick=()=>{currentFuelPage++;renderFuelTable();};else nB.disabled=true;pC.appendChild(nB);lucide.createIcons();
+  }
+  
+  function openAddFuelModal() {
+    fuelRecordToEditId = null; document.getElementById('addFuelForm').reset();
+    document.getElementById('fuelModalTitle').textContent = "Add New Fuel Record";
+    document.getElementById('fuelSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Fuel Record`;
+    populateFuelDropdowns(); 
+    lucide.createIcons(); document.getElementById('addFuelModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  async function openEditFuelModal(id) {
+    const r = allFuelRecords.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    fuelRecordToEditId = id; document.getElementById('fuelModalTitle').textContent = "Edit Fuel Record";
+    document.getElementById('fuelSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    await populateFuelDropdowns(); 
+    lucide.createIcons(); document.getElementById('fuelId_form').value = r.id;
+    document.getElementById('fuel_vehicle_id_form').value = r.vehicle_id;
+    document.getElementById('fuel_type_id_form').value = r.fuel_type_id;
+    document.getElementById('fuel_quantity_form').value = r.quantity;
+    document.getElementById('fuel_cost_form').value = r.cost;
+    document.getElementById('addFuelModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  function closeAddFuelModal() { document.getElementById('addFuelModal').classList.add('hidden'); document.body.style.overflow = ''; fuelRecordToEditId = null; }
+
+  function openViewFuelModal(id) {
+    const r = allFuelRecords.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    document.getElementById('view-fuel-id').textContent = r.id;
+    document.getElementById('view-fuel-vehicle').textContent = mockVehicles.find(v => v.id === r.vehicle_id)?.plate || 'N/A';
+    document.getElementById('view-fuel-type').textContent = mockFuelTypes.find(ft => ft.id === r.fuel_type_id)?.name || 'N/A';
+    document.getElementById('view-fuel-quantity').textContent = `${r.quantity.toFixed(2)} L`; // Assuming Liters
+    document.getElementById('view-fuel-cost').textContent = `$${r.cost.toFixed(2)}`;
+    document.getElementById('view-fuel-created_at').textContent = new Date(r.created_at).toLocaleString();
+    document.getElementById('viewFuelModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+  }
+  function closeViewFuelModal() { document.getElementById('viewFuelModal').classList.add('hidden'); document.body.style.overflow = ''; }
+
+  async function handleFuelFormSubmit(event) {
+    event.preventDefault();
+    const d = {
+      vehicle_id: parseInt(document.getElementById('fuel_vehicle_id_form').value),
+      fuel_type_id: parseInt(document.getElementById('fuel_type_id_form').value),
+      quantity: parseFloat(document.getElementById('fuel_quantity_form').value),
+      cost: parseFloat(document.getElementById('fuel_cost_form').value),
+    };
+    if (!d.vehicle_id || !d.fuel_type_id || isNaN(d.quantity) || d.quantity <=0 || isNaN(d.cost) || d.cost <=0) {
+      alert("Please fill all Fuel Record fields correctly (quantity and cost must be > 0)."); return;
+    }
+    return new Promise(res => {
+      setTimeout(() => {
+        if (fuelRecordToEditId) {
+          const idx = allFuelRecords.findIndex(r => r.id === fuelRecordToEditId);
+          if (idx !== -1) allFuelRecords[idx] = { ...allFuelRecords[idx], ...d, created_at: allFuelRecords[idx].created_at }; // Keep original created_at for edit
+          alert('Fuel record updated (mock)!');
+        } else {
+          const newRec = { ...d, id: allFuelRecords.length > 0 ? Math.max(...allFuelRecords.map(r => r.id)) + 1 : 1, created_at: new Date().toISOString() };
+          allFuelRecords.unshift(newRec);
+          alert('Fuel record added (mock)!');
+        }
+        closeAddFuelModal(); currentFuelPage = 1; renderFuelTable(); res();
+      }, 100);
+    });
   }
 
-   // Theme toggle
-   document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-  });
+  function openConfirmDeleteFuelModal(id) { fuelRecordToDeleteId = id; document.getElementById('confirmDeleteFuelModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeConfirmDeleteFuelModal() { fuelRecordToDeleteId = null; document.getElementById('confirmDeleteFuelModal').classList.add('hidden'); document.body.style.overflow = ''; }
+  async function confirmDeleteFuelRecord() {
+    if (!fuelRecordToDeleteId) return;
+    return new Promise(res => {
+      setTimeout(() => {
+        allFuelRecords = allFuelRecords.filter(r => r.id !== fuelRecordToDeleteId);
+        closeConfirmDeleteFuelModal();
+        if (document.getElementById('fuelBody').childElementCount === 1 && currentFuelPage > 1 && allFuelRecords.length > 0) { currentFuelPage--; }
+        renderFuelTable(); alert('Fuel record deleted (mock)!'); res();
+      }, 100);
+    });
+  }
 
-  renderTable();
+  function exportFuelRecordsExcel() {
+    let rTD = [...allFuelRecords]; 
+    if (activeFuelDateFilter !== 'all') { let range = (activeFuelDateFilter === 'custom' && customFuelFilterStartDate && customFuelFilterEndDate) ? {startDate:customFuelFilterStartDate,endDate:customFuelFilterEndDate} : getDateRange(activeFuelDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordDate = getISODateString(new Date(r.created_at)); return recordDate >= range.startDate && recordDate <= range.endDate; }); } }
+    const sT = document.getElementById('fuelSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (mockVehicles.find(v=>v.id===r.vehicle_id)?.plate.toLowerCase().includes(sT)) || (mockFuelTypes.find(ft=>ft.id===r.fuel_type_id)?.name.toLowerCase().includes(sT)) || (r.quantity.toString().includes(sT)) || (r.cost.toString().includes(sT)) ); }
+    const wsD = rTD.map(r => ({ ID:r.id, Vehicle:mockVehicles.find(v=>v.id===r.vehicle_id)?.plate||r.vehicle_id, 'Fuel Type':mockFuelTypes.find(ft=>ft.id===r.fuel_type_id)?.name||r.fuel_type_id, Quantity:r.quantity.toFixed(2), Cost:r.cost.toFixed(2), 'Recorded At':new Date(r.created_at).toLocaleString() }));
+    const ws = XLSX.utils.json_to_sheet(wsD); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "FuelRecords"); XLSX.writeFile(wb, "fuel_records_export.xlsx");
+  }
+  function exportFuelRecordsPDF() {
+    const {jsPDF} = window.jspdf; const doc = new jsPDF(); doc.setFontSize(18); doc.text('Fuel Records', 14, 15);
+    let rTD = [...allFuelRecords]; 
+    if (activeFuelDateFilter !== 'all') { let range = (activeFuelDateFilter === 'custom' && customFuelFilterStartDate && customFuelFilterEndDate) ? {startDate:customFuelFilterStartDate,endDate:customFuelFilterEndDate} : getDateRange(activeFuelDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordDate = getISODateString(new Date(r.created_at)); return recordDate >= range.startDate && recordDate <= range.endDate; }); } }
+    const sT = document.getElementById('fuelSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (mockVehicles.find(v=>v.id===r.vehicle_id)?.plate.toLowerCase().includes(sT)) || (mockFuelTypes.find(ft=>ft.id===r.fuel_type_id)?.name.toLowerCase().includes(sT)) || (r.quantity.toString().includes(sT)) || (r.cost.toString().includes(sT)) ); }
+    const hdrs = [['ID', 'Vehicle', 'Fuel Type', 'Quantity (L)', 'Cost ($)', 'Recorded At']];
+    const data = rTD.map(r => [r.id, mockVehicles.find(v=>v.id===r.vehicle_id)?.plate||r.vehicle_id, mockFuelTypes.find(ft=>ft.id===r.fuel_type_id)?.name||r.fuel_type_id, r.quantity.toFixed(2), r.cost.toFixed(2), new Date(r.created_at).toLocaleString()]);
+    doc.autoTable({ head:hdrs, body:data, startY:25, theme:'grid', headStyles:{fillColor:[59,130,246],textColor:255} }); doc.save('fuel_records_export.pdf');
+  }
+  // --- End Fuel Section ---
 </script>
 </body>
 </html>

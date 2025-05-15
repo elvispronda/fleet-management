@@ -52,6 +52,7 @@ class Trip(Base):
     return_date = Column(TIMESTAMP(timezone=True), nullable=False)
     vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
     driver_id = Column(Integer, ForeignKey("user.id"))
+
 ##################################################################################################################
 
 class VehicleType(Base):
@@ -77,29 +78,6 @@ class VehicleTransmission(Base):
     id = Column(Integer, primary_key=True, index=True)
     vehicle_transmission = Column(String, nullable=False)
 ##################################################################################################################
-
-""" class Vehicle(Base):
-    __tablename__ = "vehicle"
-    id = Column(Integer, primary_key=True, index=True)
-    make = Column(String, nullable=False)
-    model = Column(String, nullable=False)
-    year = Column(Integer)
-    plate_number = Column(String, unique=True, nullable=False)
-    mileage = Column(Float, default=0.0)
-    engine_size = Column(Float, default=0.0)
-    vehicle_type = Column(String, nullable=False)
-    vehicle_transmission = Column(String, nullable=False)
-    vehicle_fuel_type =  Column(String, nullable=False)
-    vin = Column(String, nullable=False)
-    color = Column(String, nullable=False)
-    purchase_price = Column(Float, default=0.0)
-    purchase_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    status = Column(String, default="available")
-    registration_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) """
-
-
-
-
 class Vehicle(Base):
     __tablename__ = "vehicle"
     id = Column(Integer, primary_key=True, index=True)

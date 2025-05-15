@@ -183,22 +183,6 @@ class VehicleBase(BaseModel):
     purchase_date: datetime
     status: str = "available" 
 
-    """ make: str
-    model: str
-    year: int
-    plate_number: str
-    mileage: float = 0.0
-    engine_size: float
-    vehicle_type: str
-    vehicle_transmission: str
-    vehicle_fuel_type: str
-    vin: str
-    color: str
-    purchase_price: float
-    purchase_date: datetime
-    status: str = "available" 
- """
-
 class VehicleCreate(VehicleBase):
     pass
 

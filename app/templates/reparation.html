@@ -3,239 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced Dashboard</title>
+  <title>Dashboard - Reparation Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
+  <style>
+    .modal { transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+    .modal.hidden { visibility: hidden; opacity: 0; }
+    .modal:not(.hidden) { visibility: visible; opacity: 1; }
+    .dark .modal-content { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.2); }
+    .date-filter-btn.active { background-color: #3b82f6; color: white; }
+    .dark .date-filter-btn.active { background-color: #60a5fa; }
+    .view-detail-label { font-weight: 500; color: #4b5563; }
+    .dark .view-detail-label { color: #d1d5db; }
+    .view-detail-value { color: #1f2937; }
+    .dark .view-detail-value { color: #f9fafb; }
+  </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 <div class="flex flex-col md:flex-row h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <!-- Add Lucide Icons CDN in <head> if not already -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-
-    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
+    <!-- Sidebar (Left) -->
+    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block flex-shrink-0">
       <div class="text-xl font-bold flex items-center space-x-2">
         <i data-lucide="menu" class="w-5 h-5"></i><span>Menu</span>
       </div>
-      <ul class="space-y-4">
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-          <a href="dashboard">Dashboard</a>
+      <ul class="space-y-2">
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><a href="#">Dashboard</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-          <a href="analytics">Analytics</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i><a href="#">Analytics</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="car" class="w-5 h-5"></i>
-          <a href="vehicle">Vehicles</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="car" class="w-5 h-5"></i><a href="#">Vehicles</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="user" class="w-5 h-5"></i>
-          <a href="user">Drivers</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="user" class="w-5 h-5"></i><a href="#">Drivers</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="wrench" class="w-5 h-5"></i>
-          <a href="reparation">Reparation</a>
+        
+        <li class="flex items-center space-x-3 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="wrench" class="w-5 h-5"></i><a href="#reparation-section">Reparation</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="droplet" class="w-5 h-5"></i>
-          <a href="fuel">Fuel</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="droplet" class="w-5 h-5"></i><a href="#">Fuel</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-          <a href="maintenance">Maintenance</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="settings" class="w-5 h-5"></i><a href="#">Maintenance (Other)</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="route" class="w-5 h-5"></i>
-          <a href="trip">Trip</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="route" class="w-5 h-5"></i><a href="#">Trip</a>
         </li>
       </ul>
     </aside>
     
-    <!-- Call Lucide to load icons -->
-    <script>
-      lucide.createIcons();
-    </script>
-
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
-    <!-- Users Table Section -->
-    <section id="users" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
-        <h3 class="text-xl font-bold">Users Management</h3>
+    <!-- Reparation Table Section -->
+    <section id="reparation-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="openAddUserModal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-1">
-            <i data-lucide="plus" class="w-4 h-4"></i> Add User
+          <button onclick="openAddReparationModal()" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Reparation
           </button>
-          <input type="text" id="userSearch" placeholder="Search users..." class="border rounded px-2 py-1 text-sm text-black">
-          <button onclick="exportUsersExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
-          <button onclick="exportUsersPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+          <input type="text" id="reparationSearch" placeholder="Search reparations..." class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="exportReparationsExcel()" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
+          <button onclick="exportReparationsPDF()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
         </div>
       </div>
+
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium mr-2">Filter Reparations by Date:</span>
+        <button id="reparation-filter-today" onclick="applyReparationDateFilter('today')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
+        <button id="reparation-filter-last7" onclick="applyReparationDateFilter('last7days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
+        <button id="reparation-filter-last30" onclick="applyReparationDateFilter('last30days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
+        <button id="reparation-filter-all" onclick="applyReparationDateFilter('all')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
+        <button id="reparation-filter-custom-btn" onclick="toggleReparationCustomDateRange()" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
+      </div>
+      <div id="reparationCustomDateRange" class="mb-4 hidden items-center gap-2 p-3 border dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
+        <input type="date" id="reparationCustomStartDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <span class="text-sm">to</span>
+        <input type="date" id="reparationCustomEndDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <button onclick="applyReparationCustomDateFilter()" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
+      </div>
+
       <div class="overflow-x-auto">
-        <table id="usersTable" class="w-full text-left text-sm">
+        <table id="reparationsTable" class="w-full text-left text-sm">
           <thead>
             <tr class="border-b dark:border-gray-700">
-              <th class="py-2">ID</th>
-              <th>Email</th>
-              <th>Username</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Actions</th>
+              <th class="py-3 px-2 font-semibold">ID</th>
+              <th class="px-2 font-semibold">Panne</th>
+              <th class="px-2 font-semibold">Cost</th>
+              <th class="px-2 font-semibold">Receipt</th>
+              <th class="px-2 font-semibold">Garage</th>
+              <th class="px-2 font-semibold">Repair Date</th>
+              <th class="px-2 font-semibold">Status</th>
+              <th class="px-2 font-semibold text-center">Actions</th>
             </tr>
           </thead>
-          <tbody id="usersBody"></tbody>
+          <tbody id="reparationsBody"></tbody>
         </table>
       </div>
-      <div class="mt-4 flex justify-between items-center">
-        <div class="text-sm text-gray-500 dark:text-gray-400" id="usersCount"></div>
-        <div class="flex space-x-2" id="usersPagination"></div>
-      </div>
-    </section>
-
-    <!-- Statistics -->
-    <section id="statistics" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
-      <h3 class="text-xl font-bold mb-2">Statistics</h3>
-      <div class="flex flex-col md:flex-row md:space-x-4">
-        <div class="w-full md:w-1/2">
-          <h4 class="text-md font-semibold mb-1">User Growth</h4>
-          <canvas id="lineChart" class="w-full h-64"></canvas>
-        </div>
-        <div class="w-full md:w-1/2 mt-4 md:mt-0">
-          <h4 class="text-md font-semibold mb-1">Status Distribution</h4>
-          <canvas id="pieChart" class="mx-auto" style="width: 200px; height: 300px;"></canvas>
-        </div>
+      <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+        <div class="text-sm text-gray-600 dark:text-gray-400" id="reparationsCount"></div>
+        <div class="flex items-center space-x-1" id="reparationsPagination"></div>
       </div>
     </section>
   </main>
 
     <!-- Right Sidebar -->
-    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
         <div class="flex justify-between items-center">
-        <button id="theme-toggle" class="text-xl">🌙</button>
-        <div>
-            <div class="text-sm font-semibold">John Doe</div>
-            <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
+        <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
+        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
         </div>
-        </div>
-
-        <!-- Recent Updates -->
-        <div>
-        <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
-        <div class="flex flex-col space-y-6 relative">
-            <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
-
-            <div class="flex items-start space-x-4 relative">
-            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-            <div class="ml-2">
-                <p class="font-medium">New user registered</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
-            </div>
-            </div>
-
-            <div class="flex items-start space-x-4 relative">
-            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-            <div class="ml-2">
-                <p class="font-medium">System updated</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p>
-            </div>
-            </div>
-
-            <div class="flex items-start space-x-4 relative">
-            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-            <div class="ml-2">
-                <p class="font-medium">Security alert</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
-            </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="mt-8">
-        <h4 class="font-bold mb-4 text-lg">Quick Actions</h4>
-        <div class="grid grid-cols-2 gap-2">
-            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
-            <i data-lucide="user-plus" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs">Add User</span>
-            </button>
-            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
-            <i data-lucide="settings" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs">Settings</span>
-            </button>
-            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
-            <i data-lucide="help-circle" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs">Help</span>
-            </button>
-            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
-            <i data-lucide="log-out" class="w-5 h-5 mb-1"></i>
-            <span class="text-xs">Logout</span>
-            </button>
-        </div>
-        </div>
+        <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New reparation logged</p><p class="text-sm text-gray-500 dark:text-gray-400">1 minute ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Vehicle status updated</p><p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p></div></div></div></div>
+        <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="file-plus-2" class="w-5 h-5 mb-1"></i><span class="text-xs">New Report</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="sliders-horizontal" class="w-5 h-5 mb-1"></i><span class="text-xs">Filters</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="help-circle" class="w-5 h-5 mb-1"></i><span class="text-xs">Help</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="log-out" class="w-5 h-5 mb-1"></i><span class="text-xs">Logout</span></button></div></div>
     </aside>
 </div>
 
-<!-- Add User Modal -->
-<div id="addUserModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+<!-- Add/Edit Reparation Modal -->
+<div id="addReparationModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
   <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New User</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the user details below</p>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="reparationModalTitle">Add New Reparation</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the reparation details below</p>
         </div>
-        <button onclick="closeAddUserModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button onclick="closeAddReparationModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
-      
-      <form id="addUserForm" class="space-y-4">
+      <form id="addReparationForm" class="space-y-4">
+        <input type="hidden" id="reparationId_form"> 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-          <input type="email" id="email" required 
-                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="user@example.com">
-        </div>
-        
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
-          <input type="text" id="username" 
-                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="username">
-        </div>
-        
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <input type="password" id="password" required 
-                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
-                 placeholder="••••••••">
-        </div>
-        
-        <div>
-          <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-          <select id="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700">
-            <option value="active">Active</option>
-            <option value="disabled">Disabled</option>
+          <label for="panne_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Panne (Breakdown)</label>
+          <select id="panne_id_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <option value="">Select Panne</option>
           </select>
         </div>
-        
+        <div>
+          <label for="reparation_cost_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reparation Cost</label>
+          <input type="number" step="0.01" id="reparation_cost_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="0.00">
+        </div>
+        <div>
+          <label for="reparation_receipt_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Receipt (e.g., URL or Ref#)</label>
+          <input type="text" id="reparation_receipt_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="Receipt details or link">
+        </div>
+        <div>
+          <label for="reparation_garage_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Garage</label>
+          <select id="reparation_garage_id_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+             <option value="">Select Garage</option>
+          </select>
+        </div>
+        <div>
+          <label for="repair_date_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repair Date</label>
+          <input type="date" id="repair_date_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+        </div>
+         <div>
+          <label for="reparation_status_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <select id="reparation_status_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <!-- Options populated by JS -->
+          </select>
+        </div>
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" onclick="closeAddUserModal()" 
-                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-            Cancel
-          </button>
-          <button type="submit" 
-                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            Add User
+          <button type="button" onclick="closeAddReparationModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+          <button type="submit" id="reparationSubmitButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Reparation
           </button>
         </div>
       </form>
@@ -243,437 +183,314 @@
   </div>
 </div>
 
-<!-- Confirmation Modal -->
-<div id="confirmDeleteModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
-  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+<!-- View Reparation Record Modal -->
+<div id="viewReparationModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
-        <div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this user?</p>
-        </div>
-        <button onclick="closeConfirmDeleteModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Reparation Record Details</h3>
+        <button onclick="closeViewReparationModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
-      
-      <div class="flex justify-end gap-3 pt-4">
-        <button onclick="closeConfirmDeleteModal()" 
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-          Cancel
-        </button>
-        <button id="confirmDeleteBtn" 
-                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
-          Delete
-        </button>
+      <div id="viewReparationDetails" class="space-y-3 text-sm">
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Record ID:</span><span id="view-reparation-id" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Panne:</span><span id="view-reparation-panne" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Cost:</span><span id="view-reparation-cost" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Receipt:</span><span id="view-reparation-receipt" class="view-detail-value col-span-2 break-all"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Garage:</span><span id="view-reparation-garage" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Repair Date:</span><span id="view-reparation-repair_date" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Status:</span><span id="view-reparation-status" class="view-detail-value col-span-2"></span></div>
+      </div>
+      <div class="flex justify-end pt-6">
+          <button type="button" onclick="closeViewReparationModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Confirmation Modal for Reparation Deletion -->
+<div id="confirmDeleteReparationModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this reparation record?</p></div>
+        <button onclick="closeConfirmDeleteReparationModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      </div>
+      <div class="flex justify-end gap-3 pt-4">
+        <button onclick="closeConfirmDeleteReparationModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+        <button id="confirmDeleteReparationBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
-  // Global variables for users table
-  let allUsers = [];
-  const usersPerPage = 5;
-  let currentUsersPage = 1;
-  let userToDelete = null;
+  // --- Global Variables for Reparation ---
+  let allReparations = []; const reparationsPerPage = 5; let currentReparationPage = 1;
+  let reparationToEditId = null; let reparationToDeleteId = null;
+  let activeReparationDateFilter = 'all'; let customReparationFilterStartDate = null; let customReparationFilterEndDate = null;
   
-  // Check authentication on page load
+  // Mock data specific to Reparation (and shared, like Garages)
+  const mockPannes = [{id:1, description:"Engine Overheating"}, {id:2, description:"Flat Tire"}, {id:3, description:"Brake Failure"}, {id:4, description:"Transmission Slipping"}];
+  const mockGarages = [{id:1, name:"Main St Auto"}, {id:2, name:"Downtown Repair"}, {id:3, name:"Speedy Lube"}, {id:4, name:"Pro Mechanics"}]; // Shared with Maintenance
+  const mockReparationStatuses = ["In Progress", "Completed", "Pending Parts", "Cancelled"];
+
+
+  // --- DOMContentLoaded ---
   document.addEventListener('DOMContentLoaded', () => {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-          window.location.href = '/login';
-          return;
-      }
-      fetchUsers();
-      initCharts();
-  });
-  
-  // Fetch users from API
-  async function fetchUsers() {
-      try {
-          const token = localStorage.getItem('access_token');
-          const response = await fetch('/user/', {
-              headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
-              }
-          });
-  
-          if (response.status === 401) {
-              localStorage.removeItem('access_token');
-              window.location.href = '/login';
-              return;
-          }
-  
-          if (!response.ok) {
-              throw new Error('Failed to fetch users');
-          }
-  
-          allUsers = await response.json();
-          // Add status to users (assuming your API doesn't return this)
-          allUsers = allUsers.map(user => ({
-              ...user,
-              status: Math.random() > 0.3 ? 'active' : 'disabled'
-          }));
-          renderUsersTable();
-      } catch (error) {
-          console.error('Error:', error);
-          alert('Error loading users. Please try again.');
-      }
-  }
-  
-  // Render users table
-  function renderUsersTable() {
-      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-      const filteredUsers = allUsers.filter(user => 
-          user.email.toLowerCase().includes(searchTerm) || 
-          (user.username && user.username.toLowerCase().includes(searchTerm))
-      );
-  
-      const start = (currentUsersPage - 1) * usersPerPage;
-      const paginatedUsers = filteredUsers.slice(start, start + usersPerPage);
-  
-      const usersBody = document.getElementById('usersBody');
-      usersBody.innerHTML = paginatedUsers.length > 0 ? 
-          paginatedUsers.map(user => `
-              <tr class="border-b dark:border-gray-700" data-id="${user.id}">
-                  <td class="py-2">${user.id}</td>
-                  <td>${user.email}</td>
-                  <td>${user.username || 'N/A'}</td>
-                  <td>
-                    <span class="px-2 py-1 text-xs rounded-full ${
-                      user.status === 'active' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }">
-                      ${user.status}
-                    </span>
-                  </td>
-                  <td>${new Date(user.created_at).toLocaleString()}</td>
-                  <td>
-                      <button class="text-blue-500 hover:underline mr-2">Edit</button>
-                      <button onclick="openConfirmDeleteModal(${user.id})" class="text-red-500 hover:underline">Delete</button>
-                  </td>
-              </tr>
-          `).join('') : 
-          `<tr><td colspan="6" class="text-center py-4">No users found</td></tr>`;
-  
-      // Update count display
-      document.getElementById('usersCount').textContent = 
-          `Showing ${start + 1}-${Math.min(start + usersPerPage, filteredUsers.length)} of ${filteredUsers.length} users`;
-  
-      // Render pagination
-      const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-      const paginationContainer = document.getElementById('usersPagination');
-      paginationContainer.innerHTML = '';
+      initializeReparationSection();  // Initialize new Reparation section
+      lucide.createIcons(); 
+      const themeToggleButton = document.getElementById('theme-toggle');
+      if (themeToggleButton) themeToggleButton.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
       
-      // Previous button
-      if (currentUsersPage > 1) {
-          paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${currentUsersPage - 1};renderUsersTable();" 
-                      class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
-                  Previous
-              </button>
-          `;
-      }
-      
-      // Page numbers
-      const maxVisiblePages = 5;
-      let startPage = Math.max(1, currentUsersPage - Math.floor(maxVisiblePages / 2));
-      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-      
-      if (endPage - startPage + 1 < maxVisiblePages) {
-          startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-          paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${i};renderUsersTable();" 
-                      class="px-3 py-1 rounded ${i === currentUsersPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">
-                  ${i}
-              </button>
-          `;
-      }
-      
-      // Next button
-      if (currentUsersPage < totalPages) {
-          paginationContainer.innerHTML += `
-              <button onclick="currentUsersPage=${currentUsersPage + 1};renderUsersTable();" 
-                      class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
-                  Next
-              </button>
-          `;
-      }
-  }
-  
-  // Search functionality for users
-  document.getElementById('userSearch').addEventListener('input', () => {
-      currentUsersPage = 1;
-      renderUsersTable();
+      // Modal close listeners
+      document.getElementById('addReparationModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddReparationModal(); });
+      document.getElementById('viewReparationModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewReparationModal(); });
+      document.getElementById('confirmDeleteReparationModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteReparationModal(); });
   });
 
-  // Modal functions
-  function openAddUserModal() {
-    const modal = document.getElementById('addUserModal');
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+  // --- Date Helper Functions (Generic) ---
+  function getISODateString(date) { return date.toISOString().split('T')[0]; }
+  function getDateRange(filterType) {
+    const today=new Date(); today.setHours(0,0,0,0); let sD=new Date(today); let eD=new Date(today); eD.setHours(23,59,59,999);
+    switch(filterType){ case 'today':break; case 'last7days':sD.setDate(today.getDate()-6);break; case 'last30days':sD.setDate(today.getDate()-29);break; case 'all':return{startDate:null,endDate:null}; default:return{startDate:null,endDate:null};}
+    return{startDate:getISODateString(sD),endDate:getISODateString(eD)};
   }
-  
-  function closeAddUserModal() {
-    const modal = document.getElementById('addUserModal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
+
+  // --- Reparation Section ---
+  function initializeReparationSection() {
+    fetchReparations(); 
+    populateReparationDropdowns();
+    document.getElementById('reparationSearch').addEventListener('input', () => { currentReparationPage = 1; renderReparationsTable(); });
+    document.getElementById('addReparationForm').addEventListener('submit', handleReparationFormSubmit);
+    document.getElementById('confirmDeleteReparationBtn').addEventListener('click', confirmDeleteReparation);
+    setActiveReparationDateFilterButton('all');
   }
-  
-  // Delete confirmation modal functions
-  function openConfirmDeleteModal(userId) {
-    userToDelete = userId;
-    const modal = document.getElementById('confirmDeleteModal');
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+
+  function applyReparationDateFilter(filterType) {
+    activeReparationDateFilter = filterType; customReparationFilterStartDate = null; customReparationFilterEndDate = null;
+    document.getElementById('reparationCustomDateRange').classList.add('hidden');
+    setActiveReparationDateFilterButton(filterType); currentReparationPage = 1; renderReparationsTable();
   }
-  
-  function closeConfirmDeleteModal() {
-    userToDelete = null;
-    const modal = document.getElementById('confirmDeleteModal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
+  function toggleReparationCustomDateRange() {
+    document.getElementById('reparationCustomDateRange').classList.toggle('hidden');
+    if (!document.getElementById('reparationCustomDateRange').classList.contains('hidden')) setActiveReparationDateFilterButton('reparation-filter-custom-btn');
+    else if (activeReparationDateFilter === 'custom') applyReparationDateFilter('all');
   }
-  
-  // Handle delete confirmation
-  document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
-    if (!userToDelete) return;
+  function applyReparationCustomDateFilter() {
+    const sD = document.getElementById('reparationCustomStartDate').value, eD = document.getElementById('reparationCustomEndDate').value;
+    if (!sD || !eD) { alert("Please select dates for Reparation."); return; }
+    if (new Date(sD) > new Date(eD)) { alert("Start date > end date for Reparation."); return; }
+    activeReparationDateFilter = 'custom'; customReparationFilterStartDate = sD; customReparationFilterEndDate = eD;
+    setActiveReparationDateFilterButton('reparation-filter-custom-btn'); currentReparationPage = 1; renderReparationsTable();
+  }
+  function setActiveReparationDateFilterButton(filterId) {
+    document.querySelectorAll('#reparation-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(filterId.startsWith('reparation-filter-') ? filterId : `reparation-filter-${filterId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    if (filterId === 'reparation-filter-custom-btn' || activeReparationDateFilter === 'custom') document.getElementById('reparation-filter-custom-btn').classList.add('active');
+  }
+
+  async function populateReparationDropdowns() {
+    const panneSelect = document.getElementById('panne_id_form');
+    panneSelect.innerHTML = '<option value="">Select Panne</option>';
+    mockPannes.forEach(p => { const o=document.createElement('option'); o.value=p.id; o.textContent=p.description; panneSelect.appendChild(o); });
+
+    const garageSelect = document.getElementById('reparation_garage_id_form');
+    garageSelect.innerHTML = '<option value="">Select Garage</option>';
+    mockGarages.forEach(g => { const o=document.createElement('option'); o.value=g.id; o.textContent=g.name; garageSelect.appendChild(o); });
     
-    try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`/user/${userToDelete}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+    const statusSelect = document.getElementById('reparation_status_form');
+    statusSelect.innerHTML = ''; 
+    mockReparationStatuses.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s; statusSelect.appendChild(o); });
+  }
+
+  async function fetchReparations() {
+    return new Promise(res => {
+      setTimeout(() => {
+        if (allReparations.length === 0) {
+          const baseTime = Date.now();
+          for (let i = 1; i <= 20; i++) { // Generate some mock reparation records
+            const daysAgo = Math.floor(Math.random() * 90); 
+            const repairDate = new Date(baseTime - daysAgo * 24 * 60 * 60 * 1000);
+            allReparations.push({
+              id: i,
+              panne_id: mockPannes[Math.floor(Math.random() * mockPannes.length)].id,
+              cost: parseFloat((Math.random() * 500 + 50).toFixed(2)),
+              receipt: `RPT-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+              garage_id: mockGarages[Math.floor(Math.random() * mockGarages.length)].id,
+              repair_date: repairDate.toISOString(),
+              status: mockReparationStatuses[Math.floor(Math.random() * mockReparationStatuses.length)]
+            });
+          }
         }
-      });
-      
-      if (response.status === 401) {
-        localStorage.removeItem('access_token');
-        window.location.href = '/login';
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
-      }
-      
-      // Remove the user from the local array
-      allUsers = allUsers.filter(user => user.id !== userToDelete);
-      
-      // Close the modal
-      closeConfirmDeleteModal();
-      
-      // Refresh the table
-      currentUsersPage = 1;
-      renderUsersTable();
-      
-      // Show success message
-      alert('User deleted successfully!');
-      
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error deleting user. Please try again.');
-    }
-  });
-
-  // Close modals when clicking outside
-  document.getElementById('addUserModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeAddUserModal();
-    }
-  });
-
-  document.getElementById('confirmDeleteModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeConfirmDeleteModal();
-    }
-  });
-
-  // Form submission
-  document.getElementById('addUserForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const status = document.getElementById('status').value;
-    
-    try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/user/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          username,
-          password,
-          status
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add user');
-      }
-      
-      const newUser = await response.json();
-      allUsers.unshift({
-        ...newUser,
-        status: status
-      });
-      
-      // Reset form and close modal
-      document.getElementById('addUserForm').reset();
-      closeAddUserModal();
-      
-      // Refresh the table
-      currentUsersPage = 1;
-      renderUsersTable();
-      
-      // Show success message
-      alert('User added successfully!');
-      
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error adding user. Please try again.');
-    }
-  });
-
-  // Export functions for users
-  function exportUsersExcel() {
-      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-      const filteredUsers = allUsers.filter(user => 
-          user.email.toLowerCase().includes(searchTerm) || 
-          (user.username && user.username.toLowerCase().includes(searchTerm))
-      );
-
-      // Create a worksheet
-      const ws = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-          ID: user.id,
-          Email: user.email,
-          Username: user.username || 'N/A',
-          Status: user.status,
-          'Created At': new Date(user.created_at).toLocaleString()
-      })));
-
-      // Create a workbook
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Users");
-
-      // Export to Excel file
-      XLSX.writeFile(wb, "users_export.xlsx");
-  }
-
-  function exportUsersPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      // Title
-      doc.setFontSize(18);
-      doc.text('Users List', 14, 15);
-
-      // Table headers
-      const headers = [['ID', 'Email', 'Username', 'Status', 'Created At']];
-      const data = allUsers.map(user => [
-          user.id,
-          user.email,
-          user.username || 'N/A',
-          user.status,
-          new Date(user.created_at).toLocaleString()
-      ]);
-
-      // Add table
-      doc.autoTable({
-          head: headers,
-          body: data,
-          startY: 25,
-          theme: 'grid',
-          headStyles: {
-              fillColor: [59, 130, 246],
-              textColor: 255
-          }
-      });
-
-      doc.save('users_export.pdf');
-  }
-
-  // Initialize charts
-  function initCharts() {
-    // Line chart
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    new Chart(lineCtx, {
-      type: 'line',
-      data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-        datasets: [
-          {
-            label: 'New Users',
-            data: [5, 8, 12, 15, 18, 22],
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            fill: true,
-            tension: 0.3
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: true },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
-
-    // Pie chart
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const activeCount = allUsers.filter(u => u.status === 'active').length;
-    const disabledCount = allUsers.filter(u => u.status === 'disabled').length;
-    
-    new Chart(pieCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Active', 'Disabled'],
-        datasets: [{
-          data: [activeCount, disabledCount],
-          backgroundColor: [
-            'rgba(16, 185, 129, 0.8)',
-            'rgba(239, 68, 68, 0.8)'
-          ],
-          borderColor: [
-            'rgba(16, 185, 129, 1)',
-            'rgba(239, 68, 68, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
-      }
+        currentReparationPage = 1; renderReparationsTable(); res();
+      }, 150);
     });
   }
 
-  // Theme toggle
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-  });
+  function renderReparationsTable() {
+    let recordsToDisplay = [...allReparations];
+    if (activeReparationDateFilter !== 'all') {
+      let range = (activeReparationDateFilter === 'custom' && customReparationFilterStartDate && customReparationFilterEndDate) ? 
+                  { startDate: customReparationFilterStartDate, endDate: customReparationFilterEndDate } : 
+                  getDateRange(activeReparationDateFilter);
+      if (range.startDate && range.endDate) {
+        recordsToDisplay = recordsToDisplay.filter(r => {
+          const repairD = getISODateString(new Date(r.repair_date));
+          return repairD >= range.startDate && repairD <= range.endDate;
+        });
+      }
+    }
+    const searchTerm = document.getElementById('reparationSearch').value.toLowerCase();
+    if (searchTerm) {
+      recordsToDisplay = recordsToDisplay.filter(r =>
+        (r.receipt && r.receipt.toLowerCase().includes(searchTerm)) ||
+        (r.cost && r.cost.toString().includes(searchTerm)) ||
+        (r.id && r.id.toString().includes(searchTerm)) ||
+        (mockPannes.find(p => p.id === r.panne_id)?.description.toLowerCase().includes(searchTerm)) ||
+        (mockGarages.find(g => g.id === r.garage_id)?.name.toLowerCase().includes(searchTerm)) ||
+        (r.status && r.status.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    const start = (currentReparationPage - 1) * reparationsPerPage;
+    const paginatedRecords = recordsToDisplay.slice(start, start + reparationsPerPage);
+    const reparationsBody = document.getElementById('reparationsBody');
+    reparationsBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(r => {
+      const panneDesc = mockPannes.find(p => p.id === r.panne_id)?.description || r.panne_id;
+      const garageName = mockGarages.find(g => g.id === r.garage_id)?.name || r.garage_id;
+      const statusColor = r.status === "Completed" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : 
+                          r.status === "In Progress" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
+                          r.status === "Pending Parts" ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" :
+                          "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"; // Default for Cancelled
+
+      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${r.id}">
+                <td class="py-3 px-2">${r.id}</td>
+                <td class="px-2">${panneDesc}</td>
+                <td class="px-2">${r.cost.toFixed(2)}</td>
+                <td class="px-2 truncate max-w-[100px] sm:max-w-xs" title="${r.receipt}">${r.receipt}</td>
+                <td class="px-2">${garageName}</td>
+                <td class="px-2">${new Date(r.repair_date).toLocaleDateString()}</td>
+                <td class="px-2"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${r.status}</span></td>
+                <td class="px-2 text-center whitespace-nowrap">
+                  <button onclick="openViewReparationModal(${r.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View Details"><i data-lucide="eye" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openEditReparationModal(${r.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit Record"><i data-lucide="edit-2" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openConfirmDeleteReparationModal(${r.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4 inline-block"></i></button>
+                </td></tr>`;
+    }).join('') : `<tr><td colspan="8" class="text-center py-8 text-gray-500">No reparation records found.</td></tr>`;
+    lucide.createIcons();
+    document.getElementById('reparationsCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + reparationsPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
+    renderReparationPagination(recordsToDisplay.length);
+  }
+
+  function renderReparationPagination(totalRecords) { 
+    const tP=Math.ceil(totalRecords/reparationsPerPage);const pC=document.getElementById('reparationsPagination');pC.innerHTML='';if(tP<=1)return;
+    const bCls="px-3 py-1.5 text-sm rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500";const iCls="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";const aCls="bg-blue-500 text-white border border-blue-500 hover:bg-blue-600";const dCls="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
+    const pB=document.createElement('button');pB.innerHTML=`<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;pB.className=`${bCls} ${currentReparationPage===1?dCls:iCls}`;if(currentReparationPage>1)pB.onclick=()=>{currentReparationPage--;renderReparationsTable();};else pB.disabled=true;pC.appendChild(pB);
+    const pgs=[];if(tP<=5){for(let i=1;i<=tP;i++)pgs.push(i);}else{pgs.push(1);if(currentReparationPage>3)pgs.push('...');for(let i=Math.max(2,currentReparationPage-1);i<=Math.min(tP-1,currentReparationPage+1);i++)if(!pgs.includes(i))pgs.push(i);if(currentReparationPage<tP-2)pgs.push('...');if(!pgs.includes(tP))pgs.push(tP);}
+    pgs.forEach(pN=>{if(pN==='...'){const el=document.createElement('span');el.textContent='...';el.className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";pC.appendChild(el);}else{const pBtn=document.createElement('button');pBtn.textContent=pN;pBtn.className=`${bCls} ${pN===currentReparationPage?aCls:iCls}`;pBtn.onclick=()=>{currentReparationPage=pN;renderReparationsTable();};pC.appendChild(pBtn);}});
+    const nB=document.createElement('button');nB.innerHTML=`Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;nB.className=`${bCls} ${currentReparationPage===tP?dCls:iCls}`;if(currentReparationPage<tP)nB.onclick=()=>{currentReparationPage++;renderReparationsTable();};else nB.disabled=true;pC.appendChild(nB);lucide.createIcons();
+  }
+  
+  function openAddReparationModal() {
+    reparationToEditId = null; document.getElementById('addReparationForm').reset();
+    document.getElementById('reparationModalTitle').textContent = "Add New Reparation";
+    document.getElementById('reparationSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Reparation`;
+    populateReparationDropdowns(); 
+    lucide.createIcons(); document.getElementById('addReparationModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  async function openEditReparationModal(id) {
+    const r = allReparations.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    reparationToEditId = id; document.getElementById('reparationModalTitle').textContent = "Edit Reparation Record";
+    document.getElementById('reparationSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    await populateReparationDropdowns(); 
+    lucide.createIcons(); document.getElementById('reparationId_form').value = r.id;
+    document.getElementById('panne_id_form').value = r.panne_id;
+    document.getElementById('reparation_cost_form').value = r.cost;
+    document.getElementById('reparation_receipt_form').value = r.receipt;
+    document.getElementById('reparation_garage_id_form').value = r.garage_id;
+    document.getElementById('repair_date_form').value = new Date(r.repair_date).toISOString().split('T')[0];
+    document.getElementById('reparation_status_form').value = r.status;
+    document.getElementById('addReparationModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  function closeAddReparationModal() { document.getElementById('addReparationModal').classList.add('hidden'); document.body.style.overflow = ''; reparationToEditId = null; }
+
+  function openViewReparationModal(id) {
+    const r = allReparations.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    document.getElementById('view-reparation-id').textContent = r.id;
+    document.getElementById('view-reparation-panne').textContent = mockPannes.find(p => p.id === r.panne_id)?.description || 'N/A';
+    document.getElementById('view-reparation-cost').textContent = `$${r.cost.toFixed(2)}`;
+    document.getElementById('view-reparation-receipt').textContent = r.receipt;
+    document.getElementById('view-reparation-garage').textContent = mockGarages.find(g => g.id === r.garage_id)?.name || 'N/A';
+    document.getElementById('view-reparation-repair_date').textContent = new Date(r.repair_date).toLocaleDateString();
+    document.getElementById('view-reparation-status').textContent = r.status;
+    document.getElementById('viewReparationModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+  }
+  function closeViewReparationModal() { document.getElementById('viewReparationModal').classList.add('hidden'); document.body.style.overflow = ''; }
+
+  async function handleReparationFormSubmit(event) {
+    event.preventDefault();
+    const d = {
+      panne_id: parseInt(document.getElementById('panne_id_form').value),
+      cost: parseFloat(document.getElementById('reparation_cost_form').value),
+      receipt: document.getElementById('reparation_receipt_form').value,
+      garage_id: parseInt(document.getElementById('reparation_garage_id_form').value),
+      repair_date: new Date(document.getElementById('repair_date_form').value).toISOString(),
+      status: document.getElementById('reparation_status_form').value
+    };
+    if (!d.panne_id || isNaN(d.cost) || !d.receipt || !d.garage_id || !d.repair_date || !d.status) {
+      alert("Please fill all Reparation fields correctly."); return;
+    }
+    return new Promise(res => {
+      setTimeout(() => {
+        if (reparationToEditId) {
+          const idx = allReparations.findIndex(r => r.id === reparationToEditId);
+          if (idx !== -1) allReparations[idx] = { ...allReparations[idx], ...d };
+          alert('Reparation record updated (mock)!');
+        } else {
+          const newRec = { ...d, id: allReparations.length > 0 ? Math.max(...allReparations.map(r => r.id)) + 1 : 1 };
+          allReparations.unshift(newRec);
+          alert('Reparation record added (mock)!');
+        }
+        closeAddReparationModal(); currentReparationPage = 1; renderReparationsTable(); res();
+      }, 150);
+    });
+  }
+
+  function openConfirmDeleteReparationModal(id) { reparationToDeleteId = id; document.getElementById('confirmDeleteReparationModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeConfirmDeleteReparationModal() { reparationToDeleteId = null; document.getElementById('confirmDeleteReparationModal').classList.add('hidden'); document.body.style.overflow = ''; }
+  async function confirmDeleteReparation() {
+    if (!reparationToDeleteId) return;
+    return new Promise(res => {
+      setTimeout(() => {
+        allReparations = allReparations.filter(r => r.id !== reparationToDeleteId);
+        closeConfirmDeleteReparationModal();
+        if (document.getElementById('reparationsBody').childElementCount === 1 && currentReparationPage > 1 && allReparations.length > 0) { currentReparationPage--; }
+        renderReparationsTable(); alert('Reparation record deleted (mock)!'); res();
+      }, 150);
+    });
+  }
+
+  function exportReparationsExcel() {
+    let rTD = [...allReparations]; 
+    if (activeReparationDateFilter !== 'all') { let range = (activeReparationDateFilter === 'custom' && customReparationFilterStartDate && customReparationFilterEndDate) ? {startDate:customReparationFilterStartDate,endDate:customReparationFilterEndDate} : getDateRange(activeReparationDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const repairD = getISODateString(new Date(r.repair_date)); return repairD >= range.startDate && repairD <= range.endDate; }); } }
+    const sT = document.getElementById('reparationSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.receipt && r.receipt.toLowerCase().includes(sT)) || (r.cost && r.cost.toString().includes(sT)) || (mockPannes.find(p=>p.id===r.panne_id)?.description.toLowerCase().includes(sT)) || (mockGarages.find(g=>g.id===r.garage_id)?.name.toLowerCase().includes(sT)) || (r.status&&r.status.toLowerCase().includes(sT)) ); }
+    const wsD = rTD.map(r => ({ ID:r.id, Panne:mockPannes.find(p=>p.id===r.panne_id)?.description||r.panne_id, Cost:r.cost.toFixed(2), Receipt:r.receipt, Garage:mockGarages.find(g=>g.id===r.garage_id)?.name||r.garage_id, 'Repair Date':new Date(r.repair_date).toLocaleDateString(), Status:r.status }));
+    const ws = XLSX.utils.json_to_sheet(wsD); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reparations"); XLSX.writeFile(wb, "reparations_export.xlsx");
+  }
+  function exportReparationsPDF() {
+    const {jsPDF} = window.jspdf; const doc = new jsPDF(); doc.setFontSize(18); doc.text('Reparation Records', 14, 15);
+    let rTD = [...allReparations]; 
+    if (activeReparationDateFilter !== 'all') { let range = (activeReparationDateFilter === 'custom' && customReparationFilterStartDate && customReparationFilterEndDate) ? {startDate:customReparationFilterStartDate,endDate:customReparationFilterEndDate} : getDateRange(activeReparationDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const repairD = getISODateString(new Date(r.repair_date)); return repairD >= range.startDate && repairD <= range.endDate; }); } }
+    const sT = document.getElementById('reparationSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.receipt && r.receipt.toLowerCase().includes(sT)) || (r.cost && r.cost.toString().includes(sT)) || (mockPannes.find(p=>p.id===r.panne_id)?.description.toLowerCase().includes(sT)) || (mockGarages.find(g=>g.id===r.garage_id)?.name.toLowerCase().includes(sT)) || (r.status&&r.status.toLowerCase().includes(sT)) ); }
+    const hdrs = [['ID', 'Panne', 'Cost', 'Receipt', 'Garage', 'Repair Date', 'Status']];
+    const data = rTD.map(r => [r.id, mockPannes.find(p=>p.id===r.panne_id)?.description||r.panne_id, r.cost.toFixed(2), r.receipt, mockGarages.find(g=>g.id===r.garage_id)?.name||r.garage_id, new Date(r.repair_date).toLocaleDateString(), r.status]);
+    doc.autoTable({ head:hdrs, body:data, startY:25, theme:'grid', headStyles:{fillColor:[59,130,246],textColor:255}, columnStyles:{3:{cellWidth:40}} }); doc.save('reparations_export.pdf');
+  }
+  // --- End Reparation Section ---
 </script>
 </body>
 </html>

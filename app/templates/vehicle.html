@@ -3,356 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced Dashboard</title>
+  <title>Dashboard - Vehicle Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
+  <style>
+    .modal { transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+    .modal.hidden { visibility: hidden; opacity: 0; }
+    .modal:not(.hidden) { visibility: visible; opacity: 1; }
+    .dark .modal-content { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.2); }
+    .date-filter-btn.active { background-color: #3b82f6; color: white; }
+    .dark .date-filter-btn.active { background-color: #60a5fa; }
+    .view-detail-label { font-weight: 500; color: #4b5563; }
+    .dark .view-detail-label { color: #d1d5db; }
+    .view-detail-value { color: #1f2937; }
+    .dark .view-detail-value { color: #f9fafb; }
+  </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 <div class="flex flex-col md:flex-row h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
+    <!-- Sidebar (Left) -->
+    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block flex-shrink-0">
       <div class="text-xl font-bold flex items-center space-x-2">
         <i data-lucide="menu" class="w-5 h-5"></i><span>Menu</span>
       </div>
-      <ul class="space-y-4">
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-          <a href="dashboard.html">Dashboard</a>
+      <ul class="space-y-2">
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><a href="#">Dashboard</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-          <a href="analytics.html">Analytics</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="users" class="w-5 h-5"></i><a href="#">Users</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="car" class="w-5 h-5"></i>
-          <a href="vehicle.html">Vehicles</a>
+        {/* Active Vehicle Link */}
+        <li class="flex items-center space-x-3 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="car" class="w-5 h-5"></i><a href="#vehicle-section">Vehicles</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="user" class="w-5 h-5"></i>
-          <a href="user.html">Drivers</a>
+         <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="wrench" class="w-5 h-5"></i><a href="#">Reparation</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="wrench" class="w-5 h-5"></i>
-          <a href="reparation.html">Reparation</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="droplet" class="w-5 h-5"></i><a href="#">Fuel</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="droplet" class="w-5 h-5"></i>
-          <a href="fuel.html">Fuel</a>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="settings" class="w-5 h-5"></i><a href="#">Maintenance</a>
         </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-          <a href="maintenance.html">Maintenance</a>
-        </li>
-        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
-          <i data-lucide="route" class="w-5 h-5"></i>
-          <a href="trip.html">Trip</a>
+         <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="route" class="w-5 h-5"></i><a href="#">Trip</a>
         </li>
       </ul>
     </aside>
     
-    <script>
-      lucide.createIcons();
-    </script>
-
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Active</h3>
-        <div class="text-2xl font-bold">18</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
-          <span class="text-blue-600 dark:text-blue-300">+15%</span>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Booked</h3>
-        <div class="text-2xl font-bold">6</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
-          <span class="text-green-600 dark:text-green-300">+10%</span>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow text-center">
-        <h3 class="text-lg font-semibold">Down</h3>
-        <div class="text-2xl font-bold">4</div>
-        <div class="w-16 h-16 mx-auto mt-2 rounded-full bg-red-100 dark:bg-red-800 flex items-center justify-center">
-          <span class="text-red-600 dark:text-red-300">-5%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reports Section -->
-    <section id="reports" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
-      <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
-        <button onclick="openAddVehicleModal()" class="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 text-sm font-semibold">
-          ➕ Add Vehicle
-        </button>
+    <!-- Vehicle Table Section -->
+    <section id="vehicle-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
         <div class="flex flex-wrap gap-2 items-center">
-          <label for="fromDate" class="text-sm">From:</label>
-          <input type="date" id="fromDate" class="border rounded px-2 py-1 text-sm text-black">
-          <label for="toDate" class="text-sm">To:</label>
-          <input type="date" id="toDate" class="border rounded px-2 py-1 text-sm text-black">
-          <input type="text" id="searchInput" placeholder="Search..." class="border rounded px-2 py-1 text-sm text-black">
-          <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
-          <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+          <button onclick="openAddVehicleModal()" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Vehicle
+          </button>
+          <input type="text" id="vehicleSearch" placeholder="Search vehicles (plate, VIN, make...)" class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto">
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="exportVehiclesExcel()" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
+          <button onclick="exportVehiclesPDF()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
         </div>
       </div>
+
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium mr-2">Filter Vehicles by Registration Date:</span>
+        <button id="vehicle-filter-today" onclick="applyVehicleDateFilter('today')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
+        <button id="vehicle-filter-last7" onclick="applyVehicleDateFilter('last7days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
+        <button id="vehicle-filter-last30" onclick="applyVehicleDateFilter('last30days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
+        <button id="vehicle-filter-all" onclick="applyVehicleDateFilter('all')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
+        <button id="vehicle-filter-custom-btn" onclick="toggleVehicleCustomDateRange()" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
+      </div>
+      <div id="vehicleCustomDateRange" class="mb-4 hidden items-center gap-2 p-3 border dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
+        <input type="date" id="vehicleCustomStartDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <span class="text-sm">to</span>
+        <input type="date" id="vehicleCustomEndDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
+        <button onclick="applyVehicleCustomDateFilter()" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
+      </div>
+
       <div class="overflow-x-auto">
-        <table id="reportTable" class="w-full text-left text-sm">
+        <table id="vehiclesTable" class="w-full text-left text-sm">
           <thead>
             <tr class="border-b dark:border-gray-700">
-              <th class="py-1">Date</th>
-              <th>Plate Number</th>
-              <th>Model</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th class="py-3 px-2 font-semibold">ID</th>
+              <th class="px-2 font-semibold">Make</th>
+              <th class="px-2 font-semibold">Model</th>
+              <th class="px-2 font-semibold">Year</th>
+              <th class="px-2 font-semibold">Plate #</th>
+              <th class="px-2 font-semibold">Mileage</th>
+              <th class="px-2 font-semibold">Status</th>
+              <th class="px-2 font-semibold">Registered</th>
+              <th class="px-2 font-semibold text-center">Actions</th>
             </tr>
           </thead>
-          <tbody id="reportBody"></tbody>
+          <tbody id="vehiclesBody"></tbody>
         </table>
       </div>
-      <div class="mt-4 flex justify-center space-x-2" id="pagination"></div>
+      <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+        <div class="text-sm text-gray-600 dark:text-gray-400" id="vehiclesCount"></div>
+        <div class="flex items-center space-x-1" id="vehiclesPagination"></div>
+      </div>
     </section>
   </main>
 
-  <!-- Right Sidebar -->
-  <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
-    <div class="flex justify-between items-center">
-      <button id="theme-toggle" class="text-xl">🌙</button>
-      <div>
-        <div class="text-sm font-semibold">John Doe</div>
-        <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
-      </div>
-    </div>
-
-    <!-- Recent Updates -->
-    <div>
-      <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
-      <div class="flex flex-col space-y-6 relative">
-        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">New vehicle was added</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
-          </div>
+    <!-- Right Sidebar -->
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
+        <div class="flex justify-between items-center">
+        <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
+        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
         </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">vehicle number was filled with 100l</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">45 minutes ago</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Vehicle no was reserved</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Vehicle no got panne</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Vehicle Analytics -->
-    <div class="mt-8">
-      <h4 class="font-bold mb-4 text-lg">Vehicle Analytics</h4>
-      <div class="flex flex-col space-y-6 relative">
-        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-green-500"></div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Fuel rate dropped by 12%</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">in the last 2 weeks</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Fuel rate increased by 7%</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">in the last 4 days</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">New vehicle was added</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">3 days ago</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Panne rate increased +5%</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">this week</p>
-          </div>
-        </div>
-        <div class="flex items-start space-x-4 relative">
-          <div class="w-3 h-3 bg-green-500 rounded-full z-10 mt-1.5 ml-4"></div>
-          <div class="ml-2">
-            <p class="font-medium">Vehicle expenses increased +20%</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">last 10 days</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
+        <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New vehicle added</p><p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Vehicle maintenance due</p><p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p></div></div></div></div>
+        <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="car-front" class="w-5 h-5 mb-1"></i><span class="text-xs">View Fleet</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="search" class="w-5 h-5 mb-1"></i><span class="text-xs">Find Vehicle</span></button></div></div>
+    </aside>
 </div>
 
-<!-- Add Vehicle Modal -->
-<div id="addVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+<!-- Add/Edit Vehicle Modal -->
+<div id="addVehicleModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"> <!-- Larger modal, scrollable -->
     <div class="p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">Add New Vehicle</h3>
-        <button onclick="closeAddVehicleModal()" class="text-gray-500 hover:text-gray-700">
-          <i data-lucide="x" class="w-6 h-6"></i>
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="vehicleModalTitle">Add New Vehicle</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the vehicle details below</p>
+        </div>
+        <button onclick="closeAddVehicleModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
-      
-      <form id="vehicleForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Basic Information -->
-        <div class="col-span-2">
-          <h4 class="font-semibold mb-2 border-b pb-1">Basic Information</h4>
+      <form id="addVehicleForm" class="space-y-4">
+        <input type="hidden" id="vehicleId_form">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="vehicle_make_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Make</label>
+              <select id="vehicle_make_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
+            <div>
+              <label for="vehicle_model_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Model</label>
+              <select id="vehicle_model_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
+            <div>
+              <label for="vehicle_year_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+              <input type="number" id="vehicle_year_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 2020">
+            </div>
         </div>
-        
-        <div>
-          <label for="make" class="block text-sm font-medium mb-1">Make</label>
-          <select id="make" name="make" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="">Select Make</option>
-            <option value="Toyota">Toyota</option>
-            <option value="Ford">Ford</option>
-            <option value="BMW">BMW</option>
-            <option value="Mercedes">Mercedes</option>
-            <option value="Honda">Honda</option>
-          </select>
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="vehicle_plate_number_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plate Number</label>
+              <input type="text" id="vehicle_plate_number_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., ABC-123">
+            </div>
+            <div>
+              <label for="vehicle_vin_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">VIN</label>
+              <input type="text" id="vehicle_vin_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="Vehicle Identification Number">
+            </div>
+             <div>
+              <label for="vehicle_color_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+              <input type="text" id="vehicle_color_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., Red">
+            </div>
         </div>
-        
-        <div>
-          <label for="model" class="block text-sm font-medium mb-1">Model</label>
-          <select id="model" name="model" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="">Select Model</option>
-            <option value="Camry">Camry</option>
-            <option value="F-150">F-150</option>
-            <option value="X5">X5</option>
-            <option value="C-Class">C-Class</option>
-            <option value="Accord">Accord</option>
-          </select>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="vehicle_mileage_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mileage</label>
+              <input type="number" step="0.1" id="vehicle_mileage_form" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 50000.5">
+            </div>
+            <div>
+              <label for="vehicle_engine_size_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Engine Size (L)</label>
+              <input type="number" step="0.1" id="vehicle_engine_size_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 2.0">
+            </div>
+             <div>
+              <label for="vehicle_type_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle Type</label>
+              <select id="vehicle_type_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
         </div>
-        
-        <div>
-          <label for="year" class="block text-sm font-medium mb-1">Year</label>
-          <input type="number" id="year" name="year" min="1900" max="2099" class="w-full px-3 py-2 border rounded-md text-black" required>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="vehicle_transmission_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transmission</label>
+              <select id="vehicle_transmission_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
+            <div>
+              <label for="vehicle_fuel_type_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fuel Type</label>
+              <select id="vehicle_fuel_type_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
         </div>
-        
-        <div>
-          <label for="plate_number" class="block text-sm font-medium mb-1">Plate Number</label>
-          <input type="text" id="plate_number" name="plate_number" class="w-full px-3 py-2 border rounded-md text-black" required>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="vehicle_purchase_price_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purchase Price</label>
+              <input type="number" step="0.01" id="vehicle_purchase_price_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 25000.00">
+            </div>
+            <div>
+              <label for="vehicle_purchase_date_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purchase Date</label>
+              <input type="date" id="vehicle_purchase_date_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label for="vehicle_status_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <select id="vehicle_status_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></select>
+            </div>
         </div>
-        
-        <div>
-          <label for="mileage" class="block text-sm font-medium mb-1">Mileage (km)</label>
-          <input type="number" id="mileage" name="mileage" step="0.1" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <div>
-          <label for="engine_size" class="block text-sm font-medium mb-1">Engine Size (L)</label>
-          <input type="number" id="engine_size" name="engine_size" step="0.1" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <!-- Vehicle Specifications -->
-        <div class="col-span-2 mt-4">
-          <h4 class="font-semibold mb-2 border-b pb-1">Specifications</h4>
-        </div>
-        
-        <div>
-          <label for="vehicle_type" class="block text-sm font-medium mb-1">Vehicle Type</label>
-          <select id="vehicle_type" name="vehicle_type" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="">Select Type</option>
-            <option value="Sedan">Sedan</option>
-            <option value="SUV">SUV</option>
-            <option value="Truck">Truck</option>
-            <option value="Van">Van</option>
-            <option value="Coupe">Coupe</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="vehicle_transmission" class="block text-sm font-medium mb-1">Transmission</label>
-          <select id="vehicle_transmission" name="vehicle_transmission" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="">Select Transmission</option>
-            <option value="Automatic">Automatic</option>
-            <option value="Manual">Manual</option>
-            <option value="CVT">CVT</option>
-            <option value="Dual-Clutch">Dual-Clutch</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="vehicle_fuel_type" class="block text-sm font-medium mb-1">Fuel Type</label>
-          <select id="vehicle_fuel_type" name="vehicle_fuel_type" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="">Select Fuel Type</option>
-            <option value="Gasoline">Gasoline</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Electric">Electric</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="color" class="block text-sm font-medium mb-1">Color</label>
-          <input type="text" id="color" name="color" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <!-- Purchase Information -->
-        <div class="col-span-2 mt-4">
-          <h4 class="font-semibold mb-2 border-b pb-1">Purchase Information</h4>
-        </div>
-        
-        <div>
-          <label for="vin" class="block text-sm font-medium mb-1">VIN</label>
-          <input type="text" id="vin" name="vin" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <div>
-          <label for="purchase_price" class="block text-sm font-medium mb-1">Purchase Price ($)</label>
-          <input type="number" id="purchase_price" name="purchase_price" step="0.01" min="0" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <div>
-          <label for="purchase_date" class="block text-sm font-medium mb-1">Purchase Date</label>
-          <input type="date" id="purchase_date" name="purchase_date" class="w-full px-3 py-2 border rounded-md text-black" required>
-        </div>
-        
-        <div>
-          <label for="status" class="block text-sm font-medium mb-1">Status</label>
-          <select id="status" name="status" class="w-full px-3 py-2 border rounded-md text-black" required>
-            <option value="available">Available</option>
-            <option value="booked">Booked</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="out_of_service">Out of Service</option>
-          </select>
-        </div>
-        
-        <div class="col-span-2 flex justify-end space-x-4 mt-6">
-          <button type="button" onclick="closeAddVehicleModal()" class="px-4 py-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-            Cancel
-          </button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            Save Vehicle
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeAddVehicleModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+          <button type="submit" id="vehicleSubmitButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Vehicle
           </button>
         </div>
       </form>
@@ -360,149 +217,417 @@
   </div>
 </div>
 
-<!-- Scripts -->
+<!-- View Vehicle Record Modal -->
+<div id="viewVehicleModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Vehicle Details</h3>
+        <button onclick="closeViewVehicleModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      <div id="viewVehicleDetails" class="space-y-3 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            <div><span class="view-detail-label">Vehicle ID:</span> <span id="view-vehicle-id" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Plate Number:</span> <span id="view-vehicle-plate_number" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Make:</span> <span id="view-vehicle-make" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Model:</span> <span id="view-vehicle-model" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Year:</span> <span id="view-vehicle-year" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">VIN:</span> <span id="view-vehicle-vin" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Color:</span> <span id="view-vehicle-color" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Mileage:</span> <span id="view-vehicle-mileage" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Engine Size:</span> <span id="view-vehicle-engine_size" class="view-detail-value"></span> L</div>
+            <div><span class="view-detail-label">Vehicle Type:</span> <span id="view-vehicle-type" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Transmission:</span> <span id="view-vehicle-transmission" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Fuel Type:</span> <span id="view-vehicle-fuel_type" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Purchase Price:</span> $<span id="view-vehicle-purchase_price" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Purchase Date:</span> <span id="view-vehicle-purchase_date" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Status:</span> <span id="view-vehicle-status" class="view-detail-value"></span></div>
+            <div><span class="view-detail-label">Registration Date:</span> <span id="view-vehicle-registration_date" class="view-detail-value"></span></div>
+        </div>
+      </div>
+      <div class="flex justify-end pt-6">
+          <button type="button" onclick="closeViewVehicleModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal for Vehicle Deletion -->
+<div id="confirmDeleteVehicleModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this vehicle record?</p></div>
+        <button onclick="closeConfirmDeleteVehicleModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      </div>
+      <div class="flex justify-end gap-3 pt-4">
+        <button onclick="closeConfirmDeleteVehicleModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+        <button id="confirmDeleteVehicleBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
-  // Modal functions
-  function openAddVehicleModal() {
-    document.getElementById('addVehicleModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeAddVehicleModal() {
-    document.getElementById('addVehicleModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-  }
-
-  // Form submission
-  document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Collect form data
-    const formData = new FormData(this);
-    const vehicleData = {};
-    formData.forEach((value, key) => {
-      vehicleData[key] = value;
-    });
-    
-    try {
-      // Send data to your backend API
-      const response = await fetch('http://localhost/vehicle/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(vehicleData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Close the modal and show success message
-      closeAddVehicleModal();
-      alert('Vehicle added successfully!');
-      
-      // Refresh the table to show the new vehicle
-      renderTable();
-      
-    } catch (error) {
-      console.error('Error saving vehicle:', error);
-      alert('Error saving vehicle. Please try again.');
-    }
-  });
-
-  // Table functionality
-  const rowsPerPage = 5;
-  let currentPage = 1;
-  const data = [
-    { date: '2025-05-01', plateNumber: 'P0034A', model: 'BMW', status: 'Available' },
-    { date: '2025-05-02', plateNumber: 'A00TB', model: 'JEEP', status: 'Booked' },
-    { date: '2025-05-03', plateNumber: 'C0B50', model: 'BENZ', status: 'Down' },
-    ...Array.from({ length: 50 }, (_, i) => ({
-      date: `2025-05-${(i + 4).toString().padStart(2, '0')}`,
-      plateNumber: `P${String.fromCharCode(65 + (i % 5))}${1000 + i}`,
-      model: ['Toyota', 'Ford', 'BMW', 'Mercedes', 'Honda'][i % 5],
-      status: ['Available', 'Booked', 'Down'][i % 3]
-    }))
+  // --- Global Variables for Vehicle ---
+  let allVehicles = []; const vehiclesPerPage = 5; let currentVehiclePage = 1;
+  let vehicleToEditId = null; let vehicleToDeleteId = null;
+  let activeVehicleDateFilter = 'all'; let customVehicleFilterStartDate = null; let customVehicleFilterEndDate = null;
+  
+  // Mock data 
+  const mockVehicleMakes = [{id:1, name:"Toyota"}, {id:2, name:"Ford"}, {id:3, name:"Honda"}, {id:4, name:"Chevrolet"}, {id:5, name:"Nissan"}];
+  const mockVehicleModels = [ // Dependent on Make, simplified here for mock. Real app would filter this.
+      {id:1, make_id:1, name:"Camry"}, {id:2, make_id:1, name:"Rav4"}, {id:3, make_id:1, name:"Corolla"},
+      {id:4, make_id:2, name:"F-150"}, {id:5, make_id:2, name:"Explorer"}, {id:6, make_id:2, name:"Escape"},
+      {id:7, make_id:3, name:"Civic"}, {id:8, make_id:3, name:"CR-V"}, {id:9, make_id:3, name:"Accord"},
+      {id:10, make_id:4, name:"Silverado"}, {id:11, make_id:4, name:"Equinox"},
+      {id:12, make_id:5, name:"Rogue"}, {id:13, make_id:5, name:"Altima"}
   ];
+  const mockVehicleTypes = [{id:1, name:"Sedan"}, {id:2, name:"SUV"}, {id:3, name:"Truck"}, {id:4, name:"Van"}, {id:5, name:"Hatchback"}];
+  const mockVehicleTransmissions = [{id:1, name:"Automatic"}, {id:2, name:"Manual"}, {id:3, name:"CVT"}];
+  const mockFuelTypes = [{id:1, name:"Gasoline"}, {id:2, name:"Diesel"}, {id:3, name:"Electric"}, {id:4, name:"Hybrid"}]; // Reusable
+  const mockVehicleStatuses = ["available", "in_repair", "in_use", "sold", "decommissioned"];
 
-  function renderTable() {
-    const start = (currentPage - 1) * rowsPerPage;
-    const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
 
-    const filtered = data.filter(row => {
-      const dateMatch = (!fromDate || row.date >= fromDate) && (!toDate || row.date <= toDate);
-      const searchMatch = Object.values(row).some(val =>
-        String(val).toLowerCase().includes(searchText)
-      );
-      return dateMatch && searchMatch;
+  // --- DOMContentLoaded ---
+  document.addEventListener('DOMContentLoaded', () => {
+      initializeVehicleSection();
+      lucide.createIcons(); 
+      const themeToggleButton = document.getElementById('theme-toggle');
+      if (themeToggleButton) themeToggleButton.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+      
+      document.getElementById('addVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddVehicleModal(); });
+      document.getElementById('viewVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewVehicleModal(); });
+      document.getElementById('confirmDeleteVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteVehicleModal(); });
+      
+      // Optional: Add event listener to make_id dropdown to filter model_id dropdown
+      // document.getElementById('vehicle_make_form').addEventListener('change', populateVehicleModelDropdown);
+
+  });
+
+  function getISODateString(date) { return date.toISOString().split('T')[0]; }
+  function getDateRange(filterType) {
+    const today=new Date(); today.setHours(0,0,0,0); let sD=new Date(today); let eD=new Date(today); eD.setHours(23,59,59,999);
+    switch(filterType){ case 'today':break; case 'last7days':sD.setDate(today.getDate()-6);break; case 'last30days':sD.setDate(today.getDate()-29);break; case 'all':return{startDate:null,endDate:null}; default:return{startDate:null,endDate:null};}
+    return{startDate:getISODateString(sD),endDate:getISODateString(eD)};
+  }
+
+  // --- Vehicle Section ---
+  function initializeVehicleSection() {
+    fetchVehicles(); 
+    populateVehicleDropdowns(); // Initial population of all dropdowns
+    document.getElementById('vehicleSearch').addEventListener('input', () => { currentVehiclePage = 1; renderVehiclesTable(); });
+    document.getElementById('addVehicleForm').addEventListener('submit', handleVehicleFormSubmit);
+    document.getElementById('confirmDeleteVehicleBtn').addEventListener('click', confirmDeleteVehicle);
+    setActiveVehicleDateFilterButton('all');
+  }
+
+  function applyVehicleDateFilter(filterType) {
+    activeVehicleDateFilter = filterType; customVehicleFilterStartDate = null; customVehicleFilterEndDate = null;
+    document.getElementById('vehicleCustomDateRange').classList.add('hidden');
+    setActiveVehicleDateFilterButton(filterType); currentVehiclePage = 1; renderVehiclesTable();
+  }
+  function toggleVehicleCustomDateRange() {
+    document.getElementById('vehicleCustomDateRange').classList.toggle('hidden');
+    if (!document.getElementById('vehicleCustomDateRange').classList.contains('hidden')) setActiveVehicleDateFilterButton('vehicle-filter-custom-btn');
+    else if (activeVehicleDateFilter === 'custom') applyVehicleDateFilter('all');
+  }
+  function applyVehicleCustomDateFilter() {
+    const sD = document.getElementById('vehicleCustomStartDate').value, eD = document.getElementById('vehicleCustomEndDate').value;
+    if (!sD || !eD) { alert("Please select dates for Vehicle Records."); return; }
+    if (new Date(sD) > new Date(eD)) { alert("Start date > end date for Vehicle Records."); return; }
+    activeVehicleDateFilter = 'custom'; customVehicleFilterStartDate = sD; customVehicleFilterEndDate = eD;
+    setActiveVehicleDateFilterButton('vehicle-filter-custom-btn'); currentVehiclePage = 1; renderVehiclesTable();
+  }
+  function setActiveVehicleDateFilterButton(filterId) {
+    document.querySelectorAll('#vehicle-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(filterId.startsWith('vehicle-filter-') ? filterId : `vehicle-filter-${filterId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    if (filterId === 'vehicle-filter-custom-btn' || activeVehicleDateFilter === 'custom') document.getElementById('vehicle-filter-custom-btn').classList.add('active');
+  }
+
+  function populateSelectWithOptions(selectElementId, optionsArray, placeholder = "Select Option") {
+      const selectElement = document.getElementById(selectElementId);
+      selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+      optionsArray.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt.id;
+          option.textContent = opt.name;
+          selectElement.appendChild(option);
+      });
+  }
+  
+  // Simplified model population for mock; in real app, models would be fetched based on make_id
+  function populateVehicleModelDropdown(selectedMakeId = null) {
+      const modelSelect = document.getElementById('vehicle_model_form');
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+      let relevantModels = mockVehicleModels;
+      if (selectedMakeId) {
+          relevantModels = mockVehicleModels.filter(m => m.make_id === parseInt(selectedMakeId));
+      }
+      relevantModels.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model.id;
+          option.textContent = model.name;
+          modelSelect.appendChild(option);
+      });
+  }
+
+
+  async function populateVehicleDropdowns() {
+    populateSelectWithOptions('vehicle_make_form', mockVehicleMakes, "Select Make");
+    // Populate models initially with all models, or based on a selected make if editing
+    // For simplicity in mock, we'll show all. A real app might fetch models based on selected make.
+    populateVehicleModelDropdown(); 
+    populateSelectWithOptions('vehicle_type_form', mockVehicleTypes, "Select Vehicle Type");
+    populateSelectWithOptions('vehicle_transmission_form', mockVehicleTransmissions, "Select Transmission");
+    populateSelectWithOptions('vehicle_fuel_type_form', mockFuelTypes, "Select Fuel Type");
+    
+    const statusSelect = document.getElementById('vehicle_status_form');
+    statusSelect.innerHTML = ''; 
+    mockVehicleStatuses.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' '); statusSelect.appendChild(o); });
+  }
+
+  async function fetchVehicles() {
+    return new Promise(res => {
+      setTimeout(() => {
+        if (allVehicles.length === 0) {
+          const baseTime = Date.now();
+          for (let i = 1; i <= 25; i++) { 
+            const daysAgoRegistered = Math.floor(Math.random() * 365 * 3); // Up to 3 years ago
+            const registrationDate = new Date(baseTime - daysAgoRegistered * 24 * 60 * 60 * 1000);
+            const purchaseDate = new Date(registrationDate.getTime() - Math.floor(Math.random() * 30) * 24*60*60*1000); // Purchase slightly before registration
+            const make = mockVehicleMakes[Math.floor(Math.random() * mockVehicleMakes.length)];
+            const model = mockVehicleModels.filter(m => m.make_id === make.id)[Math.floor(Math.random() * mockVehicleModels.filter(m => m.make_id === make.id).length)] || mockVehicleModels[0];
+
+            allVehicles.push({
+              id: i,
+              make: make.id,
+              model: model.id,
+              year: 2015 + Math.floor(Math.random() * 9), // 2015-2023
+              plate_number: `${String.fromCharCode(65 + Math.floor(Math.random()*26))}${String.fromCharCode(65 + Math.floor(Math.random()*26))}${String.fromCharCode(65 + Math.floor(Math.random()*26))}-${Math.floor(100+Math.random()*900)}`,
+              mileage: parseFloat((Math.random() * 150000).toFixed(1)),
+              engine_size: parseFloat((1.0 + Math.random() * 3.0).toFixed(1)), // 1.0L to 4.0L
+              vehicle_type: mockVehicleTypes[Math.floor(Math.random() * mockVehicleTypes.length)].id,
+              vehicle_transmission: mockVehicleTransmissions[Math.floor(Math.random() * mockVehicleTransmissions.length)].id,
+              vehicle_fuel_type: mockFuelTypes[Math.floor(Math.random() * mockFuelTypes.length)].id,
+              vin: `VIN${Math.random().toString(36).substring(2, 15).toUpperCase()}${i}`,
+              color: ["Red", "Blue", "Black", "White", "Silver", "Gray"][Math.floor(Math.random()*6)],
+              purchase_price: parseFloat((10000 + Math.random() * 40000).toFixed(2)),
+              purchase_date: purchaseDate.toISOString(),
+              status: mockVehicleStatuses[Math.floor(Math.random() * mockVehicleStatuses.length)],
+              registration_date: registrationDate.toISOString()
+            });
+          }
+        }
+        currentVehiclePage = 1; renderVehiclesTable(); res();
+      }, 180);
     });
-
-    const paginated = filtered.slice(start, start + rowsPerPage);
-    const tbody = document.getElementById("reportBody");
-    tbody.innerHTML = paginated.map(row => `
-      <tr class="border-b dark:border-gray-700">
-        <td>${row.date}</td>
-        <td>${row.plateNumber}</td>
-        <td>${row.model}</td>
-        <td><span class="${row.status === 'Available' ? 'text-green-500' : row.status === 'Booked' ? 'text-yellow-500' : 'text-red-500'}">${row.status}</span></td>
-        <td class="space-x-1">
-          <a href="#" class="text-blue-500 hover:underline">View</a>
-          <a href="#" class="text-yellow-500 hover:underline">Update</a>
-          <a href="#" class="text-red-500 hover:underline">Delete</a>
-        </td>
-      </tr>
-    `).join('');
-
-    const totalPages = Math.ceil(filtered.length / rowsPerPage);
-    const pagination = document.getElementById("pagination");
-    pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => `
-      <button class="px-2 py-1 rounded ${i + 1 === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}"
-        onclick="currentPage=${i + 1};renderTable();">${i + 1}</button>
-    `).join('');
   }
 
-  document.getElementById('searchInput').addEventListener('input', () => {
-    currentPage = 1;
-    renderTable();
-  });
+  function renderVehiclesTable() {
+    let recordsToDisplay = [...allVehicles];
+    if (activeVehicleDateFilter !== 'all') {
+      let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? 
+                  { startDate: customVehicleFilterStartDate, endDate: customVehicleFilterEndDate } : 
+                  getDateRange(activeVehicleDateFilter);
+      if (range.startDate && range.endDate) {
+        recordsToDisplay = recordsToDisplay.filter(r => {
+          const recordRegDate = getISODateString(new Date(r.registration_date)); 
+          return recordRegDate >= range.startDate && recordRegDate <= range.endDate;
+        });
+      }
+    }
+    const searchTerm = document.getElementById('vehicleSearch').value.toLowerCase();
+    if (searchTerm) {
+      recordsToDisplay = recordsToDisplay.filter(r =>
+        (r.id && r.id.toString().includes(searchTerm)) ||
+        (r.plate_number && r.plate_number.toLowerCase().includes(searchTerm)) ||
+        (r.vin && r.vin.toLowerCase().includes(searchTerm)) ||
+        (mockVehicleMakes.find(m => m.id === r.make)?.name.toLowerCase().includes(searchTerm)) ||
+        (mockVehicleModels.find(m => m.id === r.model)?.name.toLowerCase().includes(searchTerm)) ||
+        (r.year && r.year.toString().includes(searchTerm)) ||
+        (r.status && r.status.toLowerCase().includes(searchTerm))
+      );
+    }
 
-  document.getElementById('fromDate').addEventListener('change', () => {
-    currentPage = 1;
-    renderTable();
-  });
+    const start = (currentVehiclePage - 1) * vehiclesPerPage;
+    const paginatedRecords = recordsToDisplay.slice(start, start + vehiclesPerPage);
+    const vehiclesBody = document.getElementById('vehiclesBody');
+    vehiclesBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(r => {
+      const makeName = mockVehicleMakes.find(m => m.id === r.make)?.name || r.make;
+      const modelName = mockVehicleModels.find(m => m.id === r.model)?.name || r.model;
+      const statusFormatted = r.status.charAt(0).toUpperCase() + r.status.slice(1).replace(/_/g, ' ');
+      const statusColor = r.status === "available" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : 
+                          r.status === "in_use" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                          r.status === "in_repair" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
+                          r.status === "sold" ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" :
+                          "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"; // Decommissioned or other
 
-  document.getElementById('toDate').addEventListener('change', () => {
-    currentPage = 1;
-    renderTable();
-  });
-
-  function exportExcel() {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, 'Reports');
-    XLSX.writeFile(wb, 'report.xlsx');
+      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${r.id}">
+                <td class="py-3 px-2">${r.id}</td>
+                <td class="px-2">${makeName}</td>
+                <td class="px-2">${modelName}</td>
+                <td class="px-2">${r.year}</td>
+                <td class="px-2">${r.plate_number}</td>
+                <td class="px-2">${r.mileage.toLocaleString()}</td>
+                <td class="px-2"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${statusFormatted}</span></td>
+                <td class="px-2">${new Date(r.registration_date).toLocaleDateString()}</td>
+                <td class="px-2 text-center whitespace-nowrap">
+                  <button onclick="openViewVehicleModal(${r.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View Details"><i data-lucide="eye" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openEditVehicleModal(${r.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit Record"><i data-lucide="edit-2" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openConfirmDeleteVehicleModal(${r.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4 inline-block"></i></button>
+                </td></tr>`;
+    }).join('') : `<tr><td colspan="9" class="text-center py-8 text-gray-500">No vehicle records found.</td></tr>`;
+    lucide.createIcons();
+    document.getElementById('vehiclesCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + vehiclesPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
+    renderVehiclePagination(recordsToDisplay.length);
   }
 
-  async function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text("Report PDF Export", 10, 10);
-    doc.save("report.pdf");
+  function renderVehiclePagination(totalRecords) { 
+    const tP=Math.ceil(totalRecords/vehiclesPerPage);const pC=document.getElementById('vehiclesPagination');pC.innerHTML='';if(tP<=1)return;
+    const bCls="px-3 py-1.5 text-sm rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500";const iCls="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";const aCls="bg-blue-500 text-white border border-blue-500 hover:bg-blue-600";const dCls="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
+    const pB=document.createElement('button');pB.innerHTML=`<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;pB.className=`${bCls} ${currentVehiclePage===1?dCls:iCls}`;if(currentVehiclePage>1)pB.onclick=()=>{currentVehiclePage--;renderVehiclesTable();};else pB.disabled=true;pC.appendChild(pB);
+    const pgs=[];if(tP<=5){for(let i=1;i<=tP;i++)pgs.push(i);}else{pgs.push(1);if(currentVehiclePage>3)pgs.push('...');for(let i=Math.max(2,currentVehiclePage-1);i<=Math.min(tP-1,currentVehiclePage+1);i++)if(!pgs.includes(i))pgs.push(i);if(currentVehiclePage<tP-2)pgs.push('...');if(!pgs.includes(tP))pgs.push(tP);}
+    pgs.forEach(pN=>{if(pN==='...'){const el=document.createElement('span');el.textContent='...';el.className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";pC.appendChild(el);}else{const pBtn=document.createElement('button');pBtn.textContent=pN;pBtn.className=`${bCls} ${pN===currentVehiclePage?aCls:iCls}`;pBtn.onclick=()=>{currentVehiclePage=pN;renderVehiclesTable();};pC.appendChild(pBtn);}});
+    const nB=document.createElement('button');nB.innerHTML=`Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;nB.className=`${bCls} ${currentVehiclePage===tP?dCls:iCls}`;if(currentVehiclePage<tP)nB.onclick=()=>{currentVehiclePage++;renderVehiclesTable();};else nB.disabled=true;pC.appendChild(nB);lucide.createIcons();
+  }
+  
+  function openAddVehicleModal() {
+    vehicleToEditId = null; document.getElementById('addVehicleForm').reset();
+    document.getElementById('vehicleModalTitle').textContent = "Add New Vehicle";
+    document.getElementById('vehicleSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Vehicle`;
+    populateVehicleDropdowns(); 
+    lucide.createIcons(); document.getElementById('addVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  async function openEditVehicleModal(id) {
+    const r = allVehicles.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    vehicleToEditId = id; document.getElementById('vehicleModalTitle').textContent = "Edit Vehicle Record";
+    document.getElementById('vehicleSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    await populateVehicleDropdowns(); 
+    lucide.createIcons(); document.getElementById('vehicleId_form').value = r.id;
+    document.getElementById('vehicle_make_form').value = r.make;
+    populateVehicleModelDropdown(r.make); // Populate models based on selected make
+    document.getElementById('vehicle_model_form').value = r.model;
+    document.getElementById('vehicle_year_form').value = r.year;
+    document.getElementById('vehicle_plate_number_form').value = r.plate_number;
+    document.getElementById('vehicle_vin_form').value = r.vin;
+    document.getElementById('vehicle_color_form').value = r.color;
+    document.getElementById('vehicle_mileage_form').value = r.mileage;
+    document.getElementById('vehicle_engine_size_form').value = r.engine_size;
+    document.getElementById('vehicle_type_form').value = r.vehicle_type;
+    document.getElementById('vehicle_transmission_form').value = r.vehicle_transmission;
+    document.getElementById('vehicle_fuel_type_form').value = r.vehicle_fuel_type;
+    document.getElementById('vehicle_purchase_price_form').value = r.purchase_price;
+    document.getElementById('vehicle_purchase_date_form').value = new Date(r.purchase_date).toISOString().split('T')[0];
+    document.getElementById('vehicle_status_form').value = r.status;
+    document.getElementById('addVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  function closeAddVehicleModal() { document.getElementById('addVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; vehicleToEditId = null; }
+
+  function openViewVehicleModal(id) {
+    const r = allVehicles.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
+    document.getElementById('view-vehicle-id').textContent = r.id;
+    document.getElementById('view-vehicle-plate_number').textContent = r.plate_number;
+    document.getElementById('view-vehicle-make').textContent = mockVehicleMakes.find(m => m.id === r.make)?.name || 'N/A';
+    document.getElementById('view-vehicle-model').textContent = mockVehicleModels.find(m => m.id === r.model)?.name || 'N/A';
+    document.getElementById('view-vehicle-year').textContent = r.year;
+    document.getElementById('view-vehicle-vin').textContent = r.vin;
+    document.getElementById('view-vehicle-color').textContent = r.color;
+    document.getElementById('view-vehicle-mileage').textContent = r.mileage.toLocaleString();
+    document.getElementById('view-vehicle-engine_size').textContent = r.engine_size.toFixed(1);
+    document.getElementById('view-vehicle-type').textContent = mockVehicleTypes.find(vt => vt.id === r.vehicle_type)?.name || 'N/A';
+    document.getElementById('view-vehicle-transmission').textContent = mockVehicleTransmissions.find(vt => vt.id === r.vehicle_transmission)?.name || 'N/A';
+    document.getElementById('view-vehicle-fuel_type').textContent = mockFuelTypes.find(ft => ft.id === r.vehicle_fuel_type)?.name || 'N/A';
+    document.getElementById('view-vehicle-purchase_price').textContent = r.purchase_price.toFixed(2);
+    document.getElementById('view-vehicle-purchase_date').textContent = new Date(r.purchase_date).toLocaleDateString();
+    document.getElementById('view-vehicle-status').textContent = r.status.charAt(0).toUpperCase() + r.status.slice(1).replace(/_/g, ' ');
+    document.getElementById('view-vehicle-registration_date').textContent = new Date(r.registration_date).toLocaleString();
+    document.getElementById('viewVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+  }
+  function closeViewVehicleModal() { document.getElementById('viewVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; }
+
+  async function handleVehicleFormSubmit(event) {
+    event.preventDefault();
+    const purchaseDateValue = document.getElementById('vehicle_purchase_date_form').value;
+    const d = {
+      make: parseInt(document.getElementById('vehicle_make_form').value),
+      model: parseInt(document.getElementById('vehicle_model_form').value),
+      year: parseInt(document.getElementById('vehicle_year_form').value),
+      plate_number: document.getElementById('vehicle_plate_number_form').value,
+      mileage: parseFloat(document.getElementById('vehicle_mileage_form').value) || 0.0,
+      engine_size: parseFloat(document.getElementById('vehicle_engine_size_form').value),
+      vehicle_type: parseInt(document.getElementById('vehicle_type_form').value),
+      vehicle_transmission: parseInt(document.getElementById('vehicle_transmission_form').value),
+      vehicle_fuel_type: parseInt(document.getElementById('vehicle_fuel_type_form').value),
+      vin: document.getElementById('vehicle_vin_form').value,
+      color: document.getElementById('vehicle_color_form').value,
+      purchase_price: parseFloat(document.getElementById('vehicle_purchase_price_form').value),
+      purchase_date: new Date(purchaseDateValue).toISOString(),
+      status: document.getElementById('vehicle_status_form').value
+    };
+    if (!d.make || !d.model || !d.year || !d.plate_number || !d.engine_size || !d.vehicle_type || !d.vehicle_transmission || !d.vehicle_fuel_type || !d.vin || !d.color || isNaN(d.purchase_price) || !d.purchase_date || !d.status) {
+      alert("Please fill all required Vehicle fields correctly."); return;
+    }
+    return new Promise(res => {
+      setTimeout(() => {
+        if (vehicleToEditId) {
+          const idx = allVehicles.findIndex(r => r.id === vehicleToEditId);
+          if (idx !== -1) allVehicles[idx] = { ...allVehicles[idx], ...d, registration_date: allVehicles[idx].registration_date }; 
+          alert('Vehicle record updated (mock)!');
+        } else {
+          const newRec = { ...d, id: allVehicles.length > 0 ? Math.max(...allVehicles.map(r => r.id)) + 1 : 1, registration_date: new Date().toISOString() };
+          allVehicles.unshift(newRec);
+          alert('Vehicle record added (mock)!');
+        }
+        closeAddVehicleModal(); currentVehiclePage = 1; renderVehiclesTable(); res();
+      }, 100);
+    });
   }
 
-  // Theme toggle
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-  });
+  function openConfirmDeleteVehicleModal(id) { vehicleToDeleteId = id; document.getElementById('confirmDeleteVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeConfirmDeleteVehicleModal() { vehicleToDeleteId = null; document.getElementById('confirmDeleteVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; }
+  async function confirmDeleteVehicle() {
+    if (!vehicleToDeleteId) return;
+    return new Promise(res => {
+      setTimeout(() => {
+        allVehicles = allVehicles.filter(r => r.id !== vehicleToDeleteId);
+        closeConfirmDeleteVehicleModal();
+        if (document.getElementById('vehiclesBody').childElementCount === 1 && currentVehiclePage > 1 && allVehicles.length > 0) { currentVehiclePage--; }
+        renderVehiclesTable(); alert('Vehicle record deleted (mock)!'); res();
+      }, 100);
+    });
+  }
 
-  // Initialize
-  renderTable();
-  lucide.createIcons();
+  function exportVehiclesExcel() {
+    let rTD = [...allVehicles]; 
+    if (activeVehicleDateFilter !== 'all') { let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? {startDate:customVehicleFilterStartDate,endDate:customVehicleFilterEndDate} : getDateRange(activeVehicleDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordRegDate = getISODateString(new Date(r.registration_date)); return recordRegDate >= range.startDate && recordRegDate <= range.endDate; }); } }
+    const sT = document.getElementById('vehicleSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.plate_number&&r.plate_number.toLowerCase().includes(sT)) || (r.vin&&r.vin.toLowerCase().includes(sT)) || (mockVehicleMakes.find(m=>m.id===r.make)?.name.toLowerCase().includes(sT)) || (mockVehicleModels.find(m=>m.id===r.model)?.name.toLowerCase().includes(sT)) ); }
+    const wsD = rTD.map(r => ({ 
+        ID:r.id, Make:mockVehicleMakes.find(m=>m.id===r.make)?.name||r.make, Model:mockVehicleModels.find(m=>m.id===r.model)?.name||r.model, Year:r.year, 
+        'Plate #':r.plate_number, VIN: r.vin, Color: r.color, Mileage:r.mileage, 'Engine (L)':r.engine_size, Type:mockVehicleTypes.find(vt=>vt.id===r.vehicle_type)?.name||r.vehicle_type,
+        Transmission:mockVehicleTransmissions.find(vt=>vt.id===r.vehicle_transmission)?.name||r.vehicle_transmission, 'Fuel Type':mockFuelTypes.find(ft=>ft.id===r.vehicle_fuel_type)?.name||r.vehicle_fuel_type,
+        'Purchase Price':r.purchase_price, 'Purchase Date':new Date(r.purchase_date).toLocaleDateString(), Status:r.status.replace('_',' '), 'Registered At':new Date(r.registration_date).toLocaleString() 
+    }));
+    const ws = XLSX.utils.json_to_sheet(wsD); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Vehicles"); XLSX.writeFile(wb, "vehicles_export.xlsx");
+  }
+  function exportVehiclesPDF() {
+    const {jsPDF} = window.jspdf; const doc = new jsPDF('l'); 
+    doc.setFontSize(18); doc.text('Vehicle Records', 14, 15);
+    let rTD = [...allVehicles]; 
+    if (activeVehicleDateFilter !== 'all') { let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? {startDate:customVehicleFilterStartDate,endDate:customVehicleFilterEndDate} : getDateRange(activeVehicleDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordRegDate = getISODateString(new Date(r.registration_date)); return recordRegDate >= range.startDate && recordRegDate <= range.endDate; }); } }
+    const sT = document.getElementById('vehicleSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.plate_number&&r.plate_number.toLowerCase().includes(sT)) || (r.vin&&r.vin.toLowerCase().includes(sT)) || (mockVehicleMakes.find(m=>m.id===r.make)?.name.toLowerCase().includes(sT)) || (mockVehicleModels.find(m=>m.id===r.model)?.name.toLowerCase().includes(sT)) ); }
+    const hdrs = [['ID', 'Make', 'Model', 'Year', 'Plate #', 'Mileage', 'Status', 'Registered']]; // Simplified for PDF
+    const data = rTD.map(r => [r.id, mockVehicleMakes.find(m=>m.id===r.make)?.name||r.make, mockVehicleModels.find(m=>m.id===r.model)?.name||r.model, r.year, r.plate_number, r.mileage.toLocaleString(), r.status.replace('_',' '), new Date(r.registration_date).toLocaleDateString()]);
+    doc.autoTable({ head:hdrs, body:data, startY:25, theme:'grid', headStyles:{fillColor:[59,130,246],textColor:255}, 
+        columnStyles: { 0:{cellWidth:10}, 4:{cellWidth:30}, 5:{cellWidth:25}} 
+    }); 
+    doc.save('vehicles_export.pdf');
+  }
+  // --- End Vehicle Section ---
 </script>
 </body>
 </html>
