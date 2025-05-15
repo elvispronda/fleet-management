@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+<div class="flex flex-col md:flex-row h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <!-- Add Lucide Icons CDN in <head> if not already -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+
+    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
+      <div class="text-xl font-bold flex items-center space-x-2">
+        <i data-lucide="menu" class="w-5 h-5"></i><span>Menu</span>
+      </div>
+      <ul class="space-y-4">
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <a href="dashboard">Dashboard</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+          <a href="analytics">Analytics</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="car" class="w-5 h-5"></i>
+          <a href="vehicle">Vehicles</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="user" class="w-5 h-5"></i>
+          <a href="user">Drivers</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="wrench" class="w-5 h-5"></i>
+          <a href="reparation">Reparation</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="droplet" class="w-5 h-5"></i>
+          <a href="fuel">Fuel</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <a href="maintenance">Maintenance</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:text-blue-600">
+          <i data-lucide="route" class="w-5 h-5"></i>
+          <a href="trip">Trip</a>
+        </li>
+      </ul>
+    </aside>
+    
+    <!-- Call Lucide to load icons -->
+    <script>
+      lucide.createIcons();
+    </script>
+
+  <!-- Main content -->
+  <main class="flex-1 overflow-auto p-6">
+    <!-- Users Table Section -->
+    <section id="users" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+        <h3 class="text-xl font-bold">Users Management</h3>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="openAddUserModal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-1">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add User
+          </button>
+          <input type="text" id="userSearch" placeholder="Search users..." class="border rounded px-2 py-1 text-sm text-black">
+          <button onclick="exportUsersExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
+          <button onclick="exportUsersPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table id="usersTable" class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b dark:border-gray-700">
+              <th class="py-2">ID</th>
+              <th>Email</th>
+              <th>Username</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+      <div class="mt-4 flex justify-between items-center">
+        <div class="text-sm text-gray-500 dark:text-gray-400" id="usersCount"></div>
+        <div class="flex space-x-2" id="usersPagination"></div>
+      </div>
+    </section>
+
+    <!-- Statistics -->
+    <section id="statistics" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+      <h3 class="text-xl font-bold mb-2">Statistics</h3>
+      <div class="flex flex-col md:flex-row md:space-x-4">
+        <div class="w-full md:w-1/2">
+          <h4 class="text-md font-semibold mb-1">User Growth</h4>
+          <canvas id="lineChart" class="w-full h-64"></canvas>
+        </div>
+        <div class="w-full md:w-1/2 mt-4 md:mt-0">
+          <h4 class="text-md font-semibold mb-1">Status Distribution</h4>
+          <canvas id="pieChart" class="mx-auto" style="width: 200px; height: 300px;"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+    <!-- Right Sidebar -->
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
+        <div class="flex justify-between items-center">
+        <button id="theme-toggle" class="text-xl">🌙</button>
+        <div>
+            <div class="text-sm font-semibold">John Doe</div>
+            <div class="text-xs text-gray-500 dark:text-gray-300">Admin</div>
+        </div>
+        </div>
+
+        <!-- Recent Updates -->
+        <div>
+        <h4 class="font-bold mb-4 text-lg">Recent Updates</h4>
+        <div class="flex flex-col space-y-6 relative">
+            <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div>
+
+            <div class="flex items-start space-x-4 relative">
+            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+            <div class="ml-2">
+                <p class="font-medium">New user registered</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p>
+            </div>
+            </div>
+
+            <div class="flex items-start space-x-4 relative">
+            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+            <div class="ml-2">
+                <p class="font-medium">System updated</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p>
+            </div>
+            </div>
+
+            <div class="flex items-start space-x-4 relative">
+            <div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div>
+            <div class="ml-2">
+                <p class="font-medium">Security alert</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+        <h4 class="font-bold mb-4 text-lg">Quick Actions</h4>
+        <div class="grid grid-cols-2 gap-2">
+            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
+            <i data-lucide="user-plus" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs">Add User</span>
+            </button>
+            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
+            <i data-lucide="settings" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs">Settings</span>
+            </button>
+            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
+            <i data-lucide="help-circle" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs">Help</span>
+            </button>
+            <button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center">
+            <i data-lucide="log-out" class="w-5 h-5 mb-1"></i>
+            <span class="text-xs">Logout</span>
+            </button>
+        </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New User</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the user details below</p>
+        </div>
+        <button onclick="closeAddUserModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      
+      <form id="addUserForm" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+          <input type="email" id="email" required 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="user@example.com">
+        </div>
+        
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+          <input type="text" id="username" 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="username">
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+          <input type="password" id="password" required 
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
+                 placeholder="••••••••">
+        </div>
+        
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <select id="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700">
+            <option value="active">Active</option>
+            <option value="disabled">Disabled</option>
+          </select>
+        </div>
+        
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeAddUserModal()" 
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Add User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Global variables for users table
+  let allUsers = [];
+  const usersPerPage = 5;
+  let currentUsersPage = 1;
+  
+  // Check authentication on page load
+  document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+          window.location.href = '/login';
+          return;
+      }
+      fetchUsers();
+      initCharts();
+  });
+  
+  // Fetch users from API
+  async function fetchUsers() {
+      try {
+          const token = localStorage.getItem('access_token');
+          const response = await fetch('/user/', {
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              }
+          });
+  
+          if (response.status === 401) {
+              localStorage.removeItem('access_token');
+              window.location.href = '/login';
+              return;
+          }
+  
+          if (!response.ok) {
+              throw new Error('Failed to fetch users');
+          }
+  
+          allUsers = await response.json();
+          // Add status to users (assuming your API doesn't return this)
+          allUsers = allUsers.map(user => ({
+              ...user,
+              status: Math.random() > 0.3 ? 'active' : 'disabled'
+          }));
+          renderUsersTable();
+      } catch (error) {
+          console.error('Error:', error);
+          alert('Error loading users. Please try again.');
+      }
+  }
+  
+  // Render users table
+  function renderUsersTable() {
+      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+      const filteredUsers = allUsers.filter(user => 
+          user.email.toLowerCase().includes(searchTerm) || 
+          (user.username && user.username.toLowerCase().includes(searchTerm))
+      );
+  
+      const start = (currentUsersPage - 1) * usersPerPage;
+      const paginatedUsers = filteredUsers.slice(start, start + usersPerPage);
+  
+      const usersBody = document.getElementById('usersBody');
+      usersBody.innerHTML = paginatedUsers.length > 0 ? 
+          paginatedUsers.map(user => `
+              <tr class="border-b dark:border-gray-700">
+                  <td class="py-2">${user.id}</td>
+                  <td>${user.email}</td>
+                  <td>${user.username || 'N/A'}</td>
+                  <td>
+                    <span class="px-2 py-1 text-xs rounded-full ${
+                      user.status === 'active' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    }">
+                      ${user.status}
+                    </span>
+                  </td>
+                  <td>${new Date(user.created_at).toLocaleString()}</td>
+                  <td>
+                      <button class="text-blue-500 hover:underline mr-2">Edit</button>
+                      <button class="text-red-500 hover:underline">Delete</button>
+                  </td>
+              </tr>
+          `).join('') : 
+          `<tr><td colspan="6" class="text-center py-4">No users found</td></tr>`;
+  
+      // Update count display
+      document.getElementById('usersCount').textContent = 
+          `Showing ${start + 1}-${Math.min(start + usersPerPage, filteredUsers.length)} of ${filteredUsers.length} users`;
+  
+      // Render pagination
+      const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+      const paginationContainer = document.getElementById('usersPagination');
+      paginationContainer.innerHTML = '';
+      
+      // Previous button
+      if (currentUsersPage > 1) {
+          paginationContainer.innerHTML += `
+              <button onclick="currentUsersPage=${currentUsersPage - 1};renderUsersTable();" 
+                      class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
+                  Previous
+              </button>
+          `;
+      }
+      
+      // Page numbers
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentUsersPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+          paginationContainer.innerHTML += `
+              <button onclick="currentUsersPage=${i};renderUsersTable();" 
+                      class="px-3 py-1 rounded ${i === currentUsersPage ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">
+                  ${i}
+              </button>
+          `;
+      }
+      
+      // Next button
+      if (currentUsersPage < totalPages) {
+          paginationContainer.innerHTML += `
+              <button onclick="currentUsersPage=${currentUsersPage + 1};renderUsersTable();" 
+                      class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700">
+                  Next
+              </button>
+          `;
+      }
+  }
+  
+  // Search functionality for users
+  document.getElementById('userSearch').addEventListener('input', () => {
+      currentUsersPage = 1;
+      renderUsersTable();
+  });
+
+  // Modal functions
+  function openAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  
+  // Close modal when clicking outside
+  document.getElementById('addUserModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAddUserModal();
+    }
+  });
+
+  // Form submission
+  document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const status = document.getElementById('status').value;
+    
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('/user/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          username,
+          password,
+          status
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add user');
+      }
+      
+      const newUser = await response.json();
+      allUsers.unshift({
+        ...newUser,
+        status: status
+      });
+      
+      // Reset form and close modal
+      document.getElementById('addUserForm').reset();
+      closeAddUserModal();
+      
+      // Refresh the table
+      currentUsersPage = 1;
+      renderUsersTable();
+      
+      // Show success message
+      alert('User added successfully!');
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error adding user. Please try again.');
+    }
+  });
+
+  // Export functions for users
+  function exportUsersExcel() {
+      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+      const filteredUsers = allUsers.filter(user => 
+          user.email.toLowerCase().includes(searchTerm) || 
+          (user.username && user.username.toLowerCase().includes(searchTerm))
+      );
+
+      // Create a worksheet
+      const ws = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+          ID: user.id,
+          Email: user.email,
+          Username: user.username || 'N/A',
+          Status: user.status,
+          'Created At': new Date(user.created_at).toLocaleString()
+      })));
+
+      // Create a workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Users");
+
+      // Export to Excel file
+      XLSX.writeFile(wb, "users_export.xlsx");
+  }
+
+  function exportUsersPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(18);
+      doc.text('Users List', 14, 15);
+
+      // Table headers
+      const headers = [['ID', 'Email', 'Username', 'Status', 'Created At']];
+      const data = allUsers.map(user => [
+          user.id,
+          user.email,
+          user.username || 'N/A',
+          user.status,
+          new Date(user.created_at).toLocaleString()
+      ]);
+
+      // Add table
+      doc.autoTable({
+          head: headers,
+          body: data,
+          startY: 25,
+          theme: 'grid',
+          headStyles: {
+              fillColor: [59, 130, 246],
+              textColor: 255
+          }
+      });
+
+      doc.save('users_export.pdf');
+  }
+
+  // Initialize charts
+  function initCharts() {
+    // Line chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        datasets: [
+          {
+            label: 'New Users',
+            data: [5, 8, 12, 15, 18, 22],
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            fill: true,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Pie chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const activeCount = allUsers.filter(u => u.status === 'active').length;
+    const disabledCount = allUsers.filter(u => u.status === 'disabled').length;
+    
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Active', 'Disabled'],
+        datasets: [{
+          data: [activeCount, disabledCount],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(239, 68, 68, 0.8)'
+          ],
+          borderColor: [
+            'rgba(16, 185, 129, 1)',
+            'rgba(239, 68, 68, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+
+  // Theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Dashboard with Popup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+  <main class="p-6">
+    <button id="addBtn" class="bg-blue-600 text-white px-4 py-2 rounded">➕ Add</button>
+    <!-- Popup Form -->
+    <div id="popupForm" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-96 shadow-lg transform transition-all duration-300 ease-in-out">
+        <h2 class="text-xl font-bold mb-4 text-center">Add New Entry</h2>
+        <form class="space-y-4">
+          <div>
+            <label class="block mb-1">Name:</label>
+            <input type="text" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-blue-300" placeholder="Enter name" />
+          </div>
+
+          <div>
+            <label class="block mb-1">Email:</label>
+            <input type="email" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-blue-300" placeholder="Enter email" />
+          </div>
+
+          <div>
+            <label class="block mb-1">Category:</label>
+            <select class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-blue-300">
+              <option value="">Select category</option>
+              <option value="A">Category A</option>
+              <option value="B">Category B</option>
+              <option value="C">Category C</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-1">Description:</label>
+            <textarea class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-blue-300" placeholder="Enter description"></textarea>
+          </div>
+
+          <div class="flex justify-between pt-4">
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+            <button id="closeBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const addBtn = document.getElementById("addBtn");
+    const popupForm = document.getElementById("popupForm");
+    const closeBtn = document.getElementById("closeBtn");
+
+    addBtn.addEventListener("click", () => {
+      popupForm.classList.remove("hidden");
+    });
+
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      popupForm.classList.add("hidden");
+    });
+  </script>
+</body>
+</html>
+
+

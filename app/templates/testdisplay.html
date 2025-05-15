@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <style>
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 28rem;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+    .dark .modal-content {
+      background-color: #1f2937;
+    }
+    .modal.show .modal-content {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+<!-- Your existing sidebar and main content -->
+<div class="flex flex-col md:flex-row h-screen overflow-hidden">
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden md:block">
+      <!-- Sidebar content -->
+    </aside>
+    
+    <!-- Main content -->
+    <main class="flex-1 overflow-auto p-6">
+      <!-- Users Table Section -->
+      <section id="users" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+          <h3 class="text-xl font-bold">Users Management</h3>
+          <div class="flex flex-wrap gap-2 items-center">
+            <button onclick="openAddUserModal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-1">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add User
+            </button>
+            <input type="text" id="userSearch" placeholder="Search users..." class="border rounded px-2 py-1 text-sm text-black">
+            <button onclick="exportUsersExcel()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">📄 Excel</button>
+            <button onclick="exportUsersPDF()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🧾 PDF</button>
+          </div>
+        </div>
+        <!-- Table content -->
+      </section>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block">
+      <!-- Right sidebar content -->
+    </aside>
+</div>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add New User</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the user details below</p>
+        </div>
+        <button onclick="closeAddUserModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      
+      <form id="addUserForm" class="space-y-4">
+        <!-- Form fields -->
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeAddUserModal()" 
+                  class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Add User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+  
+  // Modal functions - THESE ARE THE KEY FIXES
+  function openAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  
+  // Close modal when clicking outside
+  document.getElementById('addUserModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAddUserModal();
+    }
+  });
+
+  // Rest of your JavaScript code (fetchUsers, renderUsersTable, etc.)
+  // ...
+
+</script>
+</body>
+</html>
