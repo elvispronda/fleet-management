@@ -14,13 +14,13 @@
     <form id="login-form" class="space-y-5">
       <div>
         <label for="username" class="block text-sm font-medium text-gray-700">Username or Email</label>
-        <input type="text" id="username" name="username" required
+        <input type="text" id="username" name="username" required autofocus autocomplete="username"
                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" name="password" required
+        <input type="password" id="password" name="password" required autocomplete="current-password"
                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
@@ -33,42 +33,78 @@
         </svg>
       </button>
 
-      <p id="message" class="text-center text-sm mt-3 hidden"></p>
+      <p id="message" class="text-center text-sm mt-3 hidden" aria-live="polite"></p>
     </form>
   </div>
 
   <script>
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
+    const loginForm = document.getElementById("login-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const btnText = document.getElementById("btn-text");
+    const spinner = document.getElementById("btn-spinner");
+    const messageEl = document.getElementById("message");
+
+    // IMPORTANT: Ensure this URL is exactly what your FastAPI backend expects for the POST /login
+    // If your FastAPI auth router is prefixed (e.g., /auth/login), change this URL.
+    // If login.html is served from the same origin as your API (e.g. localhost:8000),
+    // you can use a relative path: const API_LOGIN_URL = "/login";
+    // Otherwise, use the full path:
+    const API_LOGIN_URL = "http://localhost:8000/login/"; 
+
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       
       const form = e.target;
-      const submitBtn = document.getElementById("submit-btn");
-      const btnText = document.getElementById("btn-text");
-      const spinner = document.getElementById("btn-spinner");
-      const messageEl = document.getElementById("message");
       
       // Reset UI
       messageEl.classList.add("hidden");
-      messageEl.classList.remove("text-red-600", "text-green-600");
+      messageEl.classList.remove("text-red-600", "text-green-600"); // Clear previous styles
       submitBtn.disabled = true;
       btnText.textContent = "Signing in...";
       spinner.classList.remove("hidden");
 
-      try {
-        // Create form data as backend expects OAuth2 format
-        const formData = new FormData();
-        formData.append('username', form.username.value.trim());
-        formData.append('password', form.password.value.trim());
+      // Create FormData object. This is correct for OAuth2PasswordRequestForm.
+      // The browser will automatically set the Content-Type to
+      // 'application/x-www-form-urlencoded' (or 'multipart/form-data' if files were included).
+      // FastAPI's OAuth2PasswordRequestForm handles this.
+      const formData = new FormData();
+      // OAuth2PasswordRequestForm expects 'username' and 'password' fields.
+      formData.append('username', form.username.value.trim());
+      formData.append('password', form.password.value.trim());
 
-        const response = await fetch("http://localhost:8000/login", {
+      console.log("Attempting to POST to:", API_LOGIN_URL);
+      // Log FormData entries to check (note: console.log(formData) won't show entries directly)
+      for (let [key, value] of formData.entries()) {
+        console.log(`FormData: ${key}: ${value}`);
+      }
+
+      try {
+        const response = await fetch(API_LOGIN_URL, {
           method: "POST",
-          body: formData  // Let browser set Content-Type with boundary
+          body: formData
+          // DO NOT manually set 'Content-Type': 'application/json' here
+          // when using FormData for OAuth2PasswordRequestForm.
+          // Let the browser handle setting the Content-Type for FormData.
         });
 
-        const data = await response.json();
+        // Try to parse JSON regardless of response.ok to get error details
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            // If JSON parsing fails, it might be a non-JSON error page (like a proxy error)
+            // or an empty response.
+            console.error("Failed to parse JSON response:", jsonError);
+            const textResponse = await response.text(); // Get response as text
+            throw new Error(`Login request failed with status ${response.status}. Response: ${textResponse.substring(0, 200)}...`);
+        }
+        
+        console.log("Response status:", response.status);
+        console.log("Response data:", data);
 
         if (!response.ok) {
-          throw new Error(data.detail || "Login failed. Please check your credentials.");
+          // Use data.detail if available, otherwise a generic message
+          throw new Error(data.detail || `Login failed (status ${response.status}). Please check credentials.`);
         }
 
         // Success handling
@@ -76,16 +112,18 @@
         messageEl.classList.add("text-green-600");
         messageEl.classList.remove("hidden");
         
-        // Store token and redirect
         localStorage.setItem("access_token", data.access_token);
+        // Optionally store other user info if returned by your /login endpoint
+        // localStorage.setItem("user_id", data.user_id); 
+        // localStorage.setItem("username", data.username);
+
         setTimeout(() => {
-          window.location.href = "/admin";
-          //window.location.href = "/user-page";
+          window.location.href = "/admin/admin"; // Ensure /admin route exists and is handled
         }, 1500);
         
       } catch (error) {
-        console.error("Login error:", error);
-        messageEl.textContent = error.message || "An error occurred. Please try again.";
+        console.error("Full login error object:", error); // Log the full error object
+        messageEl.textContent = error.message || "An unexpected error occurred. Please try again.";
         messageEl.classList.add("text-red-600");
         messageEl.classList.remove("hidden");
         

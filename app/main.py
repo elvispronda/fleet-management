@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from . import models 
 from .database import engine
-from .routers import  user, auth,category_document,vehicle_make,vehicle_model,vehicle_type,vehicle_transmission,category_maintenance,category_panne,document_vehicle,driver,vehicle,fuel,garage,panne,reparation,trip,fuel_type
+from .routers import     user, auth,admin_api,admin_views,category_document,vehicle_make,vehicle_model,vehicle_type,vehicle_transmission,category_maintenance,category_panne,document_vehicle,driver,vehicle,fuel,garage,panne,reparation,trip,fuel_type
 from .config import settings
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -14,9 +14,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 models.Base.metadata.create_all(bind = engine)
 
-app = FastAPI(debug=True) 
+app = FastAPI(debug=True, title="Fleet Management") 
 
 # Serve static files
+
+# Mount the 'static' directory in your 'app' folder to be accessible at '/static' URL path
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Set up template directory (relative to the project root)
@@ -36,6 +38,8 @@ async def serve_page(request: Request, page_name: str):
 # Include your routers
 app.include_router(auth.router)  
 app.include_router(user.router)
+app.include_router(admin_views.router)          # Serves HTML pages like /admin, /loginpage
+app.include_router(admin_api.router)            # Serves /api/admin/* endpoints
 app.include_router(category_document.router)
 app.include_router(category_maintenance.router)
 app.include_router(category_panne.router)

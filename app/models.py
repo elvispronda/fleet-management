@@ -7,12 +7,14 @@ from .database import Base
 
 class User(Base):
     __tablename__ = "user"
+
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
-    status = Column(String, default="active")
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False) # Hashed password
+    is_active = Column(Boolean, default=True) # <-- ADD THIS OR SIMILAR
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    # Add other fields as needed (e.g., is_superuser, roles, etc.)
 ##################################################################################################################
 
 class Driver(Base):

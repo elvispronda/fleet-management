@@ -3,8 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Authentification</title>
+  <title>Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* For a slightly smoother spinner animation if needed, though Tailwind's animate-spin is usually fine */
+    /*
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-custom {
+      animation: spin 1s linear infinite;
+    }
+    */
+  </style>
 </head>
 <body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen flex items-center justify-center px-4">
 
@@ -13,14 +24,14 @@
 
     <form id="login-form" class="space-y-5">
       <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="text" id="username" name="username" required
+        <label for="username" class="block text-sm font-medium text-gray-700">Username or Email</label>
+        <input type="text" id="username" name="username" required autofocus autocomplete="username"
                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" name="password" required
+        <input type="password" id="password" name="password" required autocomplete="current-password"
                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
 
@@ -33,66 +44,105 @@
         </svg>
       </button>
 
-      <p id="message" class="text-center text-sm mt-3 hidden"></p>
+      <p id="message" class="text-center text-sm mt-3 hidden" aria-live="polite"></p>
     </form>
   </div>
 
   <script>
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
+    // Configuration
+    const API_BASE_URL = "http://localhost:8000"; // IMPORTANT: Use HTTPS (https://) in production!
+    const LOGIN_ENDPOINT = "/login";
+
+    // DOM Elements
+    const loginForm = document.getElementById("login-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const btnText = document.getElementById("btn-text");
+    const spinner = document.getElementById("btn-spinner");
+    const messageEl = document.getElementById("message");
+
+    /**
+     * Sets the state of the submit button (loading or active).
+     * @param {boolean} isLoading - True if the button should be in a loading state.
+     */
+    function setButtonState(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        btnText.textContent = "Signing in...";
+        spinner.classList.remove("hidden");
+      } else {
+        submitBtn.disabled = false;
+        btnText.textContent = "Sign In";
+        spinner.classList.add("hidden");
+      }
+    }
+
+    /**
+     * Displays a message to the user.
+     * @param {string} text - The message text to display.
+     * @param {'success' | 'error' | null} type - The type of message ('success', 'error'), or null/falsy to hide.
+     */
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      // Reset classes first
+      messageEl.classList.remove("text-green-600", "text-red-600", "hidden");
+
+      if (type === 'success') {
+        messageEl.classList.add("text-green-600");
+      } else if (type === 'error') {
+        messageEl.classList.add("text-red-600");
+      } else { // If no type or falsy type, hide the message
+        messageEl.classList.add("hidden");
+      }
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       
       const form = e.target;
-      const submitBtn = document.getElementById("submit-btn");
-      const btnText = document.getElementById("btn-text");
-      const spinner = document.getElementById("btn-spinner");
-      const messageEl = document.getElementById("message");
       
-      // Reset UI
-      messageEl.classList.add("hidden");
-      messageEl.classList.remove("text-red-600", "text-green-600");
-      submitBtn.disabled = true;
-      btnText.textContent = "Signing in...";
-      spinner.classList.remove("hidden");
+      // Set UI to loading state
+      setButtonState(true);
+      showMessage("", null); // Clear any previous messages
 
       try {
-        // Create form data as backend expects OAuth2 format
         const formData = new FormData();
         formData.append('username', form.username.value.trim());
         formData.append('password', form.password.value.trim());
 
-        const response = await fetch("http://localhost:8000/login", {
+        const response = await fetch(`${API_BASE_URL}${LOGIN_ENDPOINT}`, {
           method: "POST",
-          body: formData  // Let browser set Content-Type with boundary
+          body: formData, // Let browser set Content-Type with boundary for FormData
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.detail || "Login failed. Please check your credentials.");
+          // Prefer server's error message if available
+          throw new Error(data.detail || `HTTP error ${response.status}: Login failed. Please check your credentials.`);
         }
 
         // Success handling
-        messageEl.textContent = "Login successful! Redirecting...";
-        messageEl.classList.add("text-green-600");
-        messageEl.classList.remove("hidden");
+        showMessage("Login successful! Redirecting...", 'success');
         
-        // Store token and redirect
+        // Store token.
+        // IMPORTANT: localStorage is vulnerable to XSS. For production, consider HttpOnly cookies set by the server.
         localStorage.setItem("access_token", data.access_token);
+        
+        // Redirect after a short delay to allow user to see the success message
         setTimeout(() => {
-          window.location.href = "/admin";
-          //window.location.href = "/user-page";
+          window.location.href = "/admin"; // Or any other page like "/user-dashboard"
         }, 1500);
         
+        // Button remains disabled as we are redirecting
       } catch (error) {
         console.error("Login error:", error);
-        messageEl.textContent = error.message || "An error occurred. Please try again.";
-        messageEl.classList.add("text-red-600");
-        messageEl.classList.remove("hidden");
+        showMessage(error.message || "An unexpected error occurred. Please try again.", 'error');
         
-        // Re-enable button
-        submitBtn.disabled = false;
-        btnText.textContent = "Sign In";
-        spinner.classList.add("hidden");
+        // Clear password field for security/UX on error
+        form.password.value = "";
+        
+        // Re-enable button and reset its text/spinner
+        setButtonState(false);
       }
     });
   </script>

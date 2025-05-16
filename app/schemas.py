@@ -1,38 +1,83 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field # Field can be used for validation/examples
 from typing import Optional, Union
 from datetime import datetime
 
 ###################################################################################################################
+# --- User Schemas ---
+
 class UserBase(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    status: str
-
-class UserOut(UserBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    """
+    Base schema for user attributes common to creation and reading.
+    Password is not included here as it's handled separately for creation
+    and never exposed for reading.
+    """
+    username: str = Field(..., min_length=3, max_length=50, example="pronda")
+    email: EmailStr = Field(..., example="root@gmail.com")
+    is_active: bool = Field(default=True, description="User account is active or not")
 
 class UserCreate(UserBase):
-    pass
+    """
+    Schema for creating a new user. Includes the password.
+    """
+    password: str = Field(..., min_length=8, description="User password (will be hashed)")
+
+class UserUpdate(BaseModel):
+    """
+    Schema for updating an existing user. All fields are optional.
+    """
+    username: Optional[str] = Field(None, min_length=3, max_length=50, example="pronda")
+    email: Optional[EmailStr] = Field(None, example="root@gmail.com")
+    is_active: Optional[bool] = None
+    # Password updates should typically have a dedicated endpoint for security reasons
+    # password: Optional[str] = Field(None, min_length=8)
+
+class UserOut(UserBase):
+    """
+    Schema for returning user data in API responses.
+    Excludes sensitive information like password.
+    Includes fields from the database model like id and created_at.
+    """
+    id: int = Field(..., example=1)
+    created_at: datetime = Field(..., example=datetime.utcnow())
+
+    class Config:
+        from_attributes = True # Replaces orm_mode = True in Pydantic v2+
+        # orm_mode = True # For Pydantic v1
+
+# --- Authentication Schemas ---
 
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+    """
+    Schema for user login credentials.
+    Can use 'username' or 'email' for login.
+    """
+    identifier: str = Field(..., description="Username or email address", example="johndoe") # Or 'username_or_email'
+    password: str = Field(..., min_length=8, description="User password")
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-# class TokenData(BaseModel):
-#     id: Union[str, int]
+    """
+    Schema for the access token response.
+    """
+    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+    token_type: str = Field(default="bearer", example="bearer")
+    user_id: Optional[int] = Field(None, example=1, description="ID of the logged-in user")
+    username: Optional[str] = Field(None, example="johndoe", description="Username of the logged-in user")
+    # You can add other relevant user info to the token response if needed,
+    # but keep it minimal. The token itself (JWT) will contain more detailed claims.
 
 class TokenData(BaseModel):
-    id: str  # Change this from int to str
-    username: Optional[str] = None
+    """
+    Schema for data embedded within the JWT access token (the 'payload').
+    """
+    user_id: Optional[str] = Field(None, description="User ID from the token subject or custom claim") # Often 'sub' is user_id
+    username: Optional[str] = Field(None, description="Username from the token") # Often 'sub' is username
+    is_active: Optional[bool] = Field(None, description="User's active status at the time of token creation")
+    # exp: Optional[int] = None # Expiration time, usually handled by JWT library
+
+# --- Schema for Password Change ---
+class PasswordChange(BaseModel):
+    current_password: str = Field(..., description="User's current password")
+    new_password: str = Field(..., min_length=8, description="New desired password")
 ###################################################################################################################
 
 class DriverBase(BaseModel):
