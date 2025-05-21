@@ -621,24 +621,34 @@
     renderUserPagination(records.length);
   }
 
-  function renderUserPagination(totalRecords) { 
+  function renderUserPagination(totalRecords) {
     const totalPages = Math.ceil(totalRecords / usersPerPage);
     const paginationContainer = document.getElementById('usersPagination');
-    if (!paginationContainer) { console.warn("usersPagination container not found"); return; }
-    
+
+    if (!paginationContainer) {
+        console.warn("USERS PAGE: usersPagination element not found.");
+        return;
+    }
     paginationContainer.innerHTML = ''; 
-    if (totalPages <= 1) return; 
+
+    if (totalPages <= 1) {
+        return; 
+    }
 
     const btnBaseClasses = "flex items-center justify-center px-3 h-8 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors duration-150";
     const btnPageClasses = `${btnBaseClasses} leading-tight`;
     const btnArrowClasses = `${btnBaseClasses}`;
     const inactiveClasses = "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white";
-    const activeClasses = "text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"; 
+    const activeClasses = "text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white";
     const disabledClasses = "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-500";
 
     const createButton = (content, pageToGo, isEnabled, isCurrentPage = false, isArrow = false) => {
         const button = document.createElement('button');
-        button.innerHTML = content; 
+        if (typeof content === 'string' && content.startsWith('<')) { 
+            button.innerHTML = content;
+        } else {
+            button.textContent = content;
+        }
         let specificClasses = isCurrentPage ? activeClasses : (isEnabled ? inactiveClasses : disabledClasses);
         button.className = `${isArrow ? btnArrowClasses : btnPageClasses} ${specificClasses}`;
         if (isEnabled && !isCurrentPage) { button.onclick = () => { currentUserPage = pageToGo; renderUsersTable(); }; } 
@@ -646,23 +656,55 @@
         if(isCurrentPage) button.setAttribute('aria-current', 'page');
         return button;
     };
-    
+
+    const createEllipsis = () => {
+        const ellipsisSpan = document.createElement('span');
+        ellipsisSpan.textContent = '...';
+        ellipsisSpan.className = "flex items-center justify-center px-3 h-8 leading-tight text-gray-500 dark:text-gray-400";
+        return ellipsisSpan;
+    };
+
     paginationContainer.appendChild(createButton(`<span class="sr-only">Previous</span><i data-lucide="chevron-left" class="w-4 h-4"></i>`, currentUserPage - 1, currentUserPage > 1, false, true));
 
-    const pageNumbersToShow = []; const maxPageButtons = 7; 
-    if (totalPages <= maxPageButtons) { for (let i = 1; i <= totalPages; i++) pageNumbersToShow.push(i); } 
-    else { pageNumbersToShow.push(1); let rangeStart, rangeEnd; const sideButtons = 2; const ellipsisThreshold = sideButtons + 2; 
-        if (currentUserPage <= ellipsisThreshold) { rangeStart = 2; rangeEnd = Math.min(totalPages -1, maxPageButtons - 2); for(let i = rangeStart; i <= rangeEnd; i++) pageNumbersToShow.push(i); if (rangeEnd < totalPages -1) pageNumbersToShow.push('...'); } 
-        else if (currentUserPage >= totalPages - ellipsisThreshold + 1) { pageNumbersToShow.push('...'); rangeStart = Math.max(2, totalPages - (maxPageButtons - 3) ); for(let i = rangeStart; i <= totalPages - 1; i++) pageNumbersToShow.push(i); } 
-        else { pageNumbersToShow.push('...'); rangeStart = currentUserPage - Math.floor((maxPageButtons - 4)/2); rangeEnd = currentUserPage + Math.floor((maxPageButtons - 4)/2); for(let i = rangeStart; i <= rangeEnd; i++) pageNumbersToShow.push(i); pageNumbersToShow.push('...'); }
-        pageNumbersToShow.push(totalPages); 
+    const SIBLING_COUNT = 1; 
+    if (totalPages > 1) { // Only add page numbers if there's more than one page
+        // Page 1
+        if (currentUserPage !== 1) paginationContainer.appendChild(createButton("1", 1, true, false));
+        else paginationContainer.appendChild(createButton("1", 1, true, true));
+
+
+        // Left ellipsis
+        if (currentUserPage > SIBLING_COUNT + 2 && totalPages > SIBLING_COUNT * 2 + 3) {
+            paginationContainer.appendChild(createEllipsis());
+        }
+
+        // Pages around current page
+        const startPageLoop = Math.max(2, currentUserPage - SIBLING_COUNT);
+        const endPageLoop = Math.min(totalPages - 1, currentUserPage + SIBLING_COUNT);
+
+        for (let i = startPageLoop; i <= endPageLoop; i++) {
+            if (i !== 1 && i !== totalPages) { // Avoid duplicating 1 and last page
+                 paginationContainer.appendChild(createButton(String(i), i, true, currentUserPage === i));
+            }
+        }
+
+        // Right ellipsis
+        if (currentUserPage < totalPages - (SIBLING_COUNT + 1) && totalPages > SIBLING_COUNT * 2 + 3 ) {
+             if (endPageLoop < totalPages -1 ) // ensure ellipsis not right before last page if last page is next
+                paginationContainer.appendChild(createEllipsis());
+        }
+        
+        // Last page (only if totalPages > 1 and not already rendered as current)
+        if (totalPages > 1 && currentUserPage !== totalPages) {
+             paginationContainer.appendChild(createButton(String(totalPages), totalPages, true, false));
+        } else if (totalPages > 1 && currentUserPage === totalPages) {
+            // If current page is last page and already rendered by the loop, this ensures it's styled as active
+            // This case is handled by the loop logic if last page is within siblings
+        }
     }
-    const uniquePageElements = [...new Set(pageNumbersToShow)];
-    uniquePageElements.forEach(pageElement => {
-        if (pageElement === '...') { const el = document.createElement('span'); el.textContent = '...'; el.className = "flex items-center justify-center px-3 h-8 leading-tight text-gray-500 dark:text-gray-400"; paginationContainer.appendChild(el); } 
-        else { paginationContainer.appendChild(createButton(String(pageElement), pageElement, true, pageElement === currentUserPage)); }
-    });
+
     paginationContainer.appendChild(createButton(`<span class="sr-only">Next</span><i data-lucide="chevron-right" class="w-4 h-4"></i>`, currentUserPage + 1, currentUserPage < totalPages, false, true));
+    
     lucide.createIcons();
   }
   
@@ -763,10 +805,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-

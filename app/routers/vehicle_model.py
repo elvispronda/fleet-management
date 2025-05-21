@@ -21,8 +21,7 @@ def create_veh_model(veh_model : schemas.VehicleModelCreate, db:Session = Depend
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.VehicleModelOut])
-def get_veh_models(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_veh_models(db:Session = Depends(get_db),limit : int = 10, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all vehicle Models at the same time

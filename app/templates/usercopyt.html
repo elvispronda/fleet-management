@@ -35,17 +35,6 @@
       opacity: 1;
       transform: translateX(0);
     }
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border-width: 0;
-    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -129,7 +118,7 @@
       </div>
       <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
         <div class="text-sm text-gray-600 dark:text-gray-400" id="usersCount"></div>
-        <div class="flex items-center space-x-1" id="usersPagination"></div> <!-- Pagination will be built here -->
+        <div class="flex items-center space-x-1" id="usersPagination"></div>
       </div>
     </section>
   </main>
@@ -367,7 +356,9 @@
       successModalIconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8 ${iconColorClass}"></i>`;
       lucide.createIcons(); 
 
-      closeAddUserModal(); 
+      closeAddUserModal(); // Ensure add/edit form is closed
+      // Note: ConfirmDeleteUserModal is closed in its own flow before this is called
+
       operationSuccessModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
   }
@@ -480,6 +471,7 @@
       document.getElementById('addUserModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeAddUserModal(); });
       document.getElementById('viewUserModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeViewUserModal(); });
       document.getElementById('confirmDeleteUserModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteUserModal(); });
+      // Note: operationSuccessModal does not close on backdrop click by default with this setup, which is desired.
       
       document.getElementById('global-logout-btn')?.addEventListener('click', (e) => {
           e.preventDefault();
@@ -521,24 +513,12 @@
   }
 
   async function fetchUsers() {
-    console.log("USERS PAGE: fetchUsers called.");
     const searchTerm = document.getElementById('userSearch')?.value || "";
     let url = `${API_BASE_URL}/?limit=1000`;
     if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
     try {
         const responseData = await makeApiRequest(url); 
-        if (responseData && Array.isArray(responseData)) {
-            allFetchedUsers = responseData.map(user => ({ ...user }))
-                .sort((a, b) => {
-                    const dateA = a.created_at ? new Date(a.created_at) : new Date(0); 
-                    const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
-                    if (isNaN(dateA.getTime())) return 1; 
-                    if (isNaN(dateB.getTime())) return -1;
-                    return dateB - dateA; 
-                });
-        } else {
-            allFetchedUsers = []; 
-        }
+        allFetchedUsers = (responseData && Array.isArray(responseData)) ? responseData.map(user => ({ ...user })) : [];
         currentUserPage = 1; 
         renderUsersTable();
     } catch (error) {
@@ -621,48 +601,16 @@
     renderUserPagination(records.length);
   }
 
-  function renderUserPagination(totalRecords) { 
-    const totalPages = Math.ceil(totalRecords / usersPerPage);
-    const paginationContainer = document.getElementById('usersPagination');
-    if (!paginationContainer) { console.warn("usersPagination container not found"); return; }
-    
-    paginationContainer.innerHTML = ''; 
-    if (totalPages <= 1) return; 
-
-    const btnBaseClasses = "flex items-center justify-center px-3 h-8 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors duration-150";
-    const btnPageClasses = `${btnBaseClasses} leading-tight`;
-    const btnArrowClasses = `${btnBaseClasses}`;
-    const inactiveClasses = "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white";
-    const activeClasses = "text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"; 
-    const disabledClasses = "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed dark:bg-gray-700/50 dark:border-gray-600 dark:text-gray-500";
-
-    const createButton = (content, pageToGo, isEnabled, isCurrentPage = false, isArrow = false) => {
-        const button = document.createElement('button');
-        button.innerHTML = content; 
-        let specificClasses = isCurrentPage ? activeClasses : (isEnabled ? inactiveClasses : disabledClasses);
-        button.className = `${isArrow ? btnArrowClasses : btnPageClasses} ${specificClasses}`;
-        if (isEnabled && !isCurrentPage) { button.onclick = () => { currentUserPage = pageToGo; renderUsersTable(); }; } 
-        else if (!isEnabled) { button.disabled = true; button.setAttribute('aria-disabled', 'true'); }
-        if(isCurrentPage) button.setAttribute('aria-current', 'page');
-        return button;
-    };
-    
-    paginationContainer.appendChild(createButton(`<span class="sr-only">Previous</span><i data-lucide="chevron-left" class="w-4 h-4"></i>`, currentUserPage - 1, currentUserPage > 1, false, true));
-
-    const pageNumbersToShow = []; const maxPageButtons = 7; 
-    if (totalPages <= maxPageButtons) { for (let i = 1; i <= totalPages; i++) pageNumbersToShow.push(i); } 
-    else { pageNumbersToShow.push(1); let rangeStart, rangeEnd; const sideButtons = 2; const ellipsisThreshold = sideButtons + 2; 
-        if (currentUserPage <= ellipsisThreshold) { rangeStart = 2; rangeEnd = Math.min(totalPages -1, maxPageButtons - 2); for(let i = rangeStart; i <= rangeEnd; i++) pageNumbersToShow.push(i); if (rangeEnd < totalPages -1) pageNumbersToShow.push('...'); } 
-        else if (currentUserPage >= totalPages - ellipsisThreshold + 1) { pageNumbersToShow.push('...'); rangeStart = Math.max(2, totalPages - (maxPageButtons - 3) ); for(let i = rangeStart; i <= totalPages - 1; i++) pageNumbersToShow.push(i); } 
-        else { pageNumbersToShow.push('...'); rangeStart = currentUserPage - Math.floor((maxPageButtons - 4)/2); rangeEnd = currentUserPage + Math.floor((maxPageButtons - 4)/2); for(let i = rangeStart; i <= rangeEnd; i++) pageNumbersToShow.push(i); pageNumbersToShow.push('...'); }
-        pageNumbersToShow.push(totalPages); 
-    }
-    const uniquePageElements = [...new Set(pageNumbersToShow)];
-    uniquePageElements.forEach(pageElement => {
-        if (pageElement === '...') { const el = document.createElement('span'); el.textContent = '...'; el.className = "flex items-center justify-center px-3 h-8 leading-tight text-gray-500 dark:text-gray-400"; paginationContainer.appendChild(el); } 
-        else { paginationContainer.appendChild(createButton(String(pageElement), pageElement, true, pageElement === currentUserPage)); }
-    });
-    paginationContainer.appendChild(createButton(`<span class="sr-only">Next</span><i data-lucide="chevron-right" class="w-4 h-4"></i>`, currentUserPage + 1, currentUserPage < totalPages, false, true));
+  function renderUserPagination(total) { 
+    const tP=Math.ceil(total/usersPerPage), pC=document.getElementById('usersPagination'); if(!pC)return; pC.innerHTML=''; if(tP<=1)return;
+    const bCls="px-3 py-1.5 text-sm rounded-md focus:outline-none ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-2 focus:ring-blue-500";
+    const iCls="bg-white dark:bg-gray-800 border dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700";
+    const aCls="bg-blue-500 text-white border-blue-500 hover:bg-blue-600"; const dCls="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed";
+    const btn=(h,pg,en,cur)=>{const b=document.createElement('button');b.innerHTML=h;b.className=`${bCls} ${cur?aCls:(en?iCls:dCls)}`;if(en&&!cur)b.onclick=()=>{currentUserPage=pg;renderUsersTable();};else if(!en)b.disabled=true;return b;};
+    pC.appendChild(btn(`<i data-lucide="chevron-left"></i> Prev`,currentUserPage-1,currentUserPage>1,false));
+    const pgsN=[];if(tP<=7)for(let i=1;i<=tP;i++)pgsN.push(i);else{pgsN.push(1);if(currentUserPage>4)pgsN.push('...');let s=Math.max(2,currentUserPage-2),e=Math.min(tP-1,currentUserPage+2);if(currentUserPage<=4)e=Math.min(tP-1,5);if(currentUserPage>=tP-3)s=Math.max(2,tP-4);for(let i=s;i<=e;i++)pgsN.push(i);if(currentUserPage<tP-3)pgsN.push('...');pgsN.push(tP);}
+    [...new Set(pgsN.map((p,i,a)=>p==='...'&&a[i-1]==='...'?null:p).filter(p=>p!==null))].forEach(p=>{if(p==='...'){const el=document.createElement('span');el.textContent='...';el.className="px-3 py-1.5 text-sm";pC.appendChild(el);}else pC.appendChild(btn(p,p,true,p===currentUserPage));});
+    pC.appendChild(btn(`Next <i data-lucide="chevron-right"></i>`,currentUserPage+1,currentUserPage<tP,false));
     lucide.createIcons();
   }
   
@@ -720,8 +668,9 @@
             await makeApiRequest(`${API_BASE_URL}/`,'POST',uD);
             successTitle='User Added!'; successMessage='New user added successfully.';
         }
-        closeAddUserModal(); 
+        closeAddUserModal(); // Close form modal BEFORE showing success modal
         showOperationSuccessModal(successTitle, successMessage); 
+        // fetchUsers() will be called when the success modal's OK button is clicked
     }catch(err){ /* Error toast handled by makeApiRequest */ }
   }
 
@@ -732,11 +681,14 @@
     if(userToDeleteId==null)return;
     try{
         await makeApiRequest(`${API_BASE_URL}/${userToDeleteId}`,'DELETE'); 
-        closeConfirmDeleteUserModal(); 
+        closeConfirmDeleteUserModal(); // Close delete confirmation first
         showOperationSuccessModal('User Deleted!', 'User record deleted successfully.', 'trash-2', 'text-red-600 dark:text-red-400');
+        
+        // Optimistic UI update for immediate visual feedback before full refresh by success modal
         allFetchedUsers=allFetchedUsers.filter(u=>u.id!==userToDeleteId); 
         const tP=Math.ceil(allFetchedUsers.length/usersPerPage);
         if(currentUserPage>tP&&tP>0)currentUserPage=tP; else if(allFetchedUsers.length===0)currentUserPage=1;
+        // renderUsersTable(); // No need, success modal OK will call fetchUsers()
         userToDeleteId=null;
     }catch(err){ /* Error toast handled by makeApiRequest */ }
   }
@@ -763,10 +715,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-

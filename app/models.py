@@ -9,11 +9,17 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=False) # Added length for clarity
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False) # Hashed password
-    is_active = Column(Boolean, default=True) # <-- ADD THIS OR SIMILAR
+    
+    # MODIFIED: Replaced is_active with status
+    status = Column(String(50), nullable=False, default="pending_approval") # e.g., "active", "inactive", "pending_approval"
+    
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    
+    # You might want to add roles or other fields later
+    # role = Column(String(50), default="user") 
     # Add other fields as needed (e.g., is_superuser, roles, etc.)
 ##################################################################################################################
 
@@ -95,7 +101,7 @@ class Vehicle(Base):
     vin = Column(String, nullable=False)
     color = Column(String, nullable=False)
     purchase_price = Column(Float, default=0.0)
-    purchase_date = Column(Float, default=0.0)
+    purchase_date = Column(TIMESTAMP(timezone=True), nullable=True)
     status = Column(String, default="available")
     registration_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) 
 ##################################################################################################################

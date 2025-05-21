@@ -22,8 +22,7 @@ def create_veh_transmission(veh_transmission : schemas.VehicleTransmissionCreate
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.VehicleTransmissionOut])
-def get_vehicles_transmission(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_vehicles_transmission(db:Session = Depends(get_db),limit : int = 10, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all vehicles transmission at the same time

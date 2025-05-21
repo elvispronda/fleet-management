@@ -20,10 +20,8 @@ def create_fuel_type(typefuel : schemas.FuelTypeCreate, db:Session = Depends(get
     return new_fueltype
 
 ############################################################################################################################
-
 @router.get("/", response_model = List[schemas.FuelTypeOut])
-def get_type_fuel(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_type_fuel(db:Session = Depends(get_db),limit : int = 10, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all type of fuel at the same time

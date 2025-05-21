@@ -22,8 +22,7 @@ def create_veh_type(veh_type : schemas.VehicleTypeCreate, db:Session = Depends(g
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.VehicleTypeOut])
-def get_vehicle_types(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_vehicle_types(db:Session = Depends(get_db),limit : int = 10, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all vehicle types at the same time

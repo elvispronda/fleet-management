@@ -1,114 +1,118 @@
 # app/oauth2.py
-from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+
 from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone
+from typing import Optional # <<< CORRECT IMPORT FOR OPTIONAL
+from fastapi import Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from . import schemas, database, models
-from .config import settings
+from . import schemas, database, models # Assuming these are your project's modules
+from .config import settings # Assuming your settings (SECRET_KEY, ALGORITHM, etc.) are here
 
-# OAuth2 scheme configuration - tokenUrl should point to your login endpoint's path
-# If auth.router is prefixed, ensure this matches: e.g., "auth/login"
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/") # Assuming /login is at the root or auth router is not prefixed
-
-# JWT Configuration from settings
+# Make sure these are correctly loaded from your settings
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    
-    try:
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-        return encoded_jwt
-    except Exception as e: # More specific exception handling could be added for JWT encoding issues
-        # Log the error for debugging purposes
-        print(f"Error encoding JWT: {e}") # Replace with proper logging
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Could not create access token."
-        )
+# This URL should point to your actual login/token endpoint
+# If your login endpoint is at /login/ (as in your auth.py router prefix), this is correct.
+# If it's /auth/token or something else, adjust tokenUrl accordingly.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/")
 
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 def verify_access_token(token: str, credentials_exception: HTTPException) -> schemas.TokenData:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
-        user_id: str = payload.get("user_id")
-        username: str = payload.get("sub")
-        is_active_from_token: bool = payload.get("is_active", False) # Default to False if not present
+        # Extract claims that are expected to be in the token based on how it was created
+        # and what schemas.TokenData expects.
+        subject: Optional[str] = payload.get("sub")
+        user_id_from_token: Optional[int] = payload.get("user_id")
+        username_from_token: Optional[str] = payload.get("username") # If you also include username explicitly
+        status_from_token: Optional[str] = payload.get("status")
 
-        if user_id is None or username is None:
+        # Validate essential claims. 'sub' and 'user_id' are often critical.
+        if subject is None or user_id_from_token is None:
+            # Log this specific issue for easier debugging if it occurs
+            print(f"JWTError: Missing critical claims. Subject: {subject}, UserID: {user_id_from_token}")
             raise credentials_exception
-            
-        # Ensure user_id can be converted to int for DB lookup
-        try:
-            int(user_id)
-        except ValueError:
-            raise credentials_exception
-            
-        return schemas.TokenData(id=user_id, username=username, is_active=is_active_from_token)
-    except JWTError as e: # Catches specific JWT errors like ExpiredSignatureError, InvalidTokenError
+        
+        # Construct and validate the token data using your Pydantic schema
+        token_data = schemas.TokenData(
+            sub=subject,
+            user_id=user_id_from_token,
+            username=username_from_token if username_from_token is not None else subject, # Fallback username if not explicit
+            status=status_from_token
+        )
+    except JWTError as e:
         # Log the specific JWT error
-        print(f"JWTError during token verification: {e}") # Replace with proper logging
-        # Provide a slightly more informative message if it's an expiration issue
-        if "Expired" in str(e):
-             expired_credentials_exception = HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired. Please log in again.",
-                headers={"WWW-Authenticate": "Bearer error=\"invalid_token\", error_description=\"The token has expired\""},
-            )
-             raise expired_credentials_exception from e
-        raise credentials_exception from e
-    except Exception as e: # Catch-all for other unexpected errors
-        print(f"Unexpected error during token verification: {e}") # Replace with proper logging
-        raise credentials_exception # Re-raise the generic credentials_exception
-
+        print(f"JWTError during token decoding or validation: {str(e)}")
+        raise credentials_exception
+    except Exception as e:
+        # Catch any other unexpected errors during token processing
+        print(f"Unexpected error during token verification: {str(e)}")
+        raise credentials_exception
+    
+    return token_data
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme), 
     db: Session = Depends(database.get_db)
-) -> models.User:
+) -> models.User: # Specify that this function returns a SQLAlchemy User model instance
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials. Please log in again.",
+        detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     
     token_data = verify_access_token(token, credentials_exception)
     
-    try:
-        user_id_int = int(token_data.id)
-    except ValueError:
-        # This should have been caught in verify_access_token, but defensive check
+    # token_data.user_id is now correctly accessed (it's already an int or None)
+    if token_data.user_id is None:
+        # This case should ideally be caught by checks within verify_access_token
+        print("Error in get_current_user: token_data.user_id is None after verification.")
         raise credentials_exception
 
-    user = db.query(models.User).filter(models.User.id == user_id_int).first()
-    
+    user = db.query(models.User).filter(models.User.id == token_data.user_id).first()
+
     if user is None:
-        raise credentials_exception
+        print(f"Error in get_current_user: User with ID {token_data.user_id} not found in DB.")
+        raise credentials_exception 
+    
+    # Optional: Real-time status check after fetching user from DB.
+    # The status in the token is from when the token was created.
+    # if user.status != "active":
+    #     print(f"Access denied for user {user.username} (ID: {user.id}). Current status: {user.status}")
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail=f"User account is currently '{user.status}'. Access restricted."
+    #     )
         
-    if not user.is_active: # <-- Professional user status check from DB
-        inactive_user_exception = HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive.",
-            headers={"WWW-Authenticate": "Bearer error=\"invalid_request\", error_description=\"User account is inactive\""},
-        )
-        raise inactive_user_exception
-            
     return user
 
-# Optional: Dependency to get current *active* user, can be used directly
-async def get_current_active_user(current_user: models.User = Depends(get_current_user)):
-    # The get_current_user already checks for is_active.
-    # This function is more for semantic clarity if needed, or if you add more checks (e.g., roles).
-    # if not current_user.is_active: # This check is redundant if get_current_user does it
-    #     raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+# Example for an optional current user (if you need to check if a user is logged in
+# without throwing an error if they are not, for public pages that have extra features for logged-in users)
+# def get_current_active_user_optional(
+#     token: Optional[str] = Depends(oauth2_scheme_optional), # Define oauth2_scheme_optional if needed
+#     db: Session = Depends(database.get_db)
+# ) -> Optional[models.User]:
+#     if not token:
+#         return None
+#     try:
+#         token_data = verify_access_token(token, HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid optional token")) # Dummy exception
+#         if token_data.user_id is None:
+#             return None
+#         user = db.query(models.User).filter(models.User.id == token_data.user_id).first()
+#         if user and user.status == "active": # Only return if active
+#             return user
+#         return None # User not found or not active
+#     except HTTPException: # Includes JWTError from verify_access_token
+#         return None
