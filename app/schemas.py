@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr,Field, validator # 
-from typing import Optional
+from typing import Optional,List
 from datetime import datetime, time
 import enum # For Python enum
 
@@ -54,22 +54,18 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=8, description="User password")
 
 
-
 class Token(BaseModel):
-    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-    token_type: str = Field(default="bearer", example="bearer")
-    user_id: int = Field(..., example=1, description="ID of the logged-in user") # Made non-optional
-    username: str = Field(..., example="johndoe", description="Username of the logged-in user") # Made non-optional
-    
-    # ADDED: User status at the time of login
-    status: str = Field(..., example="active", description="User's status at the time of login") 
-
+    access_token: str
+    token_type: str
+    user_id: int
+    username: str
+    status: str
 
 class TokenData(BaseModel):
-    sub: str # Subject, typically the username
+    sub: str        
     user_id: int
     status: str
-    username: str # Explicitly add if needed, or rely on 'sub'
+    username: str   
 
 
 # --- Schema for Password Change ---
@@ -79,9 +75,9 @@ class PasswordChange(BaseModel):
 ###################################################################################################################
 
 class DriverBase(BaseModel):
-    nom: str
-    prenom: str
-    cni: str
+    last_name: str
+    first_name: str
+    cni_number: str
     email: str
     matricule: str
 
@@ -126,79 +122,79 @@ class FuelOut(FuelBase):
     class Config:
         from_attributes = True
 ##################################################################################################################
+# --- Trip Schemas ---
 
 class TripBase(BaseModel):
-    origin: str = Field(..., examples=["New York City"])
-    destination: str = Field(..., examples=["Los Angeles"])
-    vehicle_id: Optional[int] = Field(default=None, examples=[101])
-    driver_id: Optional[int] = Field(default=None, examples=[202])
-    
-    departure_day: datetime = Field(..., examples=["2023-10-27T00:00:00"]) # Frontend provides full datetime
-    return_date: Optional[datetime] = Field(default=None, examples=["2023-10-28T00:00:00"]) # Frontend provides full datetime
-    
-    leave_at: time = Field(..., examples=["09:30:00"])         # Time part for departure
-    arrive_at: Optional[time] = Field(default=None, examples=["17:45:00"]) # Time part for arrival
-    
-    status: str = Field(..., examples=["PLANNED"]) # e.g., "PLANNED", "ONGOING". Could be an Enum.
+    vehicle_id: int
+    driver_id: int
+    start_location: str
+    end_location: str
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    status: str = "planned"
+    # --- NEW OPTIONAL FIELDS ---
+    purpose: Optional[str] = None
+    notes: Optional[str] = None
+    # --- END NEW OPTIONAL FIELDS ---
 
-    @validator('return_date', always=True)
-    def check_return_date_chronology(cls, v_return_date, values):
-        departure_day = values.get('departure_day')
-        if v_return_date and departure_day:
-            if v_return_date <= departure_day:
-                raise ValueError('return_date must be strictly after departure_day')
-        return v_return_date
-
-    @validator('arrive_at', always=True)
-    def check_arrive_at_if_return_date_present(cls, v_arrive_at, values):
-        return_date = values.get('return_date')
-        # If return_date is provided (not None), then arrive_at must also be provided.
-        if return_date and v_arrive_at is None:
-            raise ValueError('arrive_at must be provided if return_date is set')
-        # If return_date is None, arrive_at should also be None or not provided.
-        if not return_date and v_arrive_at is not None:
-            raise ValueError('arrive_at should not be set if return_date is not set')
-        return v_arrive_at
-
-  
 class TripCreate(TripBase):
-    pass
+    pass # Inherits all from TripBase, including new fields
 
-class TripUpdate(BaseModel):
-    origin: Optional[str] = Field(default=None, examples=["New York City"])
-    destination: Optional[str] = Field(default=None, examples=["Los Angeles"])
-    vehicle_id: Optional[int] = Field(default=None, examples=[101])
-    driver_id: Optional[int] = Field(default=None, examples=[202])
-    
-    departure_day: Optional[datetime] = Field(default=None, examples=["2023-10-27T00:00:00"])
-    return_date: Optional[datetime] = Field(default=None, examples=["2023-10-28T00:00:00"]) 
-    
-    leave_at: Optional[time] = Field(default=None, examples=["09:30:00"])
-    arrive_at: Optional[time] = Field(default=None, examples=["17:45:00"]) 
-    
-    status: Optional[str] = Field(default=None, examples=["ONGOING"]) 
-
-
-class TripOut(BaseModel):    
-    id: int
-    origin: str
-    destination: str
+class TripUpdate(BaseModel): # For PUT, allow partial updates
     vehicle_id: Optional[int] = None
     driver_id: Optional[int] = None
-    
-    departure_date: datetime         
-    return_date: Optional[datetime] = None 
-    
-    leave_at: datetime               
-    arrive_at: Optional[datetime] = None  
-    
-    created_at: datetime
-    status: str
+    start_location: Optional[str] = None
+    end_location: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    status: Optional[str] = None
+    # --- NEW OPTIONAL FIELDS ---
+    purpose: Optional[str] = None
+    notes: Optional[str] = None
+    # --- END NEW OPTIONAL FIELDS ---
+
+# To include related vehicle and driver info when returning a trip
+# You might already have something similar
+class VehicleNestedInTrip(BaseModel): # Simplified Vehicle for nesting
+    id: int
+    plate_number: str
+    # Add other vehicle fields you want to show directly with the trip
+    make: Optional[str] = None # Assuming you resolve this from vehicle.make (id) to vehicle_make.vehicle_make (name)
+    model: Optional[str] = None# Assuming you resolve this from vehicle.model (id) to vehicle_model.vehicle_model (name)
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+class DriverNestedInTrip(BaseModel): # Simplified Driver for nesting
+    id: int
+    first_name: str
+    last_name: str
+    # Add other driver fields
+
+    class Config:
+        from_attributes = True
 
 
+class TripResponse(TripBase): # Schema for returning a trip to the client
+    id: int
+    created_at: Optional[datetime] = None # Or datetime if always present
+    updated_at: Optional[datetime] = None # Or datetime if always present
+
+    # Optional: Include nested vehicle and driver details if your API returns them
+    # vehicle: Optional[VehicleNestedInTrip] = None
+    # driver: Optional[DriverNestedInTrip] = None
+    # If you resolve make/model names from IDs at the API level, you can add them here:
+    # vehicle_plate_number: Optional[str] = None
+    # driver_full_name: Optional[str] = None
+
+
+    class Config:
+        from_attributes = True # For SQLAlchemy model to Pydantic conversion
+
+# Schema for a list of trips (if you use it)
+class TripListResponse(BaseModel):
+    trips: List[TripResponse]
+    total_count: Optional[int] = None # For pagination
 ##################################################################################################################
 
 class VehicleTransmissionBase(BaseModel):

@@ -54,35 +54,14 @@ def get_users_api( # Renamed to avoid conflict if you have another get_users
 @router.get("/users-page", response_class=HTMLResponse)
 async def get_users_page_view( # Renamed to avoid conflict
     request: Request,
-    # current_page_user: schemas.UserOut = Depends(oauth2.get_current_user) # Assuming get_current_user returns UserOut
-    # For HTML pages, sometimes you just need to know *if* a user is logged in,
-    # or pass minimal info. The full UserOut might be overkill or expose too much to templates.
-    # Let's assume oauth2.get_current_user handles redirection if not authenticated.
-    # If you need user info in the template, ensure get_current_user provides it.
-    # For simplicity, I'll assume it works and you can access current_page_user.username if needed
-    # For this example, we don't strictly need current_user in the template for basic CRUD display.
     db: Session = Depends(get_db) # Keep if needed for initial data, but JS will fetch
 ):
-    # If oauth2.get_current_user doesn't raise an exception for unauthenticated users,
-    # you might need to check its return value here.
-    # However, typically, `Depends` handles this.
-    
-    # The frontend JS will call the API endpoint (/user/) to get user data.
-    # So, we don't necessarily need to pass users from here anymore.
-    # The template just needs the current_user for display (e.g. username in sidebar).
     user_info_for_template = None
     try:
-        # This call is just to potentially get username for the template,
-        # actual auth protection is on API endpoints.
-        # This assumes get_current_user can be called without failing if token is bad for HTML views,
-        # or that your setup has a way to get a "viewer" context.
-        # This is often complex. A simpler approach for HTML views is to let JS handle auth checks.
         current_user_data = await oauth2.get_current_user_optional(request) # Made-up function for optional user
         if current_user_data:
             user_info_for_template = {"username": current_user_data.username} # Example
     except HTTPException:
-        # Not logged in or bad token, but we still serve the page if it's public-ish
-        # The JS will then fail API calls if auth is required for them.
         pass
 
     return templates.TemplateResponse("users.html", {
@@ -142,14 +121,6 @@ def update_user_by_id( # Renamed
    
     update_data_dict = user_update_payload.dict(exclude_unset=True) # Get only fields that were actually sent
 
-    # If password is part of UserUpdate and is provided, hash it
-    # if "password" in update_data_dict and update_data_dict.get("password"):
-    #     hashed_password = utils.hash(update_data_dict["password"])
-    #     update_data_dict["password"] = hashed_password
-    # elif "password" in update_data_dict: # Password field present but empty/None
-    #     del update_data_dict["password"] # Don't update password if it's empty string or None
-
-    # Check for username/email conflicts if they are being changed
     if "username" in update_data_dict and update_data_dict["username"] != db_user_to_update.username:
         existing_user_by_username = db.query(models.User).filter(models.User.username == update_data_dict["username"]).first()
         if existing_user_by_username:

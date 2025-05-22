@@ -18,42 +18,68 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/") # Matches your auth.py
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    # Ensure ACCESS_TOKEN_EXPIRE_MINUTES is treated as an integer
-    expire_minutes = int(ACCESS_TOKEN_EXPIRE_MINUTES)
+    try:
+        # Ensure ACCESS_TOKEN_EXPIRE_MINUTES is an integer
+        expire_minutes = int(ACCESS_TOKEN_EXPIRE_MINUTES)
+    except ValueError:
+        print(f"ERROR: ACCESS_TOKEN_EXPIRE_MINUTES ('{ACCESS_TOKEN_EXPIRE_MINUTES}') is not a valid integer!")
+        expire_minutes = 30 # Default to 30 minutes if config is bad
+
     expire = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
     to_encode.update({"exp": expire})
+
+    print(f"\n--- STEP 4.1: Creating Token ---")
+    print(f"Data for encoding (from auth.py): {data}")
+    print(f"Full payload to encode (with exp): {to_encode}")
+    print(f"Using SECRET_KEY (first 5 chars for log): {SECRET_KEY[:5]}...")
+    print(f"Using ALGORITHM: {ALGORITHM}")
+    print(f"Token Expiry Time (UTC): {expire}")
+
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Generated encoded JWT: {encoded_jwt}")
+    print(f"--- Token Created Successfully ---\n")
     return encoded_jwt
 
+
+# In app/oauth2.py
 def verify_access_token(token: str, credentials_exception: HTTPException) -> schemas.TokenData:
+    print(f"\n--- STEP 5.1: Verifying Token ---")
+    print(f"Received token for verification: {token}")
+    print(f"Using SECRET_KEY (first 5 chars for log): {SECRET_KEY[:5]}...")
+    print(f"Using ALGORITHM: {ALGORITHM}")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"STEP 5.2: Token decoded successfully. Payload: {payload}")
         
-        # Claims from your auth.py: "sub": username, "user_id": int, "status": str
         subject: Optional[str] = payload.get("sub") 
         user_id_from_token: Optional[int] = payload.get("user_id")
         status_from_token: Optional[str] = payload.get("status")
+        # username_from_token will be same as subject based on current create_access_token
+
+        print(f"STEP 5.3: Extracted from payload - sub: {subject}, user_id: {user_id_from_token}, status: {status_from_token}")
 
         if subject is None or user_id_from_token is None or status_from_token is None:
-            print(f"JWTError: Missing critical claims. Subject: {subject}, UserID: {user_id_from_token}, Status: {status_from_token}")
+            print(f"ERROR STEP 5.4: Missing critical claims after decoding. Cannot create TokenData.")
             raise credentials_exception
         
-        # Assuming schemas.TokenData expects 'sub', 'user_id', 'status'
-        # and possibly 'username' if you explicitly add it as a separate claim from 'sub'.
-        # In your current auth.py, 'sub' IS the username.
+        # Ensure username is consistent with sub for TokenData
         token_data = schemas.TokenData(
-            sub=subject,       # This is the username
+            sub=subject,
             user_id=user_id_from_token,
             status=status_from_token,
-            username=subject   # Explicitly setting username to match 'sub' for TokenData
+            username=subject 
         )
+        print(f"STEP 5.5: TokenData object created: {token_data.model_dump_json(indent=2)}")
     except JWTError as e:
-        print(f"JWTError during token decoding or validation: {str(e)}")
+        print(f"ERROR STEP 5.6: JWTError during token decoding: {str(e)}")
+        # Common errors: "Signature verification failed", "Token has expired"
         raise credentials_exception
     except Exception as e:
-        print(f"Unexpected error during token verification: {str(e)}")
+        # This could be a Pydantic validation error if payload doesn't match TokenData
+        print(f"ERROR STEP 5.7: Unexpected error during token verification (e.g., Pydantic validation): {str(e)}")
         raise credentials_exception
     
+    print(f"--- Token Verified Successfully (verify_access_token) ---\n")
     return token_data
 
 def get_current_user(

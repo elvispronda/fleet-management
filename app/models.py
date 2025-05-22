@@ -1,10 +1,13 @@
-from sqlalchemy import Column, Integer, String,Float, ForeignKey, TIMESTAMP, text, Enum as DBEnum # Added DBEnum
+from sqlalchemy import Column, DateTime, Integer, String,Float, ForeignKey, TIMESTAMP, text, Enum as DBEnum # Added DBEnum
 from datetime import datetime # For default values or type hinting if needed
 import enum # For Python enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
+from sqlalchemy.sql import func # For default timestamps
 from .database import Base
+
+
 
 
 class User(Base):
@@ -28,9 +31,9 @@ class User(Base):
 class Driver(Base):
     __tablename__ = "driver"
     id = Column(Integer, primary_key=True, index=True)
-    nom = Column(String, nullable=False)
-    prenom = Column(String, nullable=False)
-    cni = Column(String, nullable=False, unique=True)
+    last_name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    cni_number = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     matricule = Column(String, nullable=False, unique=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
@@ -53,22 +56,6 @@ class Fuel(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 ##################################################################################################################
 
-class Trip(Base):
-    __tablename__ = "trip"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    origin = Column(String, nullable=False)
-    destination = Column(String, nullable=False)
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id", ondelete="SET NULL"), nullable=True)
-    driver_id = Column(Integer, ForeignKey("driver.id", ondelete="SET NULL"), nullable=True)
-    departure_date = Column(TIMESTAMP(timezone=True), nullable=False)
-    return_date = Column(TIMESTAMP(timezone=True), nullable=True) # Nullable
-    leave_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    arrive_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))
-    created_at=Column(TIMESTAMP(timezone=True), nullable=False)
-    status = Column(String(50), nullable=False, default="planned") # Status as a string
-
-##################################################################################################################
 
 class VehicleType(Base):
     __tablename__ = "vehicle_type"
@@ -198,3 +185,34 @@ class Reparation(Base):
     garage_id = Column(Integer, ForeignKey("garage.id"))
     repair_date = Column(TIMESTAMP(timezone=True), nullable=False)
     status = Column(String, default="Inprogress")
+
+#########################################################################################################################
+
+class Trip(Base):
+    __tablename__ = "trip"
+
+    id = Column(Integer, primary_key=True, index=True)
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)
+    driver_id = Column(Integer, ForeignKey("driver.id"), nullable=False)
+    start_location = Column(String, nullable=False)
+    end_location = Column(String, nullable=False)
+    start_time = Column(DateTime(timezone=True), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=True) # Can be null if trip is ongoing/planned
+
+    # --- NEW FIELDS ---
+    purpose = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    # --- END NEW FIELDS ---
+
+    status = Column(String, nullable=False, default="planned") # e.g., planned, ongoing, completed, cancelled
+
+    # Assuming you have a way to track when the trip record was created
+    # This is good practice but not strictly related to 'purpose' and 'notes'
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships (if not already defined)
+    vehicle = relationship("Vehicle") # Replace "Vehicle" with your actual Vehicle model name
+    driver = relationship("Driver")   # Replace "Driver" with your actual Driver model name
+
+    # If you have other fields like distance, estimated_duration, etc., keep them.

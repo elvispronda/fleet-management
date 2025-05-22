@@ -73,46 +73,6 @@ def login_for_access_token(
         status=db_user.status
     )
 
-# If you also want a login endpoint that accepts JSON (e.g., for API clients not using forms):
-# You could add another endpoint like POST /login/json_body or similar
-#
-# from ..schemas import UserLogin # Assuming UserLogin schema has 'identifier' and 'password'
-#
-# @router.post("/json", response_model=schemas.Token) # Example: /login/json
-# def login_with_json_body(
-#     user_credentials_json: schemas.UserLogin, # Expects JSON body
-#     db: Session = Depends(database.get_db)
-# ):
-#     identifier = user_credentials_json.identifier
-#     password = user_credentials_json.password
-#
-#     db_user = db.query(models.User).filter(
-#         (models.User.email == identifier) | (models.User.username == identifier)
-#     ).first()
-#
-#     if not db_user or not utils.verify(password, db_user.password):
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username/email or password",
-#             headers={"WWW-Authenticate": "Bearer"}
-#         )
-#
-#     if db_user.status != "active":
-#         # ... (same status check logic as above) ...
-#         raise HTTPException(...) 
-#
-#     token_payload_data = {
-#         "sub": db_user.username,
-#         "user_id": db_user.id,
-#         "status": db_user.status
-#     }
-#     access_token = oauth2.create_access_token(data=token_payload_data)
-#
-#     return schemas.Token(
-#         access_token=access_token,
-#         token_type="bearer",
-#         user_id=db_user.id,
-#         username=db_user.username,
-#         status=db_user.status
-#     )
+
+
     
