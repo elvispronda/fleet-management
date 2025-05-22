@@ -21,8 +21,7 @@ def create_cat_maintenance(cat_maintenance: schemas.CategoryMaintenanceCreate, d
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.CategoryMaintenanceOut])
-def get_caat_maintenance(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_caat_maintenance(db:Session = Depends(get_db),limit : int = 5, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all maintenance categories at the same time

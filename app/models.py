@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String,Float, ForeignKey, TIMESTAMP, text, Enum as DBEnum # Added DBEnum
+from datetime import datetime # For default values or type hinting if needed
+import enum # For Python enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
@@ -53,13 +55,18 @@ class Fuel(Base):
 
 class Trip(Base):
     __tablename__ = "trip"
-    id = Column(Integer, primary_key=True, index=True)
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     origin = Column(String, nullable=False)
     destination = Column(String, nullable=False)
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id", ondelete="SET NULL"), nullable=True)
+    driver_id = Column(Integer, ForeignKey("driver.id", ondelete="SET NULL"), nullable=True)
     departure_date = Column(TIMESTAMP(timezone=True), nullable=False)
-    return_date = Column(TIMESTAMP(timezone=True), nullable=False)
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
-    driver_id = Column(Integer, ForeignKey("user.id"))
+    return_date = Column(TIMESTAMP(timezone=True), nullable=True) # Nullable
+    leave_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    arrive_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))
+    created_at=Column(TIMESTAMP(timezone=True), nullable=False)
+    status = Column(String(50), nullable=False, default="planned") # Status as a string
 
 ##################################################################################################################
 
@@ -137,14 +144,32 @@ class CategoryMaintenance(Base):
 
 class Maintenance(Base):
     __tablename__ = "maintenance"
-    id = Column(Integer, primary_key=True, index=True)
-    cat_maintenance_id = Column(Integer, ForeignKey("category_maintenance.id"))
-    vehicule_id = Column(Integer, ForeignKey("vehicle.id"))
-    garage_id = Column(Integer, ForeignKey("garage.id"))
-    maintenance_cost = Column(Float, default=0.0)
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    cat_maintenance_id = Column(Integer, ForeignKey("category_maintenance.id", ondelete="SET NULL"), nullable=True) # Consider ondelete behavior
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id", ondelete="CASCADE"), nullable=False) # Changed from vehicule_id. Consider ondelete.
+    garage_id = Column(Integer, ForeignKey("garage.id", ondelete="SET NULL"), nullable=True) # Consider ondelete behavior
+
+    maintenance_cost = Column(Float, default=0.0, nullable=False)
     receipt = Column(String, nullable=False)
     maintenance_date = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+    # Optional: Define relationships for easier data access if needed
+    # These allow you to access related objects like maintenance.vehicle, maintenance.category, etc.
+    # Ensure the related models (Vehicle, CategoryMaintenance, Garage) also have a back_populates if you use these.
+
+    # category = relationship("CategoryMaintenance", back_populates="maintenances") # Example
+    # vehicle = relationship("Vehicle", back_populates="maintenances") # Example
+    # garage = relationship("Garage", back_populates="maintenances") # Example
+
+    # If you want to access maintenance records from the other side (e.g., vehicle.maintenances):
+    # In your Vehicle model:
+    # maintenances = relationship("Maintenance", back_populates="vehicle")
+    # In your CategoryMaintenance model:
+    # maintenances = relationship("Maintenance", back_populates="category")
+    # In your Garage model:
+    # maintenances = relationship("Maintenance", back_populates="garage")
 ##################################################################################################################
 
 class CategoryPanne(Base):

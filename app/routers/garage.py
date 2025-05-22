@@ -21,8 +21,7 @@ def create_garage(garage : schemas.GarageCreate, db:Session = Depends(get_db)):
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.GarageOut])
-def get_garage(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_garage(db:Session = Depends(get_db),limit : int = 5, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all garages at the same time

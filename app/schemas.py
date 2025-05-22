@@ -1,21 +1,9 @@
-from pydantic import BaseModel, EmailStr, Field # Field can be used for validation/examples
-from typing import Optional, Union
-from datetime import datetime
+from pydantic import BaseModel, EmailStr,Field, validator # 
+from typing import Optional
+from datetime import datetime, time
+import enum # For Python enum
 
 ###################################################################################################################
-# --- User Schemas ---
-# schemas.py
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
-from datetime import datetime
-
-# Possible user statuses - can be an Enum for more robustness if desired
-# from enum import Enum
-# class UserStatusEnum(str, Enum):
-#     active = "active"
-#     inactive = "inactive"
-#     pending_approval = "pending_approval"
-#     suspended = "suspended"
 
 class UserBase(BaseModel):
     username: str = Field(..., min_length=3, max_length=50, example="pronda")
@@ -78,19 +66,10 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    # 'sub' (subject) is often used for the primary identifier (username or stringified user_id)
-    # Let's assume 'sub' will be the username for this example.
-    # If you use user_id as 'sub', make sure it's a string.
-    sub: Optional[str] = Field(None, description="Subject of the token (e.g., username or user_id as string)")
-    
-    # You can add specific claims if needed beyond 'sub'
-    user_id: Optional[int] = Field(None, description="User ID (integer)") 
-    username: Optional[str] = Field(None, description="Username (can be same as sub)") 
-    
-    # This should reflect the string status
-    status: Optional[str] = Field(None, description="User's status at the time of token creation")
-    # exp: Optional[int] = None # Expiration time, usually handled by JWT library & verified during decode
-
+    sub: str # Subject, typically the username
+    user_id: int
+    status: str
+    username: str # Explicitly add if needed, or rely on 'sub'
 
 
 # --- Schema for Password Change ---
@@ -149,21 +128,77 @@ class FuelOut(FuelBase):
 ##################################################################################################################
 
 class TripBase(BaseModel):
-    origin: str
-    destination: str
-    departure_date: datetime
-    return_date: datetime
-    vehicle_id: int
-    driver_id: int
+    origin: str = Field(..., examples=["New York City"])
+    destination: str = Field(..., examples=["Los Angeles"])
+    vehicle_id: Optional[int] = Field(default=None, examples=[101])
+    driver_id: Optional[int] = Field(default=None, examples=[202])
+    
+    departure_day: datetime = Field(..., examples=["2023-10-27T00:00:00"]) # Frontend provides full datetime
+    return_date: Optional[datetime] = Field(default=None, examples=["2023-10-28T00:00:00"]) # Frontend provides full datetime
+    
+    leave_at: time = Field(..., examples=["09:30:00"])         # Time part for departure
+    arrive_at: Optional[time] = Field(default=None, examples=["17:45:00"]) # Time part for arrival
+    
+    status: str = Field(..., examples=["PLANNED"]) # e.g., "PLANNED", "ONGOING". Could be an Enum.
 
+    @validator('return_date', always=True)
+    def check_return_date_chronology(cls, v_return_date, values):
+        departure_day = values.get('departure_day')
+        if v_return_date and departure_day:
+            if v_return_date <= departure_day:
+                raise ValueError('return_date must be strictly after departure_day')
+        return v_return_date
+
+    @validator('arrive_at', always=True)
+    def check_arrive_at_if_return_date_present(cls, v_arrive_at, values):
+        return_date = values.get('return_date')
+        # If return_date is provided (not None), then arrive_at must also be provided.
+        if return_date and v_arrive_at is None:
+            raise ValueError('arrive_at must be provided if return_date is set')
+        # If return_date is None, arrive_at should also be None or not provided.
+        if not return_date and v_arrive_at is not None:
+            raise ValueError('arrive_at should not be set if return_date is not set')
+        return v_arrive_at
+
+  
 class TripCreate(TripBase):
     pass
 
-class TripOut(TripBase):
+class TripUpdate(BaseModel):
+    origin: Optional[str] = Field(default=None, examples=["New York City"])
+    destination: Optional[str] = Field(default=None, examples=["Los Angeles"])
+    vehicle_id: Optional[int] = Field(default=None, examples=[101])
+    driver_id: Optional[int] = Field(default=None, examples=[202])
+    
+    departure_day: Optional[datetime] = Field(default=None, examples=["2023-10-27T00:00:00"])
+    return_date: Optional[datetime] = Field(default=None, examples=["2023-10-28T00:00:00"]) 
+    
+    leave_at: Optional[time] = Field(default=None, examples=["09:30:00"])
+    arrive_at: Optional[time] = Field(default=None, examples=["17:45:00"]) 
+    
+    status: Optional[str] = Field(default=None, examples=["ONGOING"]) 
+
+
+class TripOut(BaseModel):    
     id: int
+    origin: str
+    destination: str
+    vehicle_id: Optional[int] = None
+    driver_id: Optional[int] = None
+    
+    departure_date: datetime         
+    return_date: Optional[datetime] = None 
+    
+    leave_at: datetime               
+    arrive_at: Optional[datetime] = None  
+    
+    created_at: datetime
+    status: str
 
     class Config:
-        from_attributes = True
+        from_attributes = True 
+
+
 ##################################################################################################################
 
 class VehicleTransmissionBase(BaseModel):
@@ -315,23 +350,31 @@ class CategoryMaintenanceOut(CategoryMaintenanceBase):
         from_attributes = True
 ##################################################################################################################
 
+# --- Maintenance Schemas ---
 class MaintenanceBase(BaseModel):
-    cat_maintenance_id: int
+    cat_maintenance_id: Optional[int] = None # Made optional to align with nullable=True in DB if that's the case
     vehicle_id: int
-    garage_id: int
+    garage_id: Optional[int] = None # Made optional to align with nullable=True in DB if that's the case
     maintenance_cost: float
     receipt: str
     maintenance_date: datetime
 
 class MaintenanceCreate(MaintenanceBase):
-    pass
+    pass # No changes needed here, it inherits the corrected fields
 
 class MaintenanceOut(MaintenanceBase):
     id: int
     created_at: datetime
 
+    # Optional: Add fields from related models if you want to include them in the output
+    # This requires using relationship loading in your API endpoint and defining nested Pydantic models.
+    # Example:
+    # vehicle_plate_number: Optional[str] = None
+    # category_name: Optional[str] = None
+    # garage_name: Optional[str] = None
+
     class Config:
-        from_attributes = True
+        from_attributes = True # Was orm_mode = True in Pydantic V1
 ##################################################################################################################
 
 class CategoryPanneBase(BaseModel):

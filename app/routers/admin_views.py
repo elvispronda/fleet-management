@@ -61,6 +61,10 @@ async def get_page(request: Request):
 async def get_page(request: Request):
     return templates.TemplateResponse("maintenance.html", {"request": request})
 
+@router.get("/copymaintenance", response_class=HTMLResponse, name="copymaintenance_page_html")
+async def get_page(request: Request):
+    return templates.TemplateResponse("copymaintenance.html", {"request": request})
+
 @router.get("/reparation", response_class=HTMLResponse, name="reparation_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("reparation.html", {"request": request})
@@ -76,6 +80,10 @@ async def get_page(request: Request):
 @router.get("/trip", response_class=HTMLResponse, name="trip_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("trip.html", {"request": request})
+
+@router.get("/copytrip", response_class=HTMLResponse, name="copytrip_page_html")
+async def get_page(request: Request):
+    return templates.TemplateResponse("copytrip.html", {"request": request})
 
 
 @router.get("/copyuser", response_class=HTMLResponse, name="copyuser_page_html")

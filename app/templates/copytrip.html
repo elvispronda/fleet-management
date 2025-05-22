@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Trip Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <style>
+    .modal { transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+    .modal.hidden { visibility: hidden; opacity: 0; }
+    .modal:not(.hidden) { visibility: visible; opacity: 1; }
+    .dark .modal-content { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.2); }
+    .date-filter-btn.active { background-color: #3b82f6; color: white; }
+    .dark .date-filter-btn.active { background-color: #60a5fa; }
+    .view-detail-label { font-weight: 500; color: #4b5563; }
+    .dark .view-detail-label { color: #d1d5db; }
+    .view-detail-value { color: #1f2937; }
+    .dark .view-detail-value { color: #f9fafb; }
+    /* Ensure time inputs are legible in dark mode */
+    input[type="date"], input[type="time"] {
+        color-scheme: light; /* For browsers that support it */
+    }
+    .dark input[type="date"], .dark input[type="time"] {
+        color-scheme: dark;
+        background-color: #374151; /* gray-700 */
+        color: #f9fafb; /* gray-50 */
+        border-color: #4b5563; /* gray-600 */
+    }
+    .dark input[type="date"]::-webkit-calendar-picker-indicator,
+    .dark input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+<div class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Sidebar (Left) -->
+    <aside class="w-64 bg-white dark:bg-gray-800/95 backdrop-blur-sm p-4 space-y-6 shadow-lg hidden md:block flex-shrink-0 border-r dark:border-gray-700">
+      <div class="text-2xl font-bold flex items-center space-x-2 text-primary dark:text-primary-light">
+        <i data-lucide="command" class="w-7 h-7"></i><span>FleetDash</span>
+      </div>
+      <nav class="flex-1">
+        <ul class="space-y-2">
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><a href="dashboard.html">Dashboard</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="pie-chart" class="w-5 h-5"></i><a href="analytics.html">Analytics</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="users" class="w-5 h-5"></i><a href="users.html">User</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="user" class="w-5 h-5"></i><a href="driver.html">Driver</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i><a href="panne.html">Pannes (Issues)</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="car" class="w-5 h-5"></i><a href="vehicle.html">Vehicles</a>
+        </li>
+         <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="wrench" class="w-5 h-5"></i><a href="reparation.html">Reparation</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="droplet" class="w-5 h-5"></i><a href="fuel.html">Fuel</a>
+        </li>
+        <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="tool" class="w-5 h-5"></i><a href="maintenance.html">Maintenance</a>
+        </li>
+        <li id="trip-nav-link" class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+          <i data-lucide="route" class="w-5 h-5"></i><a href="trip.html">Trip</a>
+        </li>
+      </ul>
+      </nav>
+       <div class="pt-4 border-t border-gray-200 dark:border-gray-700/50 mt-auto">
+            <a href="#" id="global-logout-btn" class="flex items-center space-x-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/40 p-2.5 rounded-lg transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5"></i><span>Logout</span>
+            </a>
+       </div>
+    </aside>
+    
+  <!-- Main content -->
+  <main class="flex-1 overflow-auto p-6">
+    <!-- Trip Table Section -->
+    <section id="trip-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-2 sm:mb-0">Trip Records</h2>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="openAddTripModal()" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Trip
+          </button>
+          <input type="text" id="tripSearch" placeholder="Search trips (origin, destination, status...)" class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto">
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button onclick="exportTripsExcel()" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
+          <button onclick="exportTripsPDF()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
+        </div>
+      </div>
+
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium mr-2">Filter Trips by Departure Day:</span>
+        <button id="trip-filter-today" onclick="applyTripDateFilter('today')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
+        <button id="trip-filter-last7" onclick="applyTripDateFilter('last7days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
+        <button id="trip-filter-last30" onclick="applyTripDateFilter('last30days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
+        <button id="trip-filter-all" onclick="applyTripDateFilter('all')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
+        <button id="trip-filter-custom-btn" onclick="toggleTripCustomDateRange()" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
+        <select id="tripStatusFilterDropdown" onchange="applyTripStatusFilter(this.value)" class="ml-2 border dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">All Statuses</option>
+        </select>
+      </div>
+      <div id="tripCustomDateRange" class="mb-4 hidden items-center gap-2 p-3 border dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
+        <input type="date" id="tripCustomStartDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm">
+        <span class="text-sm">to</span>
+        <input type="date" id="tripCustomEndDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm">
+        <button onclick="applyTripCustomDateFilter()" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table id="tripsTable" class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b dark:border-gray-700">
+              <th class="py-3 px-2 font-semibold">ID</th>
+              <th class="px-2 font-semibold">Origin</th>
+              <th class="px-2 font-semibold">Destination</th>
+              <th class="px-2 font-semibold">Departure Day</th>
+              <th class="px-2 font-semibold">Leave At</th>
+              <th class="px-2 font-semibold">Return Date</th>
+              <th class="px-2 font-semibold">Arrive At</th>
+              <th class="px-2 font-semibold">Vehicle</th>
+              <th class="px-2 font-semibold">Driver</th>
+              <th class="px-2 font-semibold">Status</th>
+              <th class="px-2 font-semibold text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tripsBody"></tbody>
+        </table>
+      </div>
+      <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+        <div class="text-sm text-gray-600 dark:text-gray-400" id="tripsCount"></div>
+        <div class="flex items-center space-x-1" id="tripsPagination"></div>
+      </div>
+    </section>
+  </main>
+
+    <!-- Right Sidebar -->
+    <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
+        <div class="flex justify-between items-center">
+        <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
+        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
+        </div>
+        <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New trip scheduled</p><p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Trip status: Ongoing</p><p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Trip completed</p><p class="text-sm text-gray-500 dark:text-gray-400">1 hour ago</p></div></div></div></div>
+        <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="map-pin" class="w-5 h-5 mb-1"></i><span class="text-xs">Plan Trip</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="calendar-days" class="w-5 h-5 mb-1"></i><span class="text-xs">View Calendar</span></button><button id="quick-logout-btn" class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="log-out" class="w-5 h-5 mb-1"></i><span class="text-xs">Logout</span></button></div></div>
+    </aside>
+</div>
+
+<!-- Add/Edit Trip Modal -->
+<div id="addTripModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xl">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="tripModalTitle">Add New Trip</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the trip details below</p>
+        </div>
+        <button onclick="closeAddTripModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      <form id="addTripForm" class="space-y-4">
+        <input type="hidden" id="tripId_form">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="trip_origin_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origin</label>
+              <input type="text" id="trip_origin_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., New York City">
+            </div>
+            <div>
+              <label for="trip_destination_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination</label>
+              <input type="text" id="trip_destination_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., Los Angeles">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="trip_departure_day_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Departure Day</label>
+              <input type="date" id="trip_departure_day_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="trip_leave_at_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Leave At</label>
+              <input type="time" id="trip_leave_at_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="trip_return_date_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Return Date (Optional)</label>
+              <input type="date" id="trip_return_date_form" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="trip_arrive_at_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Arrive At (Optional)</label>
+              <input type="time" id="trip_arrive_at_form" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="trip_vehicle_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle</label>
+              <select id="trip_vehicle_id_form" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                <option value="">Select Vehicle</option>
+              </select>
+            </div>
+            <div>
+              <label for="trip_driver_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Driver</label>
+              <select id="trip_driver_id_form" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                <option value="">Select Driver</option>
+              </select>
+            </div>
+        </div>
+        <div>
+            <label for="trip_status_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trip Status</label>
+            <select id="trip_status_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            </select>
+        </div>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="closeAddTripModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+          <button type="submit" id="tripSubmitButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Trip
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- View Trip Record Modal -->
+<div id="viewTripModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Trip Details</h3>
+        <button onclick="closeViewTripModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
+      </div>
+      <div id="viewTripDetails" class="space-y-3 text-sm">
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Trip ID:</span><span id="view-trip-id" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Origin:</span><span id="view-trip-origin" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Destination:</span><span id="view-trip-destination" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Departure Day:</span><span id="view-trip-departure_day" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Leave At:</span><span id="view-trip-leave_at" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Return Date:</span><span id="view-trip-return_date" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Arrive At:</span><span id="view-trip-arrive_at" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Vehicle:</span><span id="view-trip-vehicle" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Driver:</span><span id="view-trip-driver" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Status:</span><span id="view-trip-status" class="view-detail-value col-span-2"></span></div>
+         <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Created At:</span><span id="view-trip-created_at" class="view-detail-value col-span-2"></span></div>
+         <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Updated At:</span><span id="view-trip-updated_at" class="view-detail-value col-span-2"></span></div>
+      </div>
+      <div class="flex justify-end pt-6">
+          <button type="button" onclick="closeViewTripModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal for Trip Deletion -->
+<div id="confirmDeleteTripModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this trip record?</p></div>
+        <button onclick="closeConfirmDeleteTripModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      </div>
+      <div class="flex justify-end gap-3 pt-4">
+        <button onclick="closeConfirmDeleteTripModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+        <button id="confirmDeleteTripBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // --- Global Config ---
+  const API_BASE_URL = 'http://localhost:8000';
+  const LOGIN_PAGE_URL = '/admin/loginpage';
+
+  // --- Global Variables for Trip ---
+  let allTrips = [];
+  const tripsPerPage = 5;
+  let currentTripPage = 1;
+  let tripToEditId = null;
+  let tripToDeleteId = null;
+  let activeTripDateFilter = 'all';
+  let customTripFilterStartDate = null;
+  let customTripFilterEndDate = null;
+  let currentTripStatusFilter = "";
+
+  let allVehiclesForDropdown = [];
+  let allDriversForDropdown = [];
+  const tripStatuses = {
+      PLANNED: "Planned",
+      ONGOING: "Ongoing",
+      COMPLETED: "Completed",
+      CANCELLED: "Cancelled",
+      DELAYED: "Delayed"
+  };
+
+  // --- Auth & API Helpers ---
+  function getAuthToken() { return localStorage.getItem('authToken'); }
+  function getAuthHeaders(contentType = 'application/json') {
+    const token = getAuthToken();
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (contentType) headers['Content-Type'] = contentType;
+    return headers;
+  }
+  async function handleApiResponse(response) {
+    if (response.status === 401) {
+        localStorage.removeItem('authToken');
+        showNotification("Session expired. Please log in again.", "error");
+        setTimeout(() => { window.location.href = LOGIN_PAGE_URL; }, 2500);
+        throw new Error("Unauthorized");
+    }
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+        throw new Error(`API Error: ${response.status} - ${errorData.detail || JSON.stringify(errorData)}`);
+    }
+    return response.status === 204 ? null : response.json();
+  }
+  function showNotification(message, type = 'success') { alert(`${type.toUpperCase()}: ${message}`); console[type === 'error' ? 'error' : 'info'](message); }
+
+  // --- DOMContentLoaded ---
+  document.addEventListener('DOMContentLoaded', () => {
+      updateActiveNavLink();
+      initializeTripSection();
+      lucide.createIcons();
+      document.getElementById('theme-toggle')?.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+      ['addTripModal', 'viewTripModal', 'confirmDeleteTripModal'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', e => { if (e.target === e.currentTarget) window[`close${id.charAt(0).toUpperCase() + id.slice(1, -5)}Modal`](); });
+      });
+      const handleLogout = (e) => { e.preventDefault(); localStorage.removeItem('authToken'); showNotification('Logged out.', 'info'); window.location.href = LOGIN_PAGE_URL; };
+      document.getElementById('global-logout-btn')?.addEventListener('click', handleLogout);
+      document.getElementById('quick-logout-btn')?.addEventListener('click', handleLogout);
+  });
+
+  function updateActiveNavLink() {
+      document.querySelectorAll('aside nav ul li').forEach(li => li.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-semibold', 'bg-blue-50', 'dark:bg-gray-700'));
+      document.getElementById('trip-nav-link')?.classList.add('text-blue-600', 'dark:text-blue-400', 'font-semibold', 'bg-blue-50', 'dark:bg-gray-700');
+  }
+
+  // --- Date & Time Helper Functions ---
+  function getISODateString(date) { return date.toISOString().split('T')[0]; }
+  // Helper to format time to HH:MM, suitable for input type="time"
+  function formatTimeToHHMM(timeStr) { // Expects "HH:MM:SS" or "HH:MM"
+    if (!timeStr) return "";
+    return timeStr.substring(0, 5);
+  }
+  // Helper to format date from full ISO datetime string to YYYY-MM-DD
+  function extractDateFromISO(isoDateTimeString) {
+    if (!isoDateTimeString) return "";
+    return isoDateTimeString.split('T')[0];
+  }
+
+  function getDateRange(filterType) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    let sD = new Date(today); let eD = new Date(today); eD.setHours(23,59,59,999);
+    switch(filterType){
+      case 'today': break;
+      case 'last7days': sD.setDate(today.getDate()-6); break;
+      case 'last30days': sD.setDate(today.getDate()-29); break;
+      default: return {startDate:null,endDate:null};
+    }
+    return {startDate:getISODateString(sD),endDate:getISODateString(eD)};
+  }
+
+  // --- Trip Section ---
+  async function initializeTripSection() {
+    try {
+        await populateTripLookupData();
+        populateTripDropdowns();
+        await fetchTrips();
+    } catch (error) {
+        if (error.message !== "Unauthorized") showNotification(`Page init failed: ${error.message}`, 'error');
+    }
+    document.getElementById('tripSearch').addEventListener('input', () => { currentTripPage = 1; renderTripsTable(); });
+    document.getElementById('addTripForm').addEventListener('submit', handleTripFormSubmit);
+    document.getElementById('confirmDeleteTripBtn').addEventListener('click', confirmDeleteTrip);
+    setActiveTripDateFilterButton('all');
+  }
+
+  async function populateTripLookupData() {
+    try {
+        const [vehiclesRes, driversRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/vehicle/?limit=1000`, { headers: getAuthHeaders(null) }),
+            fetch(`${API_BASE_URL}/driver/?limit=1000`, { headers: getAuthHeaders(null) })
+        ]);
+        allVehiclesForDropdown = await handleApiResponse(vehiclesRes) || [];
+        allDriversForDropdown = await handleApiResponse(driversRes) || [];
+    } catch (error) {
+        console.error("Error populating lookup data:", error);
+        if (error.message !== "Unauthorized") showNotification(`Error populating lookup data: ${error.message}`, 'error');
+        throw error;
+    }
+  }
+
+  function populateTripDropdowns() {
+    const populateSelect = (selectId, data, valueField, textFieldFn, defaultOptionText) => {
+        const select = document.getElementById(selectId);
+        select.innerHTML = `<option value="">${defaultOptionText}</option>`;
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item[valueField];
+            option.textContent = textFieldFn(item);
+            select.appendChild(option);
+        });
+    };
+    populateSelect('trip_vehicle_id_form', allVehiclesForDropdown, 'id', v => `${v.make||''} ${v.model||''} (${v.plate_number||'N/A'})`.trim(), 'Select Vehicle');
+    populateSelect('trip_driver_id_form', allDriversForDropdown, 'id', d => `${d.nom||''} ${d.prenom||''} (Mat: ${d.matricule||'N/A'})`.trim(), 'Select Driver');
+
+    const statusSelectForm = document.getElementById('trip_status_form');
+    statusSelectForm.innerHTML = '';
+    Object.entries(tripStatuses).forEach(([key, value]) => {
+        const option = document.createElement('option');
+        option.value = key; option.textContent = value; statusSelectForm.appendChild(option);
+    });
+    if (!tripToEditId) statusSelectForm.value = "PLANNED";
+
+    const statusFilterDropdown = document.getElementById('tripStatusFilterDropdown');
+    statusFilterDropdown.innerHTML = '<option value="">All Statuses</option>'; // Start with All
+    Object.entries(tripStatuses).forEach(([key, value]) => {
+        const option = document.createElement('option');
+        option.value = key; option.textContent = value; statusFilterDropdown.appendChild(option);
+    });
+  }
+  
+  function applyTripStatusFilter(statusValue) {
+    currentTripStatusFilter = statusValue; currentTripPage = 1; renderTripsTable();
+  }
+  function applyTripDateFilter(filterType) {
+    activeTripDateFilter = filterType; customTripFilterStartDate = null; customTripFilterEndDate = null;
+    document.getElementById('tripCustomDateRange').classList.add('hidden');
+    setActiveTripDateFilterButton(filterType); currentTripPage = 1; renderTripsTable();
+  }
+  function toggleTripCustomDateRange() {
+    const customRangeEl = document.getElementById('tripCustomDateRange');
+    customRangeEl.classList.toggle('hidden');
+    if (!customRangeEl.classList.contains('hidden')) setActiveTripDateFilterButton('trip-filter-custom-btn');
+    else if (activeTripDateFilter === 'custom') applyTripDateFilter('all'); // Revert if closed
+  }
+  function applyTripCustomDateFilter() {
+    const sD = document.getElementById('tripCustomStartDate').value, eD = document.getElementById('tripCustomEndDate').value;
+    if (!sD || !eD) { showNotification("Please select start and end dates.", "error"); return; }
+    if (new Date(sD) > new Date(eD)) { showNotification("Start date cannot be after end date.", "error"); return; }
+    activeTripDateFilter = 'custom'; customTripFilterStartDate = sD; customTripFilterEndDate = eD;
+    setActiveTripDateFilterButton('trip-filter-custom-btn'); currentTripPage = 1; renderTripsTable();
+  }
+  function setActiveTripDateFilterButton(filterId) {
+    document.querySelectorAll('#trip-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(filterId.startsWith('trip-filter-') ? filterId : `trip-filter-${filterId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+
+  async function fetchTrips() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/trip/?limit=10000&skip=0`, { headers: getAuthHeaders(null) });
+      allTrips = await handleApiResponse(response) || [];
+      currentTripPage = 1;
+      renderTripsTable();
+    } catch (error) {
+      if (error.message !== "Unauthorized") showNotification(`Failed to fetch trips: ${error.message}`, 'error');
+      allTrips = []; renderTripsTable();
+    }
+  }
+
+  function renderTripsTable() {
+    let recordsToDisplay = [...allTrips];
+    // Date Filter (departure_day is a full datetime string from API)
+    if (activeTripDateFilter !== 'all') {
+      const range = (activeTripDateFilter === 'custom' && customTripFilterStartDate && customTripFilterEndDate) ?
+                    { startDate: customTripFilterStartDate, endDate: customTripFilterEndDate } :
+                    getDateRange(activeTripDateFilter);
+      if (range.startDate && range.endDate) {
+        recordsToDisplay = recordsToDisplay.filter(trip => {
+          const tripDepartureDateOnly = extractDateFromISO(trip.departure_day); // Get YYYY-MM-DD part
+          return tripDepartureDateOnly >= range.startDate && tripDepartureDateOnly <= range.endDate;
+        });
+      }
+    }
+    // Status Filter
+    if (currentTripStatusFilter) {
+        recordsToDisplay = recordsToDisplay.filter(trip => trip.status === currentTripStatusFilter);
+    }
+    // Search Filter
+    const searchTerm = document.getElementById('tripSearch').value.toLowerCase();
+    if (searchTerm) {
+      recordsToDisplay = recordsToDisplay.filter(trip => {
+        const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+        const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+        return [
+            trip.id.toString(),
+            trip.origin, trip.destination,
+            trip.leave_at, trip.arrive_at, // Search in times
+            vehicle ? `${vehicle.make} ${vehicle.model} ${vehicle.plate_number}` : '',
+            driver ? `${driver.nom} ${driver.prenom}` : '',
+            tripStatuses[trip.status] || trip.status
+        ].some(field => field && field.toLowerCase().includes(searchTerm));
+      });
+    }
+
+    const start = (currentTripPage - 1) * tripsPerPage;
+    const paginatedRecords = recordsToDisplay.slice(start, start + tripsPerPage);
+    const tripsBody = document.getElementById('tripsBody');
+    tripsBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(trip => {
+      const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+      const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+      // departure_day from API is a full datetime string
+      // leave_at from API is a time string "HH:MM:SS"
+      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${trip.id}">
+                <td class="py-3 px-2">${trip.id}</td>
+                <td class="px-2">${trip.origin}</td>
+                <td class="px-2">${trip.destination}</td>
+                <td class="px-2">${trip.departure_day ? new Date(trip.departure_day).toLocaleDateString() : 'N/A'}</td>
+                <td class="px-2">${trip.leave_at ? formatTimeToHHMM(trip.leave_at) : 'N/A'}</td>
+                <td class="px-2">${trip.return_date ? new Date(trip.return_date).toLocaleDateString() : 'N/A'}</td>
+                <td class="px-2">${trip.arrive_at ? formatTimeToHHMM(trip.arrive_at) : 'N/A'}</td>
+                <td class="px-2">${vehicle ? `${vehicle.make||''} ${vehicle.model||''} (${vehicle.plate_number||'N/A'})`.trim() : 'N/A'}</td>
+                <td class="px-2">${driver ? `${driver.nom||''} ${driver.prenom||''}`.trim() : 'N/A'}</td>
+                <td class="px-2">${tripStatuses[trip.status] || trip.status}</td>
+                <td class="px-2 text-center whitespace-nowrap">
+                  <button onclick="openViewTripModal(${trip.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View"><i data-lucide="eye" class="w-4 h-4 i-b"></i></button>
+                  <button onclick="openEditTripModal(${trip.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit"><i data-lucide="edit-2" class="w-4 h-4 i-b"></i></button>
+                  <button onclick="openConfirmDeleteTripModal(${trip.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete"><i data-lucide="trash-2" class="w-4 h-4 i-b"></i></button>
+                </td></tr>`;
+    }).join('') : `<tr><td colspan="11" class="text-center py-8 text-gray-500">No trip records found.</td></tr>`; // Updated colspan
+
+    lucide.createIcons({ "i-b": { "inline-block": true }}); // For inline icons in buttons
+    document.getElementById('tripsCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + tripsPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
+    renderTripPagination(recordsToDisplay.length);
+  }
+
+  function renderTripPagination(totalRecords) {
+    const totalPages = Math.ceil(totalRecords / tripsPerPage);
+    const paginationContainer = document.getElementById('tripsPagination');
+    paginationContainer.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const createButton = (text, pageNum, isEnabled, isCurrent) => {
+        const button = document.createElement('button');
+        button.innerHTML = text; // Lucide icons can be added here if needed
+        button.className = `px-3 py-1.5 text-sm rounded-md transition-colors focus:outline-none ${
+            !isEnabled ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed" :
+            isCurrent ? "bg-blue-500 text-white border-blue-500 hover:bg-blue-600" :
+            "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        }`;
+        if (isEnabled && !isCurrent && pageNum) {
+            button.onclick = () => { currentTripPage = pageNum; renderTripsTable(); };
+        }
+        button.disabled = !isEnabled;
+        return button;
+    };
+
+    paginationContainer.appendChild(createButton('<i data-lucide="chevron-left" class="w-4 h-4 inline-block"></i> Prev', currentTripPage - 1, currentTripPage > 1));
+    
+    // Simplified pagination display logic
+    const pagesToShow = [];
+    if (totalPages <= 5) {
+        for (let i = 1; i <= totalPages; i++) pagesToShow.push(i);
+    } else {
+        pagesToShow.push(1);
+        if (currentTripPage > 3) pagesToShow.push('...');
+        let startPage = Math.max(2, currentTripPage - 1);
+        let endPage = Math.min(totalPages - 1, currentTripPage + 1);
+        for (let i = startPage; i <= endPage; i++) {
+           if (!pagesToShow.includes(i)) pagesToShow.push(i);
+        }
+        if (currentTripPage < totalPages - 2) pagesToShow.push('...');
+        if (!pagesToShow.includes(totalPages)) pagesToShow.push(totalPages);
+    }
+
+    pagesToShow.forEach(p => {
+        if (p === '...') {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.className = "px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";
+            paginationContainer.appendChild(ellipsis);
+        } else {
+            paginationContainer.appendChild(createButton(p.toString(), p, true, p === currentTripPage));
+        }
+    });
+    paginationContainer.appendChild(createButton('Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block"></i>', currentTripPage + 1, currentTripPage < totalPages));
+    lucide.createIcons();
+  }
+
+  // --- Modal Handling ---
+  function openAddTripModal() {
+    tripToEditId = null;
+    document.getElementById('addTripForm').reset();
+    document.getElementById('tripModalTitle').textContent = "Add New Trip";
+    document.getElementById('tripSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Trip`;
+    document.getElementById('trip_status_form').value = "PLANNED";
+    lucide.createIcons();
+    document.getElementById('addTripModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openEditTripModal(id) {
+    const trip = allTrips.find(t => t.id === id);
+    if (!trip) { showNotification("Trip not found!", "error"); return; }
+    tripToEditId = id;
+    document.getElementById('tripModalTitle').textContent = "Edit Trip Record";
+    document.getElementById('tripSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    lucide.createIcons();
+
+    document.getElementById('tripId_form').value = trip.id;
+    document.getElementById('trip_origin_form').value = trip.origin;
+    document.getElementById('trip_destination_form').value = trip.destination;
+    // departure_day from API is full datetime, leave_at is HH:MM:SS
+    document.getElementById('trip_departure_day_form').value = extractDateFromISO(trip.departure_day);
+    document.getElementById('trip_leave_at_form').value = formatTimeToHHMM(trip.leave_at);
+    // return_date from API is full datetime, arrive_at is HH:MM:SS
+    document.getElementById('trip_return_date_form').value = trip.return_date ? extractDateFromISO(trip.return_date) : '';
+    document.getElementById('trip_arrive_at_form').value = trip.arrive_at ? formatTimeToHHMM(trip.arrive_at) : '';
+
+    document.getElementById('trip_vehicle_id_form').value = trip.vehicle_id || "";
+    document.getElementById('trip_driver_id_form').value = trip.driver_id || "";
+    document.getElementById('trip_status_form').value = trip.status;
+
+    document.getElementById('addTripModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAddTripModal() {
+    document.getElementById('addTripModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    tripToEditId = null;
+  }
+
+  function openViewTripModal(id) {
+    const trip = allTrips.find(t => t.id === id);
+    if (!trip) { showNotification("Trip not found!", "error"); return; }
+    const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+    const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+
+    document.getElementById('view-trip-id').textContent = trip.id;
+    document.getElementById('view-trip-origin').textContent = trip.origin;
+    document.getElementById('view-trip-destination').textContent = trip.destination;
+    document.getElementById('view-trip-departure_day').textContent = trip.departure_day ? new Date(trip.departure_day).toLocaleDateString() : 'N/A';
+    document.getElementById('view-trip-leave_at').textContent = trip.leave_at ? formatTimeToHHMM(trip.leave_at) : 'N/A';
+    document.getElementById('view-trip-return_date').textContent = trip.return_date ? new Date(trip.return_date).toLocaleDateString() : 'N/A';
+    document.getElementById('view-trip-arrive_at').textContent = trip.arrive_at ? formatTimeToHHMM(trip.arrive_at) : 'N/A';
+    document.getElementById('view-trip-vehicle').textContent = vehicle ? `${vehicle.make||''} ${vehicle.model||''} (${vehicle.plate_number||'N/A'})`.trim() : 'N/A';
+    document.getElementById('view-trip-driver').textContent = driver ? `${driver.nom||''} ${driver.prenom||''}`.trim() : 'N/A';
+    document.getElementById('view-trip-status').textContent = tripStatuses[trip.status] || trip.status;
+    document.getElementById('view-trip-created_at').textContent = trip.created_at ? new Date(trip.created_at).toLocaleString() : 'N/A';
+    document.getElementById('view-trip-updated_at').textContent = trip.updated_at ? new Date(trip.updated_at).toLocaleString() : 'N/A';
+
+    document.getElementById('viewTripModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeViewTripModal() { document.getElementById('viewTripModal').classList.add('hidden'); document.body.style.overflow = ''; }
+
+  async function handleTripFormSubmit(event) {
+    event.preventDefault();
+    const departureDayVal = document.getElementById('trip_departure_day_form').value;
+    const leaveAtVal = document.getElementById('trip_leave_at_form').value;
+    const returnDateVal = document.getElementById('trip_return_date_form').value;
+    const arriveAtVal = document.getElementById('trip_arrive_at_form').value;
+
+    if (!departureDayVal || !leaveAtVal) {
+        showNotification("Departure Day and Leave At time are required.", "error");
+        return;
+    }
+    if (returnDateVal && !arriveAtVal) {
+        showNotification("If Return Date is provided, Arrive At time is also required.", "error");
+        return;
+    }
+    if (!returnDateVal && arriveAtVal) {
+        showNotification("If Arrive At time is provided, Return Date is also required.", "error");
+        return;
+    }
+
+    // Construct full ISO datetime strings for departure_day and return_date
+    // Pydantic `datetime` type expects ISO format. `time` type expects "HH:MM:SS" or "HH:MM".
+    const departureDateTimeISO = `${departureDayVal}T${leaveAtVal}:00`; // Add seconds for ISO
+    let returnDateTimeISO = null;
+    if (returnDateVal && arriveAtVal) {
+        returnDateTimeISO = `${returnDateVal}T${arriveAtVal}:00`; // Add seconds for ISO
+        if (new Date(departureDateTimeISO) >= new Date(returnDateTimeISO)) {
+            showNotification("Return date & time must be after departure date & time.", "error");
+            return;
+        }
+    }
+    
+    const data = {
+      origin: document.getElementById('trip_origin_form').value,
+      destination: document.getElementById('trip_destination_form').value,
+      vehicle_id: parseInt(document.getElementById('trip_vehicle_id_form').value) || null,
+      driver_id: parseInt(document.getElementById('trip_driver_id_form').value) || null,
+      status: document.getElementById('trip_status_form').value,
+      departure_day: departureDateTimeISO,
+      leave_at: leaveAtVal, // Send as "HH:MM" or "HH:MM:SS"
+      return_date: returnDateTimeISO,
+      arrive_at: arriveAtVal ? arriveAtVal : null // Send as "HH:MM" or "HH:MM:SS" or null
+    };
+
+    try {
+      const url = tripToEditId ? `${API_BASE_URL}/trip/${tripToEditId}` : `${API_BASE_URL}/trip/`;
+      const method = tripToEditId ? 'PUT' : 'POST';
+      const response = await fetch(url, { method, headers: getAuthHeaders(), body: JSON.stringify(data) });
+      await handleApiResponse(response);
+      showNotification(tripToEditId ? 'Trip updated!' : 'Trip added!', 'success');
+      closeAddTripModal();
+      await fetchTrips();
+    } catch (error) {
+      if (error.message !== "Unauthorized") showNotification(`Failed to save trip: ${error.message}`, 'error');
+    }
+  }
+
+  function openConfirmDeleteTripModal(id) { tripToDeleteId = id; document.getElementById('confirmDeleteTripModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeConfirmDeleteTripModal() { tripToDeleteId = null; document.getElementById('confirmDeleteTripModal').classList.add('hidden'); document.body.style.overflow = ''; }
+  async function confirmDeleteTrip() {
+    if (!tripToDeleteId) return;
+    try {
+      await fetch(`${API_BASE_URL}/trip/${tripToDeleteId}`, { method: 'DELETE', headers: getAuthHeaders(null) });
+      showNotification('Trip deleted!', 'success');
+      closeConfirmDeleteTripModal();
+      await fetchTrips();
+    } catch (error) {
+      if (error.message !== "Unauthorized") showNotification(`Failed to delete trip: ${error.message}`, 'error');
+    }
+  }
+
+  // --- Export Functions ---
+  function getFilteredAndSortedTripsForExport() {
+    let recordsToExport = [...allTrips]; // Start with all trips
+    // Apply Date Filter (same logic as renderTripsTable)
+    if (activeTripDateFilter !== 'all') {
+      const range = (activeTripDateFilter === 'custom' && customTripFilterStartDate && customTripFilterEndDate) ?
+                    { startDate: customTripFilterStartDate, endDate: customTripFilterEndDate } :
+                    getDateRange(activeTripDateFilter);
+      if (range.startDate && range.endDate) {
+        recordsToExport = recordsToExport.filter(trip => {
+          const tripDepartureDateOnly = extractDateFromISO(trip.departure_day);
+          return tripDepartureDateOnly >= range.startDate && tripDepartureDateOnly <= range.endDate;
+        });
+      }
+    }
+    // Apply Status Filter
+    if (currentTripStatusFilter) {
+        recordsToExport = recordsToExport.filter(trip => trip.status === currentTripStatusFilter);
+    }
+    // Apply Search Filter
+    const searchTerm = document.getElementById('tripSearch').value.toLowerCase();
+    if (searchTerm) {
+      recordsToExport = recordsToExport.filter(trip => {
+        const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+        const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+        return [
+            trip.id.toString(), trip.origin, trip.destination,
+            trip.leave_at, trip.arrive_at,
+            vehicle ? `${vehicle.make} ${vehicle.model} ${vehicle.plate_number}` : '',
+            driver ? `${driver.nom} ${driver.prenom}` : '',
+            tripStatuses[trip.status] || trip.status
+        ].some(field => field && field.toLowerCase().includes(searchTerm));
+      });
+    }
+    return recordsToExport;
+  }
+
+  function exportTripsExcel() {
+    const recordsToExport = getFilteredAndSortedTripsForExport();
+    if (recordsToExport.length === 0) { showNotification("No trip data to export.", "info"); return; }
+    const worksheetData = recordsToExport.map(trip => {
+        const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+        const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+        return {
+            ID: trip.id, Origin: trip.origin, Destination: trip.destination,
+            'Departure Day': trip.departure_day ? new Date(trip.departure_day).toLocaleDateString() : 'N/A',
+            'Leave At': trip.leave_at ? formatTimeToHHMM(trip.leave_at) : 'N/A',
+            'Return Date': trip.return_date ? new Date(trip.return_date).toLocaleDateString() : 'N/A',
+            'Arrive At': trip.arrive_at ? formatTimeToHHMM(trip.arrive_at) : 'N/A',
+            Vehicle: vehicle ? `${vehicle.make||''} ${vehicle.model||''} (${vehicle.plate_number||'N/A'})`.trim() : 'N/A',
+            Driver: driver ? `${driver.nom||''} ${driver.prenom||''}`.trim() : 'N/A',
+            Status: tripStatuses[trip.status] || trip.status,
+            Created: trip.created_at ? new Date(trip.created_at).toLocaleString() : 'N/A',
+            Updated: trip.updated_at ? new Date(trip.updated_at).toLocaleString() : 'N/A'
+        };
+    });
+    const ws = XLSX.utils.json_to_sheet(worksheetData);
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Trips");
+    XLSX.writeFile(wb, "trips_export_" + new Date().toISOString().split('T')[0] + ".xlsx");
+    showNotification("Trips exported to Excel.", "success");
+  }
+
+  function exportTripsPDF() {
+    const recordsToExport = getFilteredAndSortedTripsForExport();
+    if (recordsToExport.length === 0) { showNotification("No trip data to export.", "info"); return; }
+    const {jsPDF} = window.jspdf; const doc = new jsPDF('l'); // Landscape
+    doc.setFontSize(16); doc.text('Trip Records', 14, 15);
+    const headers = [['ID', 'Origin', 'Dest.', 'Dep. Day', 'Leave', 'Ret. Date', 'Arrive', 'Vehicle', 'Driver', 'Status']];
+    const data = recordsToExport.map(trip => {
+        const vehicle = allVehiclesForDropdown.find(v => v.id === trip.vehicle_id);
+        const driver = allDriversForDropdown.find(d => d.id === trip.driver_id);
+        return [
+            trip.id, trip.origin, trip.destination,
+            trip.departure_day ? new Date(trip.departure_day).toLocaleDateString() : 'N/A',
+            trip.leave_at ? formatTimeToHHMM(trip.leave_at) : 'N/A',
+            trip.return_date ? new Date(trip.return_date).toLocaleDateString() : 'N/A',
+            trip.arrive_at ? formatTimeToHHMM(trip.arrive_at) : 'N/A',
+            vehicle ? (vehicle.plate_number||'N/A') : 'N/A',
+            driver ? `${(driver.nom||'').charAt(0)}. ${driver.prenom||''}`.trim() : 'N/A', // Shorten driver name for space
+            tripStatuses[trip.status] || trip.status
+        ];
+    });
+    doc.autoTable({
+        head: headers, body: data, startY: 22, theme: 'grid',
+        headStyles:{fillColor:[59,130,246],textColor:255, fontSize: 6.5}, // Adjusted font size
+        bodyStyles: {fontSize: 6},
+        columnStyles: { // Fine-tune column widths (total typical width for A4 landscape is ~280mm)
+            0: { cellWidth: 8 },  // ID
+            1: { cellWidth: 28 }, // Origin
+            2: { cellWidth: 28 }, // Dest
+            3: { cellWidth: 18 }, // Dep. Day
+            4: { cellWidth: 12 }, // Leave
+            5: { cellWidth: 18 }, // Ret. Date
+            6: { cellWidth: 12 }, // Arrive
+            7: { cellWidth: 22 }, // Vehicle
+            8: { cellWidth: 22 }, // Driver
+            9: { cellWidth: 18 }  // Status
+        },
+        margin: {left: 10, right: 10}
+    });
+    doc.save('trips_export_' + new Date().toISOString().split('T')[0] + '.pdf');
+    showNotification("Trips exported to PDF.", "success");
+  }
+</script>
+</body>
+</html>

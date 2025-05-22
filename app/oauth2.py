@@ -2,27 +2,25 @@
 
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
-from typing import Optional # <<< CORRECT IMPORT FOR OPTIONAL
+from typing import Optional
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from . import schemas, database, models # Assuming these are your project's modules
-from .config import settings # Assuming your settings (SECRET_KEY, ALGORITHM, etc.) are here
+from . import schemas, database, models
+from .config import settings
 
-# Make sure these are correctly loaded from your settings
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes # Will now be a clean int
 
-# This URL should point to your actual login/token endpoint
-# If your login endpoint is at /login/ (as in your auth.py router prefix), this is correct.
-# If it's /auth/token or something else, adjust tokenUrl accordingly.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/") # Matches your auth.py
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # Ensure ACCESS_TOKEN_EXPIRE_MINUTES is treated as an integer
+    expire_minutes = int(ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -31,32 +29,28 @@ def verify_access_token(token: str, credentials_exception: HTTPException) -> sch
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
-        # Extract claims that are expected to be in the token based on how it was created
-        # and what schemas.TokenData expects.
-        subject: Optional[str] = payload.get("sub")
+        # Claims from your auth.py: "sub": username, "user_id": int, "status": str
+        subject: Optional[str] = payload.get("sub") 
         user_id_from_token: Optional[int] = payload.get("user_id")
-        username_from_token: Optional[str] = payload.get("username") # If you also include username explicitly
         status_from_token: Optional[str] = payload.get("status")
 
-        # Validate essential claims. 'sub' and 'user_id' are often critical.
-        if subject is None or user_id_from_token is None:
-            # Log this specific issue for easier debugging if it occurs
-            print(f"JWTError: Missing critical claims. Subject: {subject}, UserID: {user_id_from_token}")
+        if subject is None or user_id_from_token is None or status_from_token is None:
+            print(f"JWTError: Missing critical claims. Subject: {subject}, UserID: {user_id_from_token}, Status: {status_from_token}")
             raise credentials_exception
         
-        # Construct and validate the token data using your Pydantic schema
+        # Assuming schemas.TokenData expects 'sub', 'user_id', 'status'
+        # and possibly 'username' if you explicitly add it as a separate claim from 'sub'.
+        # In your current auth.py, 'sub' IS the username.
         token_data = schemas.TokenData(
-            sub=subject,
+            sub=subject,       # This is the username
             user_id=user_id_from_token,
-            username=username_from_token if username_from_token is not None else subject, # Fallback username if not explicit
-            status=status_from_token
+            status=status_from_token,
+            username=subject   # Explicitly setting username to match 'sub' for TokenData
         )
     except JWTError as e:
-        # Log the specific JWT error
         print(f"JWTError during token decoding or validation: {str(e)}")
         raise credentials_exception
     except Exception as e:
-        # Catch any other unexpected errors during token processing
         print(f"Unexpected error during token verification: {str(e)}")
         raise credentials_exception
     
@@ -65,7 +59,7 @@ def verify_access_token(token: str, credentials_exception: HTTPException) -> sch
 def get_current_user(
     token: str = Depends(oauth2_scheme), 
     db: Session = Depends(database.get_db)
-) -> models.User: # Specify that this function returns a SQLAlchemy User model instance
+) -> models.User:
     
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -75,9 +69,7 @@ def get_current_user(
     
     token_data = verify_access_token(token, credentials_exception)
     
-    # token_data.user_id is now correctly accessed (it's already an int or None)
-    if token_data.user_id is None:
-        # This case should ideally be caught by checks within verify_access_token
+    if token_data.user_id is None: # Should be caught earlier, but good safeguard
         print("Error in get_current_user: token_data.user_id is None after verification.")
         raise credentials_exception
 
@@ -85,34 +77,17 @@ def get_current_user(
 
     if user is None:
         print(f"Error in get_current_user: User with ID {token_data.user_id} not found in DB.")
-        raise credentials_exception 
+        raise credentials_exception
     
-    # Optional: Real-time status check after fetching user from DB.
-    # The status in the token is from when the token was created.
-    # if user.status != "active":
-    #     print(f"Access denied for user {user.username} (ID: {user.id}). Current status: {user.status}")
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail=f"User account is currently '{user.status}'. Access restricted."
-    #     )
+    # Security Improvement: Re-check user status on every authenticated request
+    if user.status != "active":
+        print(f"Access denied for user ID {user.id}: Account status is '{user.status}'.")
+        # You might want a more specific message or just the generic credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Account access restricted. Status: {user.status}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
         
     return user
 
-# Example for an optional current user (if you need to check if a user is logged in
-# without throwing an error if they are not, for public pages that have extra features for logged-in users)
-# def get_current_active_user_optional(
-#     token: Optional[str] = Depends(oauth2_scheme_optional), # Define oauth2_scheme_optional if needed
-#     db: Session = Depends(database.get_db)
-# ) -> Optional[models.User]:
-#     if not token:
-#         return None
-#     try:
-#         token_data = verify_access_token(token, HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid optional token")) # Dummy exception
-#         if token_data.user_id is None:
-#             return None
-#         user = db.query(models.User).filter(models.User.id == token_data.user_id).first()
-#         if user and user.status == "active": # Only return if active
-#             return user
-#         return None # User not found or not active
-#     except HTTPException: # Includes JWTError from verify_access_token
-#         return None
