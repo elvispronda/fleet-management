@@ -8,7 +8,7 @@ from ..database import  get_db
 
 router = APIRouter(
     prefix="/panne",
-    tags=["Pannes"],
+    tags=["Panne"],
     # dependencies=[Depends(get_current_active_user)] # Uncomment for global auth
 )
 
@@ -28,7 +28,7 @@ def create_new_panne(
 @router.get("/", response_model=List[schemas.PanneOut])
 def read_all_pannes(
     skip: int = 0,
-    limit: int = Query(default=10, le=200), # Increased limit example
+    limit: int = Query(default=10, le=1000), # Increased limit example
     search: Optional[str] = None,
     vehicle_id: Optional[int] = None, # Filter by vehicle
     category_panne_id: Optional[int] = None, # Filter by category

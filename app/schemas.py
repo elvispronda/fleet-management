@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr,Field, validator #
 from typing import Optional,List
 from datetime import datetime, time
 import enum # For Python enum
+from enum import Enum
 
 ###################################################################################################################
 
@@ -436,21 +437,49 @@ class PaginatedPanneOut(BaseModel):
     items: List[PanneOut]
 ##################################################################################################################
 
+class ReparationStatusEnum(str, Enum):
+    IN_PROGRESS = "Inprogress"
+    COMPLETED = "Completed"
+
 class ReparationBase(BaseModel):
     panne_id: int
-    cost: float
+    cost: Optional[float] = Field(default=0.0)
     receipt: str
     garage_id: int
     repair_date: datetime
-    status: str
+    status: Optional[ReparationStatusEnum] = ReparationStatusEnum.IN_PROGRESS
 
 class ReparationCreate(ReparationBase):
     pass
 
-class ReparationOut(ReparationBase):
-    id: int
+class ReparationUpdate(BaseModel):
+    panne_id: Optional[int] = None
+    cost: Optional[float] = None
+    receipt: Optional[str] = None
+    garage_id: Optional[int] = None
+    repair_date: Optional[datetime] = None
+    status: Optional[ReparationStatusEnum] = None
 
+
+# In your schemas.py
+class PanneOutForReparation(BaseModel): # A minimal schema for Panne
+    id: int
+    description: Optional[str] = None
+    # ... other fields you want from Panne ...
     class Config:
         from_attributes = True
 
+class GarageOutForReparation(BaseModel): # A minimal schema for Garage
+    id: int
+    nom_garage: Optional[str] = None # Or 'name'
+    # ... other fields you want from Garage ...
+    class Config:
+        from_attributes = True
 
+class ReparationResponse(ReparationBase): # Your existing base
+    id: int
+    panne: Optional[PanneOutForReparation] = None   # Add this
+    garage: Optional[GarageOutForReparation] = None # Add this
+
+    class Config:
+        from_attributes = True

@@ -69,6 +69,11 @@ async def get_page(request: Request):
 async def get_page(request: Request):
     return templates.TemplateResponse("reparation.html", {"request": request})
 
+
+@router.get("/copyreparation", response_class=HTMLResponse, name="copyreparation_page_html")
+async def get_page(request: Request):
+    return templates.TemplateResponse("copyreparation.html", {"request": request})
+
 @router.get("/panne", response_class=HTMLResponse, name="panne_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("panne.html", {"request": request})

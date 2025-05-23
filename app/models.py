@@ -10,6 +10,7 @@ from .database import Base
 
 
 
+
 class User(Base):
     __tablename__ = "user"
 
@@ -191,6 +192,10 @@ class Reparation(Base):
     garage_id = Column(Integer, ForeignKey("garage.id"))
     repair_date = Column(TIMESTAMP(timezone=True), nullable=False)
     status = Column(String, default="Inprogress")
+
+    panne = relationship("Panne") # backref can be added in Panne if needed
+    garage = relationship("Garage") # backref can be added in Garage if needed
+    # created_by = relationship("User") # If you add created_by_user_id
 
 #########################################################################################################################
 
