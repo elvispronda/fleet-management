@@ -104,18 +104,47 @@ class CategoryFuelOut(CategoryFuelBase):
 
     class Config:
         from_attributes = True
+
 ##################################################################################################################
 
-class FuelBase(BaseModel):
+class FuelTypeBase(BaseModel):
+    fuel_type: str
+    # description: Optional[str] = None
+
+class FuelTypeCreate(FuelTypeBase):
+    pass
+
+class FuelTypeOut(FuelTypeBase):
+    id: int
+    # Add any other fields you want to return from the API
+
+    class Config:
+        from_attributes = True # or orm_mode = True for older Pydantic
+##################################################################################################################
+
+class FuelBase(BaseModel): # Common fields, including those for DB model
     vehicle_id: int
     fuel_type_id: int
     quantity: float
-    cost: float
+    price_little: float
+    cost: float # This will be in the DB model and in responses
 
-class FuelCreate(FuelBase):
-    pass
+class FuelCreatePayload(BaseModel): # Schema for what the CLIENT SENDS on POST
+    vehicle_id: int
+    fuel_type_id: int
+    quantity: float
+    price_little: float
+    # 'cost' is intentionally omitted here
 
-class FuelOut(FuelBase):
+class FuelUpdatePayload(BaseModel): # Schema for what the CLIENT SENDS on PUT (partial updates)
+    vehicle_id: Optional[int] = None
+    fuel_type_id: Optional[int] = None
+    quantity: Optional[float] = None
+    price_little: Optional[float] = None
+    # 'cost' is omitted, will be recalculated if quantity or price_little changes
+    # If you want to allow manual override of cost on update, add: cost: Optional[float] = None
+
+class FuelOut(FuelBase): # Schema for API RESPONSES
     id: int
     created_at: datetime
 
@@ -210,18 +239,6 @@ class VehicleTransmissionOut(VehicleTransmissionBase):
         from_attributes = True
 ##################################################################################################################
 
-class FuelTypeBase(BaseModel):
-    fuel_type: str
-
-class FuelTypeCreate(FuelTypeBase):
-    pass
-
-class FuelTypeOut(FuelTypeBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-##################################################################################################################
 
 class VehicleTypeBase(BaseModel):
     vehicle_type: str
@@ -374,7 +391,7 @@ class MaintenanceOut(MaintenanceBase):
 ##################################################################################################################
 
 class CategoryPanneBase(BaseModel):
-    nom_panne: str
+    panne_name: str
 
 class CategoryPanneCreate(CategoryPanneBase):
     pass
@@ -386,22 +403,37 @@ class CategoryPanneOut(CategoryPanneBase):
         from_attributes = True
 ##################################################################################################################
 
+# --- Panne Schemas ---
 class PanneBase(BaseModel):
-    vehicle_id: int
-    nom_panne_id: int
-    description: Optional[str] = None
-    status: str
-    panne_date: datetime
+    vehicle_id: int = Field(..., gt=0, description="ID of the associated vehicle")
+    category_panne_id: int = Field(..., gt=0, description="ID of the panne category")
+    description: Optional[str] = Field(None, max_length=500, description="Detailed description of the panne")
+    status: str = Field(default="active", max_length=50, description="Status of the panne (e.g., active, in_progress, resolved)")
+    panne_date: datetime = Field(..., description="Date and time when the panne occurred or was reported")
 
 class PanneCreate(PanneBase):
-    pass
+    pass # Inherits all fields and their validation from PanneBase
+
+class PanneUpdate(BaseModel): # For partial updates, all fields should be optional
+    vehicle_id: Optional[int] = Field(None, gt=0)
+    category_panne_id: Optional[int] = Field(None, gt=0)
+    description: Optional[str] = Field(None, max_length=500)
+    status: Optional[str] = Field(None, max_length=50)
+    panne_date: Optional[datetime] = None
 
 class PanneOut(PanneBase):
     id: int
     created_at: datetime
+    vehicle: Optional[VehicleOut] = None       # To hold related vehicle data
+    category_panne: Optional[CategoryPanneOut] = None # To hold related category data
 
     class Config:
         from_attributes = True
+
+# Schema for paginated response (useful for frontend)
+class PaginatedPanneOut(BaseModel):
+    total_count: int
+    items: List[PanneOut]
 ##################################################################################################################
 
 class ReparationBase(BaseModel):

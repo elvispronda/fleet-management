@@ -39,23 +39,6 @@ class Driver(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 ##################################################################################################################
 
-class FuelType(Base):
-    __tablename__ = "fuel_type"
-    id = Column(Integer, primary_key=True, index=True)
-    fuel_type = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-##################################################################################################################
-
-class Fuel(Base):
-    __tablename__ = "fuel"
-    id = Column(Integer, primary_key=True, index=True)
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id", ondelete="CASCADE"), nullable=False)
-    fuel_type_id = Column(Integer, ForeignKey("fuel_type.id", ondelete="CASCADE"), nullable=False)
-    quantity = Column(Float, nullable=False)
-    cost = Column(Float, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-##################################################################################################################
-
 
 class VehicleType(Base):
     __tablename__ = "vehicle_type"
@@ -80,6 +63,34 @@ class VehicleTransmission(Base):
     id = Column(Integer, primary_key=True, index=True)
     vehicle_transmission = Column(String, nullable=False)
 ##################################################################################################################
+
+
+class FuelType(Base):
+    __tablename__ = "fuel_type" # Singular as established
+    id = Column(Integer, primary_key=True, index=True)
+    fuel_type = Column(String, unique=True, index=True, nullable=False) # The name like "Petrol", "Diesel"
+    # Optional: Add a description or other relevant fields
+    # description = Column(String, nullable=True)
+
+#########################################################################################################################
+
+class Fuel(Base):
+    __tablename__ = "fuel" # This table name can be singular or plural as you prefer
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Foreign Keys now correctly point to singular table names
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id", ondelete="CASCADE"), nullable=False)
+    fuel_type_id = Column(Integer, ForeignKey("fuel_type.id", ondelete="CASCADE"), nullable=False)
+
+    quantity = Column(Float, nullable=False)
+    price_little = Column(Float, nullable=False) # Price per Liter/Unit
+    cost = Column(Float, nullable=False)         # Total cost (quantity * price_little)
+
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    # updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))
+
+#########################################################################################################################
 class Vehicle(Base):
     __tablename__ = "vehicle"
     id = Column(Integer, primary_key=True, index=True)
@@ -142,38 +153,33 @@ class Maintenance(Base):
     maintenance_date = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
-    # Optional: Define relationships for easier data access if needed
-    # These allow you to access related objects like maintenance.vehicle, maintenance.category, etc.
-    # Ensure the related models (Vehicle, CategoryMaintenance, Garage) also have a back_populates if you use these.
-
-    # category = relationship("CategoryMaintenance", back_populates="maintenances") # Example
-    # vehicle = relationship("Vehicle", back_populates="maintenances") # Example
-    # garage = relationship("Garage", back_populates="maintenances") # Example
-
-    # If you want to access maintenance records from the other side (e.g., vehicle.maintenances):
-    # In your Vehicle model:
-    # maintenances = relationship("Maintenance", back_populates="vehicle")
-    # In your CategoryMaintenance model:
-    # maintenances = relationship("Maintenance", back_populates="category")
-    # In your Garage model:
-    # maintenances = relationship("Maintenance", back_populates="garage")
+   
 ##################################################################################################################
 
 class CategoryPanne(Base):
     __tablename__ = "category_panne"
     id = Column(Integer, primary_key=True, index=True)
-    nom_panne = Column(String, nullable=False)
+    panne_name = Column(String, nullable=False)
 ##################################################################################################################
 
 class Panne(Base):
     __tablename__ = "panne"
+
     id = Column(Integer, primary_key=True, index=True)
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
-    nom_panne_id = Column(Integer, ForeignKey("category_panne.id"))
-    description = Column(String, nullable=True)
-    status = Column(String, default="active")
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False) # Make nullable=False explicit
+    category_panne_id = Column(Integer, ForeignKey("category_panne.id"), nullable=False) # Make nullable=False explicit
+    description = Column(String(500), nullable=True) # Added max length matching schema
+    status = Column(String(50), default="active", nullable=False) # Added max length, nullable=False
     panne_date = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+    # Define relationships for joinedload to work effectively for PanneOut
+    # Ensure 'Vehicle' and 'CategoryPanne' are the correct class names of your SQLAlchemy models
+    # and that they have corresponding 'pannes' back_populates if you want bi-directional.
+    vehicle = relationship("Vehicle", lazy="joined") # lazy="joined" can also work like joinedload by default
+    category_panne = relationship("CategoryPanne", lazy="joined")
+
+
 ##################################################################################################################
 
 class Reparation(Base):

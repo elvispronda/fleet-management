@@ -58,7 +58,7 @@
         <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
           <i data-lucide="droplet" class="w-5 h-5"></i><a href="fuel.html">Fuel</a>
         </li>
-        <li id="maintenance-nav-link" class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
+        <li id="maintenance-nav-link" class="flex items-center space-x-3 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-gray-700 p-2 rounded-md transition-colors">
           <i data-lucide="tool" class="w-5 h-5"></i><a href="maintenance.html">Maintenance</a>
         </li>
         <li class="flex items-center space-x-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md transition-colors">
@@ -72,38 +72,38 @@
             </a>
        </div>
     </aside>
-    
+
   <!-- Main content -->
   <main class="flex-1 overflow-auto p-6">
     <!-- Maintenance Table Section -->
     <section id="maintenance-section" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-2 sm:mb-0">Maintenance Records</h2>
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-2 sm:mb-0">Records</h2>
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="openAddMaintenanceModal()" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
+          <button id="openAddMaintenanceModalButton" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i> Add Maintenance
           </button>
-          <input type="text" id="maintenanceSearch" placeholder="Search maintenance..." class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <input type="text" id="maintenanceSearch" placeholder="Search (category, vehicle, receipt...)" class="border dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-black dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto">
         </div>
         <div class="flex flex-wrap gap-2 items-center">
-          <button onclick="exportMaintenancesExcel()" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
-          <button onclick="exportMaintenancesPDF()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
+          <button id="exportExcelButton" class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 text-sm shadow-sm">📄 Excel</button>
+          <button id="exportPdfButton" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 text-sm shadow-sm">🧾 PDF</button>
         </div>
       </div>
 
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <span class="text-sm font-medium mr-2">Filter Maintenance by Date:</span>
-        <button id="maintenance-filter-today" onclick="applyMaintenanceDateFilter('today')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
-        <button id="maintenance-filter-last7" onclick="applyMaintenanceDateFilter('last7days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
-        <button id="maintenance-filter-last30" onclick="applyMaintenanceDateFilter('last30days')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
-        <button id="maintenance-filter-all" onclick="applyMaintenanceDateFilter('all')" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
-        <button id="maintenance-filter-custom-btn" onclick="toggleMaintenanceCustomDateRange()" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
+        <button id="maintenance-filter-today" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Today</button>
+        <button id="maintenance-filter-last7" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 7 Days</button>
+        <button id="maintenance-filter-last30" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Last 30 Days</button>
+        <button id="maintenance-filter-all" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 active">All Time</button>
+        <button id="maintenance-filter-custom-btn" class="date-filter-btn px-3 py-1.5 text-sm border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Custom Range</button>
       </div>
       <div id="maintenanceCustomDateRange" class="mb-4 hidden items-center gap-2 p-3 border dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800/50">
         <input type="date" id="maintenanceCustomStartDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
         <span class="text-sm">to</span>
         <input type="date" id="maintenanceCustomEndDate" class="border dark:border-gray-600 rounded-md px-2 py-1.5 text-sm text-black dark:bg-gray-700 dark:text-white">
-        <button onclick="applyMaintenanceCustomDateFilter()" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
+        <button id="applyCustomDateFilterButton" class="bg-blue-500 text-white px-3 py-1.5 text-sm rounded-md hover:bg-blue-600">Apply</button>
       </div>
 
       <div class="overflow-x-auto">
@@ -113,10 +113,10 @@
               <th class="py-3 px-2 font-semibold">ID</th>
               <th class="px-2 font-semibold">Category</th>
               <th class="px-2 font-semibold">Vehicle</th>
-              <th class="px-2 font-semibold">Cost</th>
+              <th class="px-2 font-semibold">Cost ($)</th>
               <th class="px-2 font-semibold">Receipt</th>
               <th class="px-2 font-semibold">Garage</th>
-              <th class="px-2 font-semibold">Maintenance Date</th>
+              <th class="px-2 font-semibold">Maint. Date</th>
               <th class="px-2 font-semibold text-center">Actions</th>
             </tr>
           </thead>
@@ -134,7 +134,7 @@
     <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
         <div class="flex justify-between items-center">
         <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
-        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
+        <div><div class="text-sm font-semibold" id="userDisplayName">User</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
         </div>
         <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New maintenance logged</p><p class="text-sm text-gray-500 dark:text-gray-400">1 minute ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Vehicle status updated</p><p class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</p></div></div></div></div>
         <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="file-plus-2" class="w-5 h-5 mb-1"></i><span class="text-xs">New Report</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="sliders-horizontal" class="w-5 h-5 mb-1"></i><span class="text-xs">Filters</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="help-circle" class="w-5 h-5 mb-1"></i><span class="text-xs">Help</span></button><button id="quick-logout-btn" class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="log-out" class="w-5 h-5 mb-1"></i><span class="text-xs">Logout</span></button></div></div>
@@ -144,19 +144,19 @@
 
 <!-- Add/Edit Maintenance Modal -->
 <div id="addMaintenanceModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
-  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="maintenanceModalTitle">Add New Maintenance</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Fill in the maintenance details below</p>
         </div>
-        <button onclick="closeAddMaintenanceModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button id="closeAddMaintenanceModalButtonTop" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
       <form id="addMaintenanceForm" class="space-y-4">
-        <input type="hidden" id="maintenanceId_form"> 
+        <input type="hidden" id="maintenanceId_form">
         <div>
           <label for="cat_maintenance_id_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maintenance Category</label>
           <select id="cat_maintenance_id_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
@@ -170,8 +170,8 @@
           </select>
         </div>
         <div>
-          <label for="maintenance_cost_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maintenance Cost</label>
-          <input type="number" step="0.01" id="maintenance_cost_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="0.00">
+          <label for="maintenance_cost_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maintenance Cost ($)</label>
+          <input type="number" step="0.01" id="maintenance_cost_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="e.g., 150.75">
         </div>
         <div>
           <label for="maintenance_receipt_form" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Receipt (e.g., URL or Ref#)</label>
@@ -188,7 +188,7 @@
           <input type="date" id="maintenance_date_form" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
         </div>
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" onclick="closeAddMaintenanceModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+          <button type="button" id="cancelAddMaintenanceModalButton" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
           <button type="submit" id="maintenanceSubmitButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
             <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Maintenance
           </button>
@@ -200,42 +200,67 @@
 
 <!-- View Maintenance Record Modal -->
 <div id="viewMaintenanceModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
-  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Maintenance Record Details</h3>
-        <button onclick="closeViewMaintenanceModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Record Details</h3>
+        <button id="closeViewMaintenanceModalButtonTop" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
           <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
         </button>
       </div>
       <div id="viewMaintenanceDetails" class="space-y-3 text-sm">
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Record ID:</span><span id="view-maintenance-id" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Category:</span><span id="view-maintenance-category" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Vehicle:</span><span id="view-maintenance-vehicle" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Cost:</span><span id="view-maintenance-cost" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Receipt:</span><span id="view-maintenance-receipt" class="view-detail-value col-span-2 break-all"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Garage:</span><span id="view-maintenance-garage" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Maintenance Date:</span><span id="view-maintenance-maintenance_date" class="view-detail-value col-span-2"></span></div>
-        <div class="grid grid-cols-3 gap-x-4"><span class="view-detail-label col-span-1">Created At:</span><span id="view-maintenance-created_at" class="view-detail-value col-span-2"></span></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2">
+            <span class="view-detail-label sm:col-span-1">Record ID:</span><span id="view-maintenance-id" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Category:</span><span id="view-maintenance-category" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Vehicle:</span><span id="view-maintenance-vehicle" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Cost:</span><span id="view-maintenance-cost" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Receipt:</span><span id="view-maintenance-receipt" class="view-detail-value sm:col-span-2 break-all"></span>
+            <span class="view-detail-label sm:col-span-1">Garage:</span><span id="view-maintenance-garage" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Maint. Date:</span><span id="view-maintenance-maintenance_date" class="view-detail-value sm:col-span-2"></span>
+            <span class="view-detail-label sm:col-span-1">Created At:</span><span id="view-maintenance-created_at" class="view-detail-value sm:col-span-2"></span>
+        </div>
       </div>
       <div class="flex justify-end pt-6">
-          <button type="button" onclick="closeViewMaintenanceModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
+          <button type="button" id="closeViewMaintenanceModalButtonBottom" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Close</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Confirmation Modal for Maintenance Deletion -->
-<div id="confirmDeleteMaintenanceModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+<!-- Generic Confirmation Modal -->
+<div id="genericConfirmModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
   <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
     <div class="p-6">
-      <div class="flex justify-between items-center mb-6">
-        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this maintenance record?</p></div>
-        <button onclick="closeConfirmDeleteMaintenanceModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="genericConfirmModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">Confirm Action</h3>
+        <button id="closeGenericConfirmModalButtonX" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
       </div>
+      <p id="genericConfirmModalMessage" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure?</p>
       <div class="flex justify-end gap-3 pt-4">
-        <button onclick="closeConfirmDeleteMaintenanceModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-        <button id="confirmDeleteMaintenanceBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+        <button id="cancelGenericConfirmModalButton" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+        <button id="genericConfirmModalConfirmBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+          {/* Content set by JS */} Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Information/Status Modal -->
+<div id="infoStatusModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6 text-center">
+      <div id="infoStatusModalIconContainer" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+        {/* Icon set by JS */}
+      </div>
+      <h3 id="infoStatusModalTitle" class="text-lg font-medium text-gray-900 dark:text-white mb-2">Status</h3>
+      <div class="mt-2">
+        <p id="infoStatusModalMessage" class="text-sm text-gray-500 dark:text-gray-400">Message.</p>
+      </div>
+      <div class="mt-5 sm:mt-6">
+        <button type="button" id="infoStatusModalOkButton" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">OK</button>
       </div>
     </div>
   </div>
@@ -243,161 +268,230 @@
 
 
 <script>
-  const API_BASE_URL = 'http://localhost:8000'; // Adjust if your API is hosted elsewhere
-  const LOGIN_PAGE_URL = 'login.html'; // <<< CONFIGURE YOUR LOGIN PAGE URL HERE
+  const API_BASE_URL = 'http://localhost:8000';
+  const LOGIN_PAGE_URL = 'login.html';
+
+  // --- Authentication Helper ---
+  function getAuthToken() { return localStorage.getItem('accessToken'); }
+  function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { console.error("JWT Parse Error:", e); return null; }}
+
+  function updateUserInfoDisplay() {
+    const token = getAuthToken();
+    const userDisplayElement = document.getElementById('userDisplayName');
+    if (!userDisplayElement) return;
+    if (token) {
+        const decoded = parseJwt(token);
+        userDisplayElement.textContent = (decoded && decoded.sub) ? decoded.sub : 'User (token issue)';
+    } else {
+        userDisplayElement.textContent = 'Guest';
+    }
+  }
+
+  async function apiRequest(endpoint, method = 'GET', body = null) {
+    const token = getAuthToken();
+    const headers = { 'Content-Type': 'application/json' };
+    const publicEndpoints = ['/category_maintenance/', '/garage/', '/vehicle/'];
+    const isPublic = publicEndpoints.some(publicEp => endpoint.startsWith(publicEp) && method === 'GET');
+
+    if (token && !isPublic) headers['Authorization'] = `Bearer ${token}`;
+    else if (!token && !isPublic && !endpoint.startsWith('/login')) { console.warn(`WARN: Protected endpoint ${endpoint} called without token.`); }
+
+    const config = { method, headers };
+    if (body) config.body = JSON.stringify(body);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+      const responseForJson = response.clone();
+      const responseForText = response.clone();
+
+      if (response.status === 401 && !isPublic && !endpoint.endsWith('/login/')) {
+        openInfoStatusModal("Authentication Error", "Session expired or unauthorized. Please log in again.", "error", 5000);
+        return null;
+      }
+      if (response.status === 204) return true;
+
+      const responseData = await responseForJson.json().catch(async (jsonError) => {
+          const text = await responseForText.text();
+          console.error(`JSON Parse Error for ${endpoint}. Status: ${response.status}. Response (first 100 chars): ${text.substring(0,100)}...`, jsonError);
+          if (!response.ok) {
+              return Promise.reject({ detail: text || `Server error ${response.status}` });
+          }
+          throw new Error(`Invalid JSON response from server (status ${response.status}). Check console for raw response.`);
+      });
+
+      if (!response.ok) {
+        const errorDetail = responseData.detail || (typeof responseData === 'object' ? JSON.stringify(responseData) : responseData) || 'Unknown error from server.';
+        console.error(`API Error for ${endpoint}: ${response.status}`, errorDetail);
+        if (!(response.status === 401 && endpoint.endsWith('/login/'))) {
+            openInfoStatusModal(`API Error: ${response.status}`, errorDetail, "error");
+        }
+        return null;
+      }
+      return responseData;
+    } catch (error) {
+      console.error(`Network/Catch Error during API request to ${endpoint}:`, error);
+      const errorMessage = error.detail || error.message || "A network or request error occurred.";
+      openInfoStatusModal("Request Error", errorMessage, "error");
+      return null;
+    }
+  }
 
   // --- Global Variables for Maintenance ---
   let allMaintenances = [];
   const maintenancesPerPage = 5;
   let currentMaintenancePage = 1;
   let maintenanceToEditId = null;
-  let maintenanceToDeleteId = null;
+
   let activeMaintenanceDateFilter = 'all';
   let customMaintenanceFilterStartDate = null;
   let customMaintenanceFilterEndDate = null;
 
-  // Global lookup data stores
   let allMaintenanceCategories = [];
   let allVehiclesForDropdown = [];
   let allGaragesForDropdown = [];
 
-  // --- Authentication & API Helpers ---
-  function getAuthToken() {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      console.warn("Auth token not found in localStorage.");
-      // If you want to force login immediately if no token is found upon page load:
-      // showNotification("No active session. Redirecting to login.", "error");
-      // window.location.href = LOGIN_PAGE_URL;
-      // return null; // Or throw new Error("No token"); to stop further execution
-    }
-    return token;
+  let currentConfirmAction = null;
+  let currentActionData = null;
+  let infoStatusModalTimeout = null;
+
+  // --- MODAL CONTROL FUNCTIONS ---
+  function closeAddMaintenanceModal() {
+    document.getElementById('addMaintenanceModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    maintenanceToEditId = null;
+    document.getElementById('addMaintenanceForm').reset();
+    const submitButton = document.getElementById('maintenanceSubmitButton');
+    if (submitButton) submitButton.disabled = false; // Re-enable submit button
+  }
+  function closeViewMaintenanceModal() {
+    document.getElementById('viewMaintenanceModal').classList.add('hidden'); document.body.style.overflow = '';
+  }
+  function closeGenericConfirmModal() {
+    document.getElementById('genericConfirmModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    currentConfirmAction = null; currentActionData = null;
+  }
+  function closeInfoStatusModal() {
+    if (infoStatusModalTimeout) { clearTimeout(infoStatusModalTimeout); infoStatusModalTimeout = null; }
+    document.getElementById('infoStatusModal').classList.add('hidden'); document.body.style.overflow = '';
   }
 
-  function getAuthHeaders(contentType = 'application/json') {
-    const token = getAuthToken();
-    const headers = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+  function openGenericConfirmModal(title, message, confirmButtonText, confirmButtonIcon, onConfirmCallback, actionData = null) {
+    document.getElementById('genericConfirmModalTitle').textContent = title;
+    document.getElementById('genericConfirmModalMessage').textContent = message;
+    const confirmBtn = document.getElementById('genericConfirmModalConfirmBtn');
+    confirmBtn.innerHTML = `<i data-lucide="${confirmButtonIcon || 'check-circle'}" class="w-4 h-4 mr-1"></i> ${confirmButtonText || 'Confirm'}`;
+    if(confirmButtonIcon === 'trash-2'){
+        confirmBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600');
     } else {
-      // This case should ideally be handled by redirecting to login
-      // before an API call is made without a token.
-      console.warn("Attempting to make an API call without an auth token.");
+        confirmBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        confirmBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
     }
-    if (contentType) {
-      headers['Content-Type'] = contentType;
-    }
-    return headers;
+    lucide.createIcons();
+    currentConfirmAction = onConfirmCallback; currentActionData = actionData;
+    document.getElementById('genericConfirmModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
   }
 
-  async function handleApiResponse(response) {
-    if (response.status === 401) {
-        // Unauthorized - token likely expired or invalid
-        localStorage.removeItem('authToken'); // Clear the bad token
-        showNotification("Your session has expired or is invalid. Please log in again.", "error");
-        // Redirect to login page
-        setTimeout(() => {
-            window.location.href = LOGIN_PAGE_URL;
-        }, 2500); // Delay to allow user to see notification
-        throw new Error("Unauthorized: Session expired or token invalid. Redirecting to login."); // Stop further processing
-    }
+  function openInfoStatusModal(title, message, type = 'success', autoCloseDelay = 3000) {
+    const modal = document.getElementById('infoStatusModal');
+    const titleEl = document.getElementById('infoStatusModalTitle');
+    const messageEl = document.getElementById('infoStatusModalMessage');
+    const iconContainer = document.getElementById('infoStatusModalIconContainer');
+    const okButton = document.getElementById('infoStatusModalOkButton');
 
-    if (!response.ok) {
-        // Handle other non-successful HTTP statuses
-        let errorMsg = `API Error: ${response.status} ${response.statusText}`;
-        try {
-            const errorData = await response.json(); // Try to parse error details from response body
-            errorMsg += ` - ${errorData.detail || JSON.stringify(errorData)}`;
-        } catch (e) {
-            // If parsing error details fails, use the raw text
-            const textError = await response.text();
-            errorMsg += ` - Server response: ${textError.substring(0, 200)}...`; // Show a snippet
-        }
-        throw new Error(errorMsg);
-    }
+    titleEl.textContent = title; messageEl.textContent = message;
+    if (infoStatusModalTimeout) clearTimeout(infoStatusModalTimeout);
+    iconContainer.innerHTML = '';
+    let iconName = 'info', iconColorClass = 'text-blue-600', bgColorClass = 'bg-blue-100', btnClass = 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
 
-    if (response.status === 204) { // No Content success status
-        return null;
+    if (type === 'success') {
+        iconName = 'check'; iconColorClass = 'text-green-600'; bgColorClass = 'bg-green-100'; btnClass = 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
+    } else if (type === 'error') {
+        iconName = 'x-circle'; iconColorClass = 'text-red-600'; bgColorClass = 'bg-red-100'; btnClass = 'bg-red-600 hover:bg-red-700 focus:ring-red-500';
     }
-
-    // If response is OK and not 204, try to parse as JSON
-    try {
-        return await response.json();
-    } catch (e) {
-        // This case might happen if server sends 200 OK but with non-JSON body
-        const textResponse = await response.text();
-        console.error("API response was 200 OK but not valid JSON. Received:", textResponse);
-        throw new Error("API response was OK but not valid JSON. Check console for details.");
+    iconContainer.className = `mx-auto flex items-center justify-center h-12 w-12 rounded-full ${bgColorClass} mb-4`;
+    iconContainer.innerHTML = `<i data-lucide="${iconName}" class="h-6 w-6 ${iconColorClass}"></i>`;
+    okButton.className = `inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white ${btnClass} focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm`;
+    lucide.createIcons();
+    modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+    if (autoCloseDelay > 0) {
+        infoStatusModalTimeout = setTimeout(() => { closeInfoStatusModal(); }, autoCloseDelay);
     }
   }
 
-  // --- Utility for Notifications ---
-  function showNotification(message, type = 'success') {
-    // Replace with a proper toast notification system for better UX
-    alert(`${type.toUpperCase()}: ${message}`);
-    if (type === 'error') console.error(message);
-    else console.log(message);
-  }
-
-  // --- DOMContentLoaded ---
-  document.addEventListener('DOMContentLoaded', () => {
-      // Critical: Check for token immediately. If not present, redirect to login.
-      // This prevents the page from trying to load data if the user isn't logged in.
-      // if (!getAuthToken()) {
-      //    showNotification("You are not logged in. Redirecting to login page...", "error");
-      //    window.location.href = LOGIN_PAGE_URL;
-      //    return; // Stop further execution of DOMContentLoaded
-      // }
-
-      initializeMaintenanceSection();
+  // --- DOMContentLoaded & Event Listeners ---
+  document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
+      updateUserInfoDisplay();
+      document.getElementById('theme-toggle')?.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
 
-      const themeToggleButton = document.getElementById('theme-toggle');
-      if (themeToggleButton) themeToggleButton.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
-
-      // Modal close listeners
       document.getElementById('addMaintenanceModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddMaintenanceModal(); });
       document.getElementById('viewMaintenanceModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewMaintenanceModal(); });
-      document.getElementById('confirmDeleteMaintenanceModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteMaintenanceModal(); });
+      document.getElementById('genericConfirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeGenericConfirmModal(); });
+      document.getElementById('infoStatusModal').addEventListener('click', e => { if (e.target.id === 'infoStatusModal' || e.target.closest('#infoStatusModalOkButton')) closeInfoStatusModal(); });
 
-      updateActiveNavLink();
-
-      // Logout Buttons
-      const handleLogout = (e) => {
-          e.preventDefault();
-          localStorage.removeItem('authToken');
-          showNotification('You have been logged out.', 'info');
-          window.location.href = LOGIN_PAGE_URL;
-      };
-      const mainLogoutBtn = document.getElementById('global-logout-btn');
-      if (mainLogoutBtn) mainLogoutBtn.addEventListener('click', handleLogout);
-      const quickLogoutBtn = document.getElementById('quick-logout-btn');
-      if (quickLogoutBtn) quickLogoutBtn.addEventListener('click', handleLogout);
-  });
-
-  function updateActiveNavLink() {
-      const currentPageFile = window.location.pathname.split("/").pop() || "maintenance.html"; 
-      document.querySelectorAll('aside nav ul li').forEach(li => {
-          const link = li.querySelector('a');
-          if (link) {
-              const linkFile = link.getAttribute('href').split('#')[0];
-              if (linkFile === currentPageFile) {
-                  li.classList.add('text-blue-600', 'dark:text-blue-400', 'font-semibold', 'bg-blue-50', 'dark:bg-gray-700');
-                  li.classList.remove('text-gray-700', 'dark:text-gray-300');
-              } else {
-                  li.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-semibold', 'bg-blue-50', 'dark:bg-gray-700');
-                  li.classList.add('text-gray-700', 'dark:text-gray-300');
-              }
+      document.getElementById('closeAddMaintenanceModalButtonTop')?.addEventListener('click', closeAddMaintenanceModal);
+      document.getElementById('cancelAddMaintenanceModalButton')?.addEventListener('click', closeAddMaintenanceModal);
+      document.getElementById('closeViewMaintenanceModalButtonTop')?.addEventListener('click', closeViewMaintenanceModal);
+      document.getElementById('closeViewMaintenanceModalButtonBottom')?.addEventListener('click', closeViewMaintenanceModal);
+      document.getElementById('closeGenericConfirmModalButtonX')?.addEventListener('click', closeGenericConfirmModal);
+      
+      document.getElementById('cancelGenericConfirmModalButton')?.addEventListener('click', () => {
+          closeGenericConfirmModal();
+          // Re-enable the main form's submit button if it was part of an add/edit flow
+          const maintenanceSubmitButton = document.getElementById('maintenanceSubmitButton');
+          if (maintenanceSubmitButton) {
+              maintenanceSubmitButton.disabled = false;
           }
       });
-  }
+
+      document.getElementById('genericConfirmModalConfirmBtn').addEventListener('click', async () => {
+        if (typeof currentConfirmAction === 'function') {
+             try {
+                await currentConfirmAction(currentActionData);
+             } catch (error) {
+                console.error("Error in currentConfirmAction:", error);
+                // Potentially re-enable submit button if error is from action and form is still open
+                const maintenanceSubmitButton = document.getElementById('maintenanceSubmitButton');
+                if (maintenanceSubmitButton && !document.getElementById('addMaintenanceModal').classList.contains('hidden')) {
+                     maintenanceSubmitButton.disabled = false;
+                }
+             }
+        }
+        closeGenericConfirmModal();
+      });
+
+      const handleLogout = (e) => {
+          e.preventDefault();
+          localStorage.removeItem('accessToken');
+          openInfoStatusModal('Logged Out', 'You have been successfully logged out.', 'success', 2500);
+          updateUserInfoDisplay(); allMaintenances = [];
+          fetchAndRenderMaintenances(); // Will show empty table or login message
+      };
+      document.getElementById('global-logout-btn')?.addEventListener('click', handleLogout);
+      document.getElementById('quick-logout-btn')?.addEventListener('click', handleLogout);
+
+      document.getElementById('openAddMaintenanceModalButton')?.addEventListener('click', openAddMaintenanceModal);
+      document.getElementById('exportExcelButton')?.addEventListener('click', exportMaintenancesExcel);
+      document.getElementById('exportPdfButton')?.addEventListener('click', exportMaintenancesPDF);
+      document.getElementById('maintenanceSearch').addEventListener('input', () => { currentMaintenancePage = 1; renderMaintenancesTable(); });
+      document.getElementById('maintenance-filter-today')?.addEventListener('click', () => applyMaintenanceDateFilter('today'));
+      document.getElementById('maintenance-filter-last7')?.addEventListener('click', () => applyMaintenanceDateFilter('last7days'));
+      document.getElementById('maintenance-filter-last30')?.addEventListener('click', () => applyMaintenanceDateFilter('last30days'));
+      document.getElementById('maintenance-filter-all')?.addEventListener('click', () => applyMaintenanceDateFilter('all'));
+      document.getElementById('maintenance-filter-custom-btn')?.addEventListener('click', toggleMaintenanceCustomDateRange);
+      document.getElementById('applyCustomDateFilterButton')?.addEventListener('click', applyMaintenanceCustomDateFilter);
+      document.getElementById('addMaintenanceForm').addEventListener('submit', handleMaintenanceFormSubmit);
+
+      await initializeMaintenanceSection();
+  });
 
   // --- Date Helper Functions ---
-  function getISODateString(date) { return date.toISOString().split('T')[0]; }
+  function getISODateString(date) { return new Date(date).toISOString().split('T')[0]; }
   function getDateRange(filterType) {
     const today = new Date(); today.setHours(0,0,0,0);
-    let sD = new Date(today);
-    let eD = new Date(today); eD.setHours(23,59,59,999);
+    let sD = new Date(today); let eD = new Date(today); eD.setHours(23,59,59,999);
     switch(filterType){
       case 'today': break;
       case 'last7days': sD.setDate(today.getDate()-6); break;
@@ -408,63 +502,47 @@
     return {startDate:getISODateString(sD),endDate:getISODateString(eD)};
   }
 
-  // --- Maintenance Section Initialization and Filters ---
+  // --- Initialization & Dropdown Population ---
   async function initializeMaintenanceSection() {
-    try {
-        // Check token again before fetching, in case it was removed by another tab or expired between page load and this call
-        if (!getAuthToken()) {
-            // It's possible handleApiResponse would catch this in fetchMaintenances,
-            // but an early exit can be cleaner.
-            // showNotification("Session lost. Redirecting to login.", "error");
-            // window.location.href = LOGIN_PAGE_URL;
-            // return; // This might be too aggressive if a token can be acquired by a refresh mechanism later
-        }
-        await populateLookupData();
-        populateMaintenanceDropdowns();
-        await fetchMaintenances();
-    } catch (error) {
-        // If the error is due to 401, handleApiResponse should have redirected.
-        // This catch is for other initialization errors.
-        if (!error.message.toLowerCase().includes("unauthorized")) { // Avoid double notification for 401
-            showNotification(`Page initialization failed: ${error.message}`, 'error');
-        }
-    }
-
-    document.getElementById('maintenanceSearch').addEventListener('input', () => { currentMaintenancePage = 1; renderMaintenancesTable(); });
-    document.getElementById('addMaintenanceForm').addEventListener('submit', handleMaintenanceFormSubmit);
-    document.getElementById('confirmDeleteMaintenanceBtn').addEventListener('click', confirmDeleteMaintenance);
+    await populateLookupData(); // Populates dropdowns
+    await fetchAndRenderMaintenances(); // Fetches data and renders table
     setActiveMaintenanceDateFilterButton('all');
   }
 
   async function populateLookupData() {
-    // No changes needed here unless the endpoints themselves require specific handling
-    // handleApiResponse will manage 401 errors for these calls.
-    try {
-        let response = await fetch(`${API_BASE_URL}/category_maintenance/?limit=200`, { headers: getAuthHeaders(null) });
-        allMaintenanceCategories = await handleApiResponse(response);
-
-        response = await fetch(`${API_BASE_URL}/vehicle/?limit=500`, { headers: getAuthHeaders(null) });
-        allVehiclesForDropdown = await handleApiResponse(response);
-        
-        response = await fetch(`${API_BASE_URL}/garage/?limit=200`, { headers: getAuthHeaders(null) });
-        allGaragesForDropdown = await handleApiResponse(response);
-    } catch (error) {
-        console.error("Error populating lookup data:", error);
-        // showNotification is likely called by handleApiResponse if it's an API error like 401
-        // If it's a network error or other, this helps.
-        if (!error.message.toLowerCase().includes("unauthorized")) {
-             showNotification(`Error populating lookup data: ${error.message}`, 'error');
-        }
-        throw error; // Re-throw to be caught by initializeMaintenanceSection if needed
-    }
+    allMaintenanceCategories = await apiRequest('/category_maintenance/?limit=200') || [];
+    allVehiclesForDropdown = await apiRequest('/vehicle/?limit=1000') || [];
+    allGaragesForDropdown = await apiRequest('/garage/?limit=200') || [];
+    populateMaintenanceDropdowns();
   }
 
+  function populateMaintenanceDropdowns() {
+    const populate = (selectId, data, valueField, textField, placeholder) => {
+        const select = document.getElementById(selectId);
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        (data || []).forEach(item => {
+            const option = document.createElement('option');
+            option.value = item[valueField];
+            if (textField.includes('+')) {
+                const fields = textField.split('+').map(f => f.trim());
+                option.textContent = fields.map(f => item[f] || 'N/A').join(' ') + (item.plate_number ? ` (${item.plate_number})` : '');
+            } else {
+                option.textContent = item[textField] || `ID: ${item[valueField]}`;
+            }
+            select.appendChild(option);
+        });
+    };
+    populate('cat_maintenance_id_form', allMaintenanceCategories, 'id', 'cat_maintenance', 'Select Category');
+    populate('vehicle_id_form', allVehiclesForDropdown, 'id', 'make+model', 'Select Vehicle');
+    populate('maintenance_garage_id_form', allGaragesForDropdown, 'id', 'nom_garage', 'Select Garage');
+  }
+
+  // --- Filter Logic ---
   function applyMaintenanceDateFilter(filterType) {
     activeMaintenanceDateFilter = filterType; customMaintenanceFilterStartDate = null; customMaintenanceFilterEndDate = null;
     document.getElementById('maintenanceCustomDateRange').classList.add('hidden');
     setActiveMaintenanceDateFilterButton(filterType); currentMaintenancePage = 1; renderMaintenancesTable();
   }
-
   function toggleMaintenanceCustomDateRange() {
     document.getElementById('maintenanceCustomDateRange').classList.toggle('hidden');
     if (!document.getElementById('maintenanceCustomDateRange').classList.contains('hidden')) {
@@ -473,113 +551,77 @@
         applyMaintenanceDateFilter('all');
     }
   }
-
   function applyMaintenanceCustomDateFilter() {
     const startDate = document.getElementById('maintenanceCustomStartDate').value;
     const endDate = document.getElementById('maintenanceCustomEndDate').value;
-    if (!startDate || !endDate) { showNotification("Please select both start and end dates.", "error"); return; }
-    if (new Date(startDate) > new Date(endDate)) { showNotification("Start date cannot be after end date.", "error"); return; }
-    activeMaintenanceDateFilter = 'custom';
-    customMaintenanceFilterStartDate = startDate;
-    customMaintenanceFilterEndDate = endDate;
-    setActiveMaintenanceDateFilterButton('maintenance-filter-custom-btn');
-    currentMaintenancePage = 1;
-    renderMaintenancesTable();
+    if (!startDate || !endDate) { openInfoStatusModal("Input Error","Please select both start and end dates.", "error"); return; }
+    if (new Date(startDate) > new Date(endDate)) { openInfoStatusModal("Input Error", "Start date cannot be after end date.", "error"); return; }
+    activeMaintenanceDateFilter = 'custom'; customMaintenanceFilterStartDate = startDate; customMaintenanceFilterEndDate = endDate;
+    setActiveMaintenanceDateFilterButton('maintenance-filter-custom-btn'); currentMaintenancePage = 1; renderMaintenancesTable();
   }
-
   function setActiveMaintenanceDateFilterButton(filterId) {
     document.querySelectorAll('#maintenance-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(filterId.startsWith('maintenance-filter-') ? filterId : `maintenance-filter-${filterId}`);
     if (activeBtn) activeBtn.classList.add('active');
   }
 
-  // --- Dropdown Population ---
-  function populateMaintenanceDropdowns() {
-    const categorySelect = document.getElementById('cat_maintenance_id_form');
-    categorySelect.innerHTML = '<option value="">Select Category</option>';
-    (allMaintenanceCategories || []).forEach(cat => { // Add guard for undefined
-      const option = document.createElement('option');
-      option.value = cat.id;
-      option.textContent = cat.cat_maintenance;
-      categorySelect.appendChild(option);
-    });
-
-    const vehicleSelect = document.getElementById('vehicle_id_form');
-    vehicleSelect.innerHTML = '<option value="">Select Vehicle</option>';
-    (allVehiclesForDropdown || []).forEach(v => { // Add guard for undefined
-      const option = document.createElement('option');
-      option.value = v.id;
-      option.textContent = `${v.make || ''} ${v.model || ''} (${v.plate_number || 'N/A'})`.trim();
-      vehicleSelect.appendChild(option);
-    });
-    
-    const garageSelect = document.getElementById('maintenance_garage_id_form');
-    garageSelect.innerHTML = '<option value="">Select Garage</option>';
-    (allGaragesForDropdown || []).forEach(g => { // Add guard for undefined
-      const option = document.createElement('option');
-      option.value = g.id;
-      option.textContent = g.nom_garage;
-      garageSelect.appendChild(option);
-    });
-  }
-
-  // --- CRUD Operations & Table Rendering ---
-  async function fetchMaintenances() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/maintenance/?limit=10000&skip=0`, { headers: getAuthHeaders(null) });
-      // handleApiResponse will throw if !response.ok (including 401)
-      allMaintenances = await handleApiResponse(response) || []; // Ensure allMaintenances is an array
-      currentMaintenancePage = 1;
-      renderMaintenancesTable();
-    } catch (error) {
-      // If error is from handleApiResponse (like 401), it would have already redirected.
-      // This catches other network issues or if handleApiResponse itself had an issue.
-      if (!error.message.toLowerCase().includes("unauthorized")) {
-        showNotification(`Failed to fetch maintenance records: ${error.message}`, 'error');
-      }
-      allMaintenances = []; // Ensure it's an array even on error
-      renderMaintenancesTable(); // Render empty table or error message
+  // --- CRUD & Table Rendering ---
+  async function fetchAndRenderMaintenances(options = {}) {
+    if (!getAuthToken() && !options.isInitialLoadForGuest) { // Avoid fetching if logged out, unless it's an initial display for guests.
+        allMaintenances = []; // Clear data
+        renderMaintenancesTable(); // This will show "Please log in"
+        return;
     }
+
+    const data = await apiRequest(`/maintenance/?limit=10000&skip=0`);
+    allMaintenances = Array.isArray(data) ? data : [];
+
+    const totalPages = Math.ceil(allMaintenances.length / maintenancesPerPage);
+
+    if (options.goToLastPage) {
+        currentMaintenancePage = totalPages > 0 ? totalPages : 1;
+    } else {
+        if (currentMaintenancePage > totalPages) {
+            currentMaintenancePage = totalPages > 0 ? totalPages : 1;
+        }
+        if (allMaintenances.length === 0) {
+            currentMaintenancePage = 1;
+        }
+    }
+    renderMaintenancesTable();
   }
+
 
   function renderMaintenancesTable() {
     let recordsToDisplay = [...allMaintenances];
-    // Apply Date Filter
+    if (!getAuthToken()) { // If not logged in, show message and clear table.
+        document.getElementById('maintenancesBody').innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500">Please log in to view maintenance records.</td></tr>`;
+        document.getElementById('maintenancesCount').textContent = '0 records';
+        document.getElementById('maintenancesPagination').innerHTML = '';
+        return;
+    }
+
     if (activeMaintenanceDateFilter !== 'all') {
-      let range;
-      if (activeMaintenanceDateFilter === 'custom' && customMaintenanceFilterStartDate && customMaintenanceFilterEndDate) {
-        range = { startDate: customMaintenanceFilterStartDate, endDate: customMaintenanceFilterEndDate };
-      } else {
-        range = getDateRange(activeMaintenanceDateFilter);
-      }
+      let range = (activeMaintenanceDateFilter === 'custom' && customMaintenanceFilterStartDate && customMaintenanceFilterEndDate)
+                  ? { startDate: customMaintenanceFilterStartDate, endDate: customMaintenanceFilterEndDate }
+                  : getDateRange(activeMaintenanceDateFilter);
       if (range.startDate && range.endDate) {
         recordsToDisplay = recordsToDisplay.filter(m => {
-          const maintenanceD = getISODateString(new Date(m.maintenance_date));
-          return maintenanceD >= range.startDate && maintenanceD <= range.endDate;
+          const mDate = getISODateString(new Date(m.maintenance_date));
+          return mDate >= range.startDate && mDate <= range.endDate;
         });
       }
     }
-    // Apply Search Filter (Client-side)
     const searchTerm = document.getElementById('maintenanceSearch').value.toLowerCase();
     if (searchTerm) {
       recordsToDisplay = recordsToDisplay.filter(m => {
-        const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_id);
-        const categoryName = category ? category.cat_maintenance.toLowerCase() : '';
-        
-        const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-        const vehicleName = vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || ''})`.toLowerCase() : '';
-        const vehiclePlate = vehicle ? (vehicle.plate_number || '').toLowerCase() : '';
-
-        const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
-        const garageName = garage ? garage.nom_garage.toLowerCase() : '';
-
-        return (m.id.toString().includes(searchTerm)) ||
-               (categoryName.includes(searchTerm)) ||
-               (vehicleName.includes(searchTerm)) ||
-               (vehiclePlate.includes(searchTerm)) ||
-               (m.maintenance_cost.toString().includes(searchTerm)) ||
-               (m.receipt.toLowerCase().includes(searchTerm)) ||
-               (garageName.includes(searchTerm));
+        const cat = (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance.toLowerCase()) || '';
+        const veh = allVehiclesForDropdown.find(v => v.id === m.vehicle_id);
+        const vehText = veh ? `${veh.make||''} ${veh.model||''} ${veh.plate_number||''}`.toLowerCase() : '';
+        const gar = (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage.toLowerCase()) || '';
+        const receipt = m.receipt ? m.receipt.toLowerCase() : '';
+        return (m.id.toString().includes(searchTerm)) || cat.includes(searchTerm) || vehText.includes(searchTerm) ||
+               (m.maintenance_cost.toString().includes(searchTerm)) || receipt.includes(searchTerm) || gar.includes(searchTerm);
       });
     }
 
@@ -588,37 +630,31 @@
     const maintenancesBody = document.getElementById('maintenancesBody');
 
     maintenancesBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(m => {
-      const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_id);
-      const categoryName = category ? category.cat_maintenance : `ID: ${m.cat_maintenance_id}`;
-
-      const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-      const vehicleName = vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || 'N/A'})`.trim() : `ID: ${m.vehicle_id}`;
-      
-      const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
-      const garageName = garage ? garage.nom_garage : `ID: ${m.garage_id}`;
-
-      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${m.id}">
+      const catName = (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance) || `Cat.ID ${m.cat_maintenance_id}`;
+      const veh = allVehiclesForDropdown.find(v => v.id === m.vehicle_id);
+      const vehName = veh ? `${veh.make||'N/A'} ${veh.model||'N/A'} (${veh.plate_number||'N/A'})` : `Veh.ID ${m.vehicle_id}`;
+      const garName = (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage) || `Gar.ID ${m.garage_id}`;
+      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50" data-id="${m.id}">
                 <td class="py-3 px-2">${m.id}</td>
-                <td class="px-2">${categoryName}</td>
-                <td class="px-2">${vehicleName}</td>
-                <td class="px-2">${parseFloat(m.maintenance_cost).toFixed(2)}</td>
-                <td class="px-2 truncate max-w-[100px] sm:max-w-xs" title="${m.receipt}">${m.receipt}</td>
-                <td class="px-2">${garageName}</td>
+                <td class="px-2">${catName}</td>
+                <td class="px-2">${vehName}</td>
+                <td class="px-2 text-right">${parseFloat(m.maintenance_cost).toFixed(2)}</td>
+                <td class="px-2 truncate max-w-[100px] sm:max-w-xs" title="${m.receipt || ''}">${m.receipt || 'N/A'}</td>
+                <td class="px-2">${garName}</td>
                 <td class="px-2">${new Date(m.maintenance_date).toLocaleDateString()}</td>
                 <td class="px-2 text-center whitespace-nowrap">
-                  <button onclick="openViewMaintenanceModal(${m.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View Details"><i data-lucide="eye" class="w-4 h-4 inline-block"></i></button>
-                  <button onclick="openEditMaintenanceModal(${m.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit Record"><i data-lucide="edit-2" class="w-4 h-4 inline-block"></i></button>
-                  <button onclick="openConfirmDeleteMaintenanceModal(${m.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4 inline-block"></i></button>
+                  <button onclick="openViewMaintenanceModal(${m.id})" class="text-green-600 dark:text-green-400 p-1" title="View"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                  <button onclick="openEditMaintenanceModal(${m.id})" class="text-blue-600 dark:text-blue-400 p-1 ml-1" title="Edit"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                  <button onclick="openConfirmDeleteMaintenanceModal(${m.id})" class="text-red-600 dark:text-red-400 p-1 ml-1" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </td></tr>`;
-    }).join('') : `<tr><td colspan="8" class="text-center py-8 text-gray-500">No maintenance records found.</td></tr>`;
-    
+    }).join('') : `<tr><td colspan="8" class="text-center py-8 text-gray-500">No maintenance records found${searchTerm || activeMaintenanceDateFilter !== 'all' ? ' matching criteria' : (allMaintenances.length === 0 ? '. Try adding one!' : '')}.</td></tr>`;
     lucide.createIcons();
     document.getElementById('maintenancesCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + maintenancesPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
     renderMaintenancePagination(recordsToDisplay.length);
   }
 
-  function renderMaintenancePagination(totalRecords) {
-    const totalPages = Math.ceil(totalRecords / maintenancesPerPage);
+  function renderMaintenancePagination(totalRecordsInView) { // totalRecordsInView is after filtering
+    const totalPages = Math.ceil(totalRecordsInView / maintenancesPerPage);
     const paginationContainer = document.getElementById('maintenancesPagination');
     paginationContainer.innerHTML = '';
     if (totalPages <= 1) return;
@@ -628,69 +664,48 @@
     const activeClasses = "bg-blue-500 text-white border border-blue-500 hover:bg-blue-600";
     const disabledClasses = "bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
 
-    const prevButton = document.createElement('button');
-    prevButton.innerHTML = `<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;
-    prevButton.className = `${btnClasses} ${currentMaintenancePage === 1 ? disabledClasses : itemClasses}`;
-    if (currentMaintenancePage > 1) prevButton.onclick = () => { currentMaintenancePage--; renderMaintenancesTable(); };
-    else prevButton.disabled = true;
-    paginationContainer.appendChild(prevButton);
+    const createButton = (text, lucideIcon, pageNum, isDisabled = false, isActive = false) => {
+        const button = document.createElement('button');
+        if (lucideIcon) button.innerHTML = `<i data-lucide="${lucideIcon}" class="w-4 h-4 inline-block mr-1"></i> `;
+        button.appendChild(document.createTextNode(text));
+        button.className = `${btnClasses} ${isDisabled ? disabledClasses : (isActive ? activeClasses : itemClasses)}`;
+        if (!isDisabled) button.onclick = () => { currentMaintenancePage = pageNum; renderMaintenancesTable(); }; // renderMaintenancesTable will use the new page
+        else button.disabled = true;
+        return button;
+    };
+    paginationContainer.appendChild(createButton('Prev', 'chevron-left', currentMaintenancePage - 1, currentMaintenancePage === 1));
 
-    const pagesToShow = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pagesToShow.push(i);
-    } else {
-      pagesToShow.push(1);
-      if (currentMaintenancePage > 3) pagesToShow.push('...');
-      for (let i = Math.max(2, currentMaintenancePage - 1); i <= Math.min(totalPages - 1, currentMaintenancePage + 1); i++) {
-        if (!pagesToShow.includes(i)) pagesToShow.push(i);
-      }
-      if (currentMaintenancePage < totalPages - 2) pagesToShow.push('...');
-      if (!pagesToShow.includes(totalPages)) pagesToShow.push(totalPages);
-    }
+    const pageInfo = document.createElement('span');
+    pageInfo.className = "px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";
+    pageInfo.textContent = `Page ${currentMaintenancePage} of ${totalPages}`;
+    paginationContainer.appendChild(pageInfo);
 
-    pagesToShow.forEach(pageNum => {
-      if (pageNum === '...') {
-        const ellipsis = document.createElement('span');
-        ellipsis.textContent = '...';
-        ellipsis.className = "px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";
-        paginationContainer.appendChild(ellipsis);
-      } else {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = pageNum;
-        pageButton.className = `${btnClasses} ${pageNum === currentMaintenancePage ? activeClasses : itemClasses}`;
-        pageButton.onclick = () => { currentMaintenancePage = pageNum; renderMaintenancesTable(); };
-        paginationContainer.appendChild(pageButton);
-      }
-    });
-
-    const nextButton = document.createElement('button');
-    nextButton.innerHTML = `Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;
-    nextButton.className = `${btnClasses} ${currentMaintenancePage === totalPages ? disabledClasses : itemClasses}`;
-    if (currentMaintenancePage < totalPages) nextButton.onclick = () => { currentMaintenancePage++; renderMaintenancesTable(); };
-    else nextButton.disabled = true;
-    paginationContainer.appendChild(nextButton);
+    paginationContainer.appendChild(createButton('Next', 'chevron-right', currentMaintenancePage + 1, currentMaintenancePage === totalPages));
     lucide.createIcons();
   }
 
-  // --- Modal Handling (Add/Edit/View/Delete) ---
+  // --- Modal Operations ---
   function openAddMaintenanceModal() {
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to add records.", "error"); return; }
     maintenanceToEditId = null;
     document.getElementById('addMaintenanceForm').reset();
-    document.getElementById('maintenanceModalTitle').textContent = "Add New Maintenance";
-    document.getElementById('maintenanceSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Maintenance`;
+    document.getElementById('maintenanceModalTitle').textContent = "Add New Maintenance Record";
+    document.getElementById('maintenanceSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add Record`;
+    document.getElementById('maintenanceSubmitButton').disabled = false; // Ensure button is enabled
     lucide.createIcons();
     document.getElementById('addMaintenanceModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
 
-  function openEditMaintenanceModal(id) {
-    const m = allMaintenances.find(rec => rec.id === id);
-    if (!m) { showNotification("Maintenance record not found for editing!", "error"); return; }
+  async function openEditMaintenanceModal(id) {
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to edit records.", "error"); return; }
+    const m = await apiRequest(`/maintenance/${id}`);
+    if (!m) { openInfoStatusModal("Error","Could not fetch record for editing.", "error"); return; }
     maintenanceToEditId = id;
     document.getElementById('maintenanceModalTitle').textContent = "Edit Maintenance Record";
-    document.getElementById('maintenanceSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    document.getElementById('maintenanceSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4 mr-1"></i> Save Changes`;
+    document.getElementById('maintenanceSubmitButton').disabled = false; // Ensure button is enabled
     lucide.createIcons();
-
     document.getElementById('maintenanceId_form').value = m.id;
     document.getElementById('cat_maintenance_id_form').value = m.cat_maintenance_id;
     document.getElementById('vehicle_id_form').value = m.vehicle_id;
@@ -698,259 +713,183 @@
     document.getElementById('maintenance_receipt_form').value = m.receipt;
     document.getElementById('maintenance_garage_id_form').value = m.garage_id;
     document.getElementById('maintenance_date_form').value = new Date(m.maintenance_date).toISOString().split('T')[0];
-
     document.getElementById('addMaintenanceModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeAddMaintenanceModal() {
-    document.getElementById('addMaintenanceModal').classList.add('hidden');
-    document.body.style.overflow = '';
-    maintenanceToEditId = null;
-  }
-
-  function openViewMaintenanceModal(id) {
-    const m = allMaintenances.find(rec => rec.id === id);
-    if (!m) { showNotification("Maintenance record not found for viewing!", "error"); return; }
-
-    const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_id);
-    const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-    const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
+  async function openViewMaintenanceModal(id) {
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to view records.", "error"); return; }
+    const m = await apiRequest(`/maintenance/${id}`);
+    if (!m) { openInfoStatusModal("Error", "Could not fetch record details.", "error"); return; }
+    const catName = (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance) || `Cat.ID ${m.cat_maintenance_id}`;
+    const veh = allVehiclesForDropdown.find(v => v.id === m.vehicle_id);
+    const vehName = veh ? `${veh.make||'N/A'} ${veh.model||'N/A'} (${veh.plate_number||'N/A'})` : `Veh.ID ${m.vehicle_id}`;
+    const garName = (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage) || `Gar.ID ${m.garage_id}`;
 
     document.getElementById('view-maintenance-id').textContent = m.id;
-    document.getElementById('view-maintenance-category').textContent = category ? category.cat_maintenance : 'N/A';
-    document.getElementById('view-maintenance-vehicle').textContent = vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || 'N/A'})`.trim() : 'N/A';
+    document.getElementById('view-maintenance-category').textContent = catName;
+    document.getElementById('view-maintenance-vehicle').textContent = vehName;
     document.getElementById('view-maintenance-cost').textContent = `$${parseFloat(m.maintenance_cost).toFixed(2)}`;
-    document.getElementById('view-maintenance-receipt').textContent = m.receipt;
-    document.getElementById('view-maintenance-garage').textContent = garage ? garage.nom_garage : 'N/A';
+    document.getElementById('view-maintenance-receipt').textContent = m.receipt || 'N/A';
+    document.getElementById('view-maintenance-garage').textContent = garName;
     document.getElementById('view-maintenance-maintenance_date').textContent = new Date(m.maintenance_date).toLocaleDateString();
     document.getElementById('view-maintenance-created_at').textContent = new Date(m.created_at).toLocaleString();
-
     document.getElementById('viewMaintenanceModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeViewMaintenanceModal() {
-    document.getElementById('viewMaintenanceModal').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
   async function handleMaintenanceFormSubmit(event) {
     event.preventDefault();
-    // Validate form inputs
-    const catMaintenanceId = document.getElementById('cat_maintenance_id_form').value;
-    const vehicleId = document.getElementById('vehicle_id_form').value;
-    const cost = document.getElementById('maintenance_cost_form').value;
-    const receipt = document.getElementById('maintenance_receipt_form').value;
-    const garageId = document.getElementById('maintenance_garage_id_form').value;
-    const maintenanceDate = document.getElementById('maintenance_date_form').value;
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in.", "error"); return; }
 
-    if (!catMaintenanceId || !vehicleId || !cost || !receipt || !garageId || !maintenanceDate) {
-      showNotification("Please fill all required fields.", "error");
-      return;
-    }
-    if (isNaN(parseFloat(cost))) {
-      showNotification("Maintenance cost must be a valid number.", "error");
-      return;
-    }
+    const submitButton = document.getElementById('maintenanceSubmitButton');
+    if (submitButton.disabled) return; // Already processing
+    submitButton.disabled = true; // Disable to prevent double clicks
 
-    const data = {
-      cat_maintenance_id: parseInt(catMaintenanceId),
-      vehicle_id: parseInt(vehicleId),
-      maintenance_cost: parseFloat(cost),
-      receipt: receipt,
-      garage_id: parseInt(garageId),
-      maintenance_date: new Date(maintenanceDate).toISOString()
+    const formData = {
+      cat_maintenance_id: parseInt(document.getElementById('cat_maintenance_id_form').value),
+      vehicle_id: parseInt(document.getElementById('vehicle_id_form').value),
+      maintenance_cost: parseFloat(document.getElementById('maintenance_cost_form').value),
+      receipt: document.getElementById('maintenance_receipt_form').value.trim(),
+      garage_id: parseInt(document.getElementById('maintenance_garage_id_form').value),
+      maintenance_date: document.getElementById('maintenance_date_form').value
     };
-
-    try {
-      let response;
-      let successMessage;
-      if (maintenanceToEditId) { // Editing existing record
-        response = await fetch(`${API_BASE_URL}/maintenance/${maintenanceToEditId}`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(data)
-        });
-        successMessage = 'Maintenance record updated successfully!';
-      } else { // Creating new record
-        response = await fetch(`${API_BASE_URL}/maintenance/`, {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(data)
-        });
-        successMessage = 'Maintenance record added successfully!';
-      }
-      // handleApiResponse will throw an error if !response.ok (e.g. 401, 422, 500)
-      await handleApiResponse(response);
-      showNotification(successMessage, 'success');
-      closeAddMaintenanceModal();
-      await fetchMaintenances(); // Refresh table data
-    } catch (error) {
-      // If the error is 401, handleApiResponse would have already started the redirect.
-      // We only show notification for other errors here.
-      if (!error.message.toLowerCase().includes("unauthorized")) {
-        showNotification(`Failed to save maintenance record: ${error.message}`, 'error');
-      }
+    if (!formData.cat_maintenance_id || !formData.vehicle_id || isNaN(formData.maintenance_cost) || !formData.receipt || !formData.garage_id || !formData.maintenance_date) {
+      openInfoStatusModal("Validation Error", "Please fill all required fields correctly.", "error");
+      submitButton.disabled = false; // Re-enable on validation error
+      return;
     }
+    if (formData.maintenance_cost < 0) {
+        openInfoStatusModal("Validation Error", "Maintenance cost cannot be negative.", "error");
+        submitButton.disabled = false; return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    if (formData.maintenance_date > today) {
+        openInfoStatusModal("Validation Error", "Maintenance date cannot be in the future.", "error");
+        submitButton.disabled = false; return;
+    }
+    formData.maintenance_date = new Date(formData.maintenance_date).toISOString();
+
+    const actionType = maintenanceToEditId ? "update" : "add";
+    openGenericConfirmModal(
+        maintenanceToEditId ? "Confirm Update" : "Confirm Add",
+        `Are you sure you want to ${actionType} this maintenance record?`,
+        maintenanceToEditId ? "Update" : "Add", maintenanceToEditId ? "save" : "plus-circle",
+        async (data) => { // This is currentConfirmAction
+            let result;
+            try {
+                if (maintenanceToEditId) {
+                    result = await apiRequest(`/maintenance/${maintenanceToEditId}`, 'PUT', data);
+                } else {
+                    result = await apiRequest('/maintenance/', 'POST', data);
+                }
+
+                if (result) {
+                    openInfoStatusModal("Success", `Maintenance record ${actionType}d successfully!`, "success");
+                    closeAddMaintenanceModal(); // This will re-enable submitButton
+                    await fetchAndRenderMaintenances({ goToLastPage: actionType === 'add' });
+                } else {
+                    // API request failed (e.g. 4xx, 5xx, but not auth 401 which is handled in apiRequest)
+                    // openInfoStatusModal already shown by apiRequest for non-401 errors
+                    if (submitButton) submitButton.disabled = false; // Re-enable on failure
+                }
+            } catch (error) {
+                console.error("Error processing maintenance form action:", error);
+                openInfoStatusModal("Processing Error", `An error occurred: ${error.message || 'Unknown error'}.`, "error");
+                if (submitButton) submitButton.disabled = false; // Re-enable on catch
+            }
+        },
+        formData
+    );
+    // If user cancels generic confirm, the cancelGenericConfirmModalButton listener will re-enable submitButton.
+    // If openGenericConfirmModal itself is not shown due to some prior error (should not happen with current flow)
+    // then submitButton might remain disabled. But validation should catch issues before this.
   }
 
   function openConfirmDeleteMaintenanceModal(id) {
-    maintenanceToDeleteId = id;
-    document.getElementById('confirmDeleteMaintenanceModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeConfirmDeleteMaintenanceModal() {
-    maintenanceToDeleteId = null;
-    document.getElementById('confirmDeleteMaintenanceModal').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-  async function confirmDeleteMaintenance() {
-    if (!maintenanceToDeleteId) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/maintenance/${maintenanceToDeleteId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(null)
-      });
-      // handleApiResponse will throw an error if !response.ok (e.g. 401, 404)
-      // and will return null for 204 No Content.
-      await handleApiResponse(response);
-      showNotification('Maintenance record deleted successfully!', 'success');
-      closeConfirmDeleteMaintenanceModal();
-      
-      // Optimistically remove from local array or refetch
-      // To be absolutely sure, refetching is safer:
-      await fetchMaintenances(); 
-      // If you want to adjust pagination without full refetch:
-      // allMaintenances = allMaintenances.filter(m => m.id !== maintenanceToDeleteId);
-      // const currentItemsOnPage = allMaintenances.slice((currentMaintenancePage - 1) * maintenancesPerPage, currentMaintenancePage * maintenancesPerPage).length;
-      // if (paginatedRecords.length === 1 && currentMaintenancePage > 1 && totalRecords > 0) { // Check logic here
-      //   if (document.getElementById('maintenancesBody').childElementCount === 1 && currentMaintenancePage > 1) { // A bit simplified
-      //      currentMaintenancePage--;
-      //   }
-      // }
-      // renderMaintenancesTable();
-
-    } catch (error) {
-      if (!error.message.toLowerCase().includes("unauthorized")) {
-        showNotification(`Failed to delete maintenance record: ${error.message}`, 'error');
-      }
-    }
+      if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to delete.", "error"); return; }
+      openGenericConfirmModal(
+        "Confirm Deletion", `Are you sure you want to delete maintenance record ID: ${id}? This action cannot be undone.`,
+        "Delete", "trash-2",
+        async (recordIdToDelete) => {
+            const result = await apiRequest(`/maintenance/${recordIdToDelete}`, 'DELETE');
+            if (result === true) {
+                openInfoStatusModal("Success", `Maintenance record ID: ${recordIdToDelete} deleted successfully.`, "success");
+                await fetchAndRenderMaintenances(); // Re-fetches and re-renders, adjusting page if needed
+            }
+        },
+        id
+      );
   }
 
   // --- Export Functions ---
-  function getFilteredAndSortedMaintenancesForExport() {
+  function getFilteredMaintenancesForExport() {
     let recordsToExport = [...allMaintenances];
     if (activeMaintenanceDateFilter !== 'all') {
-      let range = (activeMaintenanceDateFilter === 'custom' && customMaintenanceFilterStartDate && customMaintenanceFilterEndDate) ?
-                  {startDate:customMaintenanceFilterStartDate,endDate:customMaintenanceFilterEndDate} :
-                  getDateRange(activeMaintenanceDateFilter);
+      let range = (activeMaintenanceDateFilter === 'custom' && customMaintenanceFilterStartDate && customMaintenanceFilterEndDate)
+                  ? { startDate: customMaintenanceFilterStartDate, endDate: customMaintenanceFilterEndDate }
+                  : getDateRange(activeMaintenanceDateFilter);
       if (range.startDate && range.endDate) {
         recordsToExport = recordsToExport.filter(m => {
-          const maintenanceD = getISODateString(new Date(m.maintenance_date));
-          return maintenanceD >= range.startDate && maintenanceD <= range.endDate;
+          const mDate = getISODateString(new Date(m.maintenance_date));
+          return mDate >= range.startDate && mDate <= range.endDate;
         });
       }
     }
     const searchTerm = document.getElementById('maintenanceSearch').value.toLowerCase();
     if (searchTerm) {
       recordsToExport = recordsToExport.filter(m => {
-        const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_id);
-        const categoryName = category ? category.cat_maintenance.toLowerCase() : '';
-        const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-        const vehicleName = vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || ''})`.toLowerCase() : '';
-        const vehiclePlate = vehicle ? (vehicle.plate_number || '').toLowerCase() : '';
-        const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
-        const garageName = garage ? garage.nom_garage.toLowerCase() : '';
-
-        return (m.id.toString().includes(searchTerm)) ||
-               (categoryName.includes(searchTerm)) ||
-               (vehicleName.includes(searchTerm)) ||
-               (vehiclePlate.includes(searchTerm)) ||
-               (m.maintenance_cost.toString().includes(searchTerm)) ||
-               (m.receipt.toLowerCase().includes(searchTerm)) ||
-               (garageName.includes(searchTerm));
+        const cat = (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance.toLowerCase()) || '';
+        const veh = allVehiclesForDropdown.find(v => v.id === m.vehicle_id);
+        const vehText = veh ? `${veh.make||''} ${veh.model||''} ${veh.plate_number||''}`.toLowerCase() : '';
+        const gar = (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage.toLowerCase()) || '';
+        const receipt = m.receipt ? m.receipt.toLowerCase() : '';
+        return (m.id.toString().includes(searchTerm)) || cat.includes(searchTerm) || vehText.includes(searchTerm) ||
+               (m.maintenance_cost.toString().includes(searchTerm)) || receipt.includes(searchTerm) || gar.includes(searchTerm);
       });
     }
     return recordsToExport;
   }
 
   function exportMaintenancesExcel() {
-    const recordsToExport = getFilteredAndSortedMaintenancesForExport();
-    if (recordsToExport.length === 0) {
-        showNotification("No data to export.", "info");
-        return;
-    }
-    const worksheetData = recordsToExport.map(m => {
-        const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_.id);
-        const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-        const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
-        return {
-            ID: m.id,
-            Category: category ? category.cat_maintenance : m.cat_maintenance_id,
-            Vehicle: vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || 'N/A'})`.trim() : m.vehicle_id,
-            Cost: parseFloat(m.maintenance_cost).toFixed(2),
-            Receipt: m.receipt,
-            Garage: garage ? garage.nom_garage : m.garage_id,
-            'Maintenance Date': new Date(m.maintenance_date).toLocaleDateString(),
-            'Created At': new Date(m.created_at).toLocaleString()
-        };
-    });
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Maintenances");
-    XLSX.writeFile(workbook, "maintenances_export.xlsx");
-    showNotification("Data exported to Excel.", "success");
+    const records = getFilteredMaintenancesForExport();
+    if (records.length === 0) { openInfoStatusModal("Info", "No data to export based on current filters.", "info"); return; }
+    const data = records.map(m => ({
+        ID: m.id,
+        Category: (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance) || `Cat.ID ${m.cat_maintenance_id}`,
+        Vehicle: ((v=allVehiclesForDropdown.find(ve=>ve.id===m.vehicle_id)) => v ? `${v.make||'N/A'} ${v.model||'N/A'} (${v.plate_number||'N/A'})` : `Veh.ID ${m.vehicle_id}`)(),
+        Cost: parseFloat(m.maintenance_cost).toFixed(2),
+        Receipt: m.receipt,
+        Garage: (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage) || `Gar.ID ${m.garage_id}`,
+        'Maintenance Date': new Date(m.maintenance_date).toLocaleDateString(),
+        'Created At': new Date(m.created_at).toLocaleString()
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Maintenances");
+    XLSX.writeFile(wb, "maintenances_export.xlsx");
+    openInfoStatusModal("Success", "Data exported to Excel.", "success");
   }
 
   function exportMaintenancesPDF() {
-    const recordsToExport = getFilteredAndSortedMaintenancesForExport();
-    if (recordsToExport.length === 0) {
-        showNotification("No data to export.", "info");
-        return;
-    }
-    const {jsPDF} = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Maintenance Records', 14, 15);
-
-    const headers = [['ID', 'Category', 'Vehicle', 'Cost', 'Receipt', 'Garage', 'Maint. Date', 'Created At']];
-    const data = recordsToExport.map(m => {
-        const category = (allMaintenanceCategories || []).find(cat => cat.id === m.cat_maintenance_id);
-        const vehicle = (allVehiclesForDropdown || []).find(v => v.id === m.vehicle_id);
-        const garage = (allGaragesForDropdown || []).find(g => g.id === m.garage_id);
-        return [
-            m.id,
-            category ? category.cat_maintenance : m.cat_maintenance_id,
-            vehicle ? `${vehicle.make || ''} ${vehicle.model || ''} (${vehicle.plate_number || 'N/A'})`.trim() : m.vehicle_id,
-            parseFloat(m.maintenance_cost).toFixed(2),
-            m.receipt,
-            garage ? garage.nom_garage : m.garage_id,
-            new Date(m.maintenance_date).toLocaleDateString(),
-            new Date(m.created_at).toLocaleDateString()
-        ];
-    });
-
-    doc.autoTable({
-        head: headers,
-        body: data,
-        startY: 25,
-        theme: 'grid',
-        headStyles: {fillColor: [59,130,246], textColor: 255},
-        columnStyles: {
-            2: { cellWidth: 'auto' }, // Vehicle column
-            4: { cellWidth: 'auto' }  // Receipt column
-        },
-        didParseCell: function (data) {
-            if ((data.column.dataKey === 2 || data.column.dataKey === 4) && data.cell.raw) { // Check data.cell.raw
-                 if (typeof data.cell.raw === 'string' && data.cell.raw.length > 25) {
-                    data.cell.text = data.cell.raw.substring(0, 22) + '...';
-                }
-            }
-        }
-    });
+    const records = getFilteredMaintenancesForExport();
+    if (records.length === 0) { openInfoStatusModal("Info", "No data to export based on current filters.", "info"); return; }
+    const {jsPDF} = window.jspdf; const doc = new jsPDF('l');
+    doc.setFontSize(18); doc.text('Maintenance Records', 14, 15);
+    const headers = [['ID', 'Category', 'Vehicle (Plate)', 'Cost ($)', 'Receipt (Ref)', 'Garage', 'Maint. Date']];
+    const data = records.map(m => [
+        m.id,
+        (allMaintenanceCategories.find(c => c.id === m.cat_maintenance_id)?.cat_maintenance) || `Cat.ID ${m.cat_maintenance_id}`,
+        (allVehiclesForDropdown.find(v => v.id === m.vehicle_id)?.plate_number) || `Veh.ID ${m.vehicle_id}`,
+        parseFloat(m.maintenance_cost).toFixed(2),
+        m.receipt ? m.receipt.substring(0,20)+(m.receipt.length > 20 ? '...' : '') : 'N/A',
+        (allGaragesForDropdown.find(g => g.id === m.garage_id)?.nom_garage) || `Gar.ID ${m.garage_id}`,
+        new Date(m.maintenance_date).toLocaleDateString()
+    ]);
+    doc.autoTable({ head: headers, body: data, startY: 25, theme:'grid', headStyles:{fillColor:[59,130,246],textColor:255},
+                    columnStyles: {0:{cellWidth:10}, 3:{halign:'right', cellWidth:20}, 4:{cellWidth:35}} });
     doc.save('maintenances_export.pdf');
-    showNotification("Data exported to PDF.", "success");
+    openInfoStatusModal("Success", "Data exported to PDF.", "success");
   }
 </script>
 </body>

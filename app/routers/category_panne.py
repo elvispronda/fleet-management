@@ -20,12 +20,11 @@ def create_category_panne(cat_panne : schemas.CategoryPanneCreate, db:Session = 
 ############################################################################################################################
 
 @router.get("/", response_model = List[schemas.CategoryPanneOut])
-def get_panne_categories(db:Session = Depends(get_db), current_user : str = Depends(oauth2.get_current_user),
-              limit : int = 5, skip : int = 0, search :Optional[str] = ""):
+def get_panne_categories(db:Session = Depends(get_db),limit : int = 20, skip : int = 0, search :Optional[str] = ""):
               
   
     ##filter all panne categories at the same time
-    users = db.query(models.CategoryPanne).filter(models.CategoryPanne.nom_panne.contains(search)).limit(limit).offset(skip).all()
+    users = db.query(models.CategoryPanne).filter(models.CategoryPanne.panne_name.contains(search)).limit(limit).offset(skip).all()
     return users 
 ############################################################################################################################
 
