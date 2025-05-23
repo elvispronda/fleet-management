@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
@@ -134,7 +135,7 @@
     <aside class="w-1/5 bg-white dark:bg-gray-800 p-4 space-y-6 shadow-md hidden lg:block flex-shrink-0">
         <div class="flex justify-between items-center">
         <button id="theme-toggle" class="text-xl p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌙</button>
-        <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
+        <div><div class="text-sm font-semibold" id="userDisplayName">User</div><div class="text-xs text-gray-500 dark:text-gray-300">Admin</div></div>
         </div>
         <div><h4 class="font-bold mb-4 text-lg">Recent Updates</h4><div class="flex flex-col space-y-6 relative"><div class="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-500"></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">New vehicle added</p><p class="text-sm text-gray-500 dark:text-gray-400">15 minutes ago</p></div></div><div class="flex items-start space-x-4 relative"><div class="w-3 h-3 bg-blue-500 rounded-full z-10 mt-1.5 ml-4"></div><div class="ml-2"><p class="font-medium">Vehicle maintenance due</p><p class="text-sm text-gray-500 dark:text-gray-400">2 hours ago</p></div></div></div></div>
         <div class="mt-8"><h4 class="font-bold mb-4 text-lg">Quick Actions</h4><div class="grid grid-cols-2 gap-2"><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="car-front" class="w-5 h-5 mb-1"></i><span class="text-xs">View Fleet</span></button><button class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center hover:bg-gray-200 dark:hover:bg-gray-600"><i data-lucide="search" class="w-5 h-5 mb-1"></i><span class="text-xs">Find Vehicle</span></button></div></div>
@@ -143,7 +144,7 @@
 
 <!-- Add/Edit Vehicle Modal -->
 <div id="addVehicleModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
-  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"> <!-- Larger modal, scrollable -->
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <div>
@@ -270,17 +271,50 @@
   </div>
 </div>
 
-<!-- Confirmation Modal for Vehicle Deletion -->
-<div id="confirmDeleteVehicleModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+<!-- Generic Confirmation Modal (for Add/Edit/Delete) -->
+<div id="genericConfirmModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
   <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
     <div class="p-6">
-      <div class="flex justify-between items-center mb-6">
-        <div><h3 class="text-xl font-bold text-gray-800 dark:text-white">Confirm Deletion</h3><p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this vehicle record?</p></div>
-        <button onclick="closeConfirmDeleteVehicleModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i></button>
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="genericConfirmModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">Confirm Action</h3>
+        <button onclick="closeGenericConfirmModal()" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i data-lucide="x" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+        </button>
       </div>
+      <p id="genericConfirmModalMessage" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to proceed?</p>
       <div class="flex justify-end gap-3 pt-4">
-        <button onclick="closeConfirmDeleteVehicleModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-        <button id="confirmDeleteVehicleBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+        <button onclick="closeGenericConfirmModal()" 
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+          Cancel
+        </button>
+        <button id="genericConfirmModalConfirmBtn" 
+                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2">
+          {/* Icon and text will be set dynamically */}
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Information/Status Modal -->
+<div id="infoStatusModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 hidden">
+  <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="p-6 text-center">
+      <div id="infoStatusModalIconContainer" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+        {/* Icon will be set dynamically */}
+      </div>
+      <h3 id="infoStatusModalTitle" class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">Status</h3>
+      <div class="mt-2">
+        <p id="infoStatusModalMessage" class="text-sm text-gray-500 dark:text-gray-400">Message here.</p>
+      </div>
+      <div class="mt-5 sm:mt-6">
+        <button type="button" 
+                onclick="closeInfoStatusModal()"
+                id="infoStatusModalOkButton" 
+                class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+          OK
+        </button>
       </div>
     </div>
   </div>
@@ -288,40 +322,129 @@
 
 
 <script>
-  // --- Global Variables for Vehicle ---
-  let allVehicles = []; const vehiclesPerPage = 5; let currentVehiclePage = 1;
-  let vehicleToEditId = null; let vehicleToDeleteId = null;
-  let activeVehicleDateFilter = 'all'; let customVehicleFilterStartDate = null; let customVehicleFilterEndDate = null;
-  
-  // Mock data 
-  const mockVehicleMakes = [{id:1, name:"Toyota"}, {id:2, name:"Ford"}, {id:3, name:"Honda"}, {id:4, name:"Chevrolet"}, {id:5, name:"Nissan"}];
-  const mockVehicleModels = [ // Dependent on Make, simplified here for mock. Real app would filter this.
-      {id:1, make_id:1, name:"Camry"}, {id:2, make_id:1, name:"Rav4"}, {id:3, make_id:1, name:"Corolla"},
-      {id:4, make_id:2, name:"F-150"}, {id:5, make_id:2, name:"Explorer"}, {id:6, make_id:2, name:"Escape"},
-      {id:7, make_id:3, name:"Civic"}, {id:8, make_id:3, name:"CR-V"}, {id:9, make_id:3, name:"Accord"},
-      {id:10, make_id:4, name:"Silverado"}, {id:11, make_id:4, name:"Equinox"},
-      {id:12, make_id:5, name:"Rogue"}, {id:13, make_id:5, name:"Altima"}
-  ];
-  const mockVehicleTypes = [{id:1, name:"Sedan"}, {id:2, name:"SUV"}, {id:3, name:"Truck"}, {id:4, name:"Van"}, {id:5, name:"Hatchback"}];
-  const mockVehicleTransmissions = [{id:1, name:"Automatic"}, {id:2, name:"Manual"}, {id:3, name:"CVT"}];
-  const mockFuelTypes = [{id:1, name:"Gasoline"}, {id:2, name:"Diesel"}, {id:3, name:"Electric"}, {id:4, name:"Hybrid"}]; // Reusable
-  const mockVehicleStatuses = ["available", "in_repair", "in_use", "sold", "decommissioned"];
+  const API_BASE_URL = 'http://localhost:8000'; 
+  const LOGIN_PAGE_URL = 'login.html'; 
 
+  // --- Authentication Helper ---
+  function getAuthToken() { return localStorage.getItem('accessToken'); }
+  function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { console.error("JWT Parse Error:", e); return null; }}
+
+  function updateUserInfoDisplay() {
+    const token = getAuthToken();
+    const userDisplayElement = document.getElementById('userDisplayName');
+    if (!userDisplayElement) return;
+    if (token) {
+        const decoded = parseJwt(token);
+        userDisplayElement.textContent = (decoded && decoded.sub) ? decoded.sub : 'User (token issue)';
+    } else {
+        userDisplayElement.textContent = 'Guest';
+    }
+  }
+
+  async function apiRequest(endpoint, method = 'GET', body = null) {
+    const token = getAuthToken();
+    // console.log(`API REQ: ${method} ${API_BASE_URL}${endpoint}. Token: ${token ? 'Present' : 'Absent'}`);
+
+    const headers = { 'Content-Type': 'application/json' };
+    const publicEndpoints = ['/vehicle_make/', '/vehicle_model/', '/vehicle_type/', '/vehicle_transmission/', '/fuel_type/'];
+    const isPublic = publicEndpoints.some(publicEp => endpoint.startsWith(publicEp));
+
+    if (token && !isPublic) headers['Authorization'] = `Bearer ${token}`;
+    else if (!token && !isPublic) console.warn(`WARN: Protected endpoint ${endpoint} called without token.`);
+
+    const config = { method, headers };
+    if (body) config.body = JSON.stringify(body);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+      
+      const responseForJson = response.clone();
+      const responseForText = response.clone();
+
+      if (response.status === 401 && !isPublic) {
+        openInfoStatusModal("Authentication Error", "Session expired or unauthorized. Please log in again.", "error", 5000);
+        return null; 
+      }
+      if (response.status === 204) return true;
+
+      const responseData = await responseForJson.json().catch(async (jsonError) => {
+          const text = await responseForText.text(); 
+          console.error(`JSON Parse Error for ${endpoint}. Status: ${response.status}. Response text (first 100 chars): ${text.substring(0,100)}...`, jsonError);
+          if (!response.ok) {
+              return Promise.reject({ detail: text || `Server error ${response.status}` });
+          }
+          throw new Error(`Invalid JSON response from server (status ${response.status}). Check console for raw response.`);
+      });
+      
+      if (!response.ok) {
+        const errorDetail = responseData.detail || (typeof responseData === 'object' ? JSON.stringify(responseData) : responseData) || 'Unknown error from server.';
+        console.error(`API Error for ${endpoint}: ${response.status}`, errorDetail);
+        openInfoStatusModal(`API Error: ${response.status}`, errorDetail, "error");
+        return null;
+      }
+      return responseData;
+    } catch (error) { 
+      console.error(`Network/Catch Error during API request to ${endpoint}:`, error);
+      openInfoStatusModal("Request Error", error.message, "error");
+      return null;
+    }
+  }
+  
+  // --- Global Variables ---
+  let allFetchedVehiclesFromServer = []; 
+  let vehicleMakesData = [];
+  let vehicleModelsData = []; 
+  let vehicleTypesData = [];
+  let vehicleTransmissionsData = [];
+  let fuelTypesData = [];
+  const mockVehicleStatuses = ["available", "in_repair", "in_use", "sold", "decommissioned"];
+  
+  const vehiclesPerPage = 5; 
+  let currentVehiclePage = 1;
+  let vehicleToEditId = null; 
+  let vehicleToDeleteId = null;
+  let activeVehicleDateFilter = 'all'; 
+  let customVehicleFilterStartDate = null; 
+  let customVehicleFilterEndDate = null;
+  
+  let currentConfirmAction = null; 
+  let currentActionData = null;  
+  let infoStatusModalTimeout = null; 
+
+  function setActiveVehicleDateFilterButton(filterId) {
+    document.querySelectorAll('#vehicle-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(filterId.startsWith('vehicle-filter-') ? filterId : `vehicle-filter-${filterId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    else console.warn(`setActiveVehicleDateFilterButton: Button ID for '${filterId}' not found.`);
+  }
 
   // --- DOMContentLoaded ---
-  document.addEventListener('DOMContentLoaded', () => {
-      initializeVehicleSection();
+  document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons(); 
-      const themeToggleButton = document.getElementById('theme-toggle');
-      if (themeToggleButton) themeToggleButton.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
+      updateUserInfoDisplay(); 
+      document.getElementById('theme-toggle')?.addEventListener('click', () => document.documentElement.classList.toggle('dark'));
       
       document.getElementById('addVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddVehicleModal(); });
       document.getElementById('viewVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewVehicleModal(); });
-      document.getElementById('confirmDeleteVehicleModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmDeleteVehicleModal(); });
+      document.getElementById('genericConfirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeGenericConfirmModal(); });
+      document.getElementById('genericConfirmModalConfirmBtn').addEventListener('click', async () => {
+        if (typeof currentConfirmAction === 'function') {
+            await currentConfirmAction(currentActionData); 
+        }
+        closeGenericConfirmModal();
+      });
+      document.getElementById('infoStatusModal').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.id === 'infoStatusModalOkButton' || e.target.closest('#infoStatusModalOkButton')) closeInfoStatusModal(); });
       
-      // Optional: Add event listener to make_id dropdown to filter model_id dropdown
-      // document.getElementById('vehicle_make_form').addEventListener('change', populateVehicleModelDropdown);
-
+      document.getElementById('global-logout-btn')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('accessToken');
+          openInfoStatusModal("Logged Out", "You have been successfully logged out.", "success", 2500);
+          updateUserInfoDisplay(); 
+          allFetchedVehiclesFromServer = []; 
+          renderVehiclesTable(); 
+          // setTimeout(() => { window.location.href = LOGIN_PAGE_URL; }, 2500);
+      });
+      await initializeVehicleSection();
   });
 
   function getISODateString(date) { return date.toISOString().split('T')[0]; }
@@ -331,121 +454,81 @@
     return{startDate:getISODateString(sD),endDate:getISODateString(eD)};
   }
 
-  // --- Vehicle Section ---
-  function initializeVehicleSection() {
-    fetchVehicles(); 
-    populateVehicleDropdowns(); // Initial population of all dropdowns
-    document.getElementById('vehicleSearch').addEventListener('input', () => { currentVehiclePage = 1; renderVehiclesTable(); });
+  async function initializeVehicleSection() {
+    console.log("Initializing vehicle section (INDEPENDENT Make/Model dropdowns)...");
+    await fetchAndPopulateAllDropdowns();
+    const token = getAuthToken();
+    if (!token) {
+        console.warn("INITIALIZE: No auth token. Main vehicle list will not load.");
+        document.getElementById('vehiclesBody').innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-500">Please log in to view vehicles.</td></tr>`;
+        document.getElementById('vehiclesCount').textContent = '0 records';
+        document.getElementById('vehiclesPagination').innerHTML = '';
+    } else {
+        console.log("INITIALIZE: Auth token found. Fetching main vehicle list.");
+        await fetchVehicles(); 
+    }
+    document.getElementById('vehicleSearch').addEventListener('input', () => { currentVehiclePage = 1; fetchVehicles(); });
     document.getElementById('addVehicleForm').addEventListener('submit', handleVehicleFormSubmit);
-    document.getElementById('confirmDeleteVehicleBtn').addEventListener('click', confirmDeleteVehicle);
     setActiveVehicleDateFilterButton('all');
   }
 
-  function applyVehicleDateFilter(filterType) {
-    activeVehicleDateFilter = filterType; customVehicleFilterStartDate = null; customVehicleFilterEndDate = null;
-    document.getElementById('vehicleCustomDateRange').classList.add('hidden');
-    setActiveVehicleDateFilterButton(filterType); currentVehiclePage = 1; renderVehiclesTable();
-  }
-  function toggleVehicleCustomDateRange() {
-    document.getElementById('vehicleCustomDateRange').classList.toggle('hidden');
-    if (!document.getElementById('vehicleCustomDateRange').classList.contains('hidden')) setActiveVehicleDateFilterButton('vehicle-filter-custom-btn');
-    else if (activeVehicleDateFilter === 'custom') applyVehicleDateFilter('all');
-  }
-  function applyVehicleCustomDateFilter() {
-    const sD = document.getElementById('vehicleCustomStartDate').value, eD = document.getElementById('vehicleCustomEndDate').value;
-    if (!sD || !eD) { alert("Please select dates for Vehicle Records."); return; }
-    if (new Date(sD) > new Date(eD)) { alert("Start date > end date for Vehicle Records."); return; }
-    activeVehicleDateFilter = 'custom'; customVehicleFilterStartDate = sD; customVehicleFilterEndDate = eD;
-    setActiveVehicleDateFilterButton('vehicle-filter-custom-btn'); currentVehiclePage = 1; renderVehiclesTable();
-  }
-  function setActiveVehicleDateFilterButton(filterId) {
-    document.querySelectorAll('#vehicle-section .date-filter-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(filterId.startsWith('vehicle-filter-') ? filterId : `vehicle-filter-${filterId}`);
-    if (activeBtn) activeBtn.classList.add('active');
-    if (filterId === 'vehicle-filter-custom-btn' || activeVehicleDateFilter === 'custom') document.getElementById('vehicle-filter-custom-btn').classList.add('active');
-  }
-
-  function populateSelectWithOptions(selectElementId, optionsArray, placeholder = "Select Option") {
-      const selectElement = document.getElementById(selectElementId);
-      selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-      optionsArray.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt.id;
-          option.textContent = opt.name;
-          selectElement.appendChild(option);
-      });
+  async function fetchAndPopulateAllDropdowns() {
+    console.log("Fetching all independent dropdown data...");
+    vehicleMakesData = await apiRequest('/vehicle_make/?limit=200') || [];
+    vehicleModelsData = await apiRequest('/vehicle_model/?limit=1000') || []; 
+    vehicleTypesData = await apiRequest('/vehicle_type/?limit=200') || [];
+    vehicleTransmissionsData = await apiRequest('/vehicle_transmission/?limit=200') || [];
+    fuelTypesData = await apiRequest('/fuel_type/?limit=200') || [];
+    populateAllDropdownsInForm();
+    console.log("All dropdown data fetched and populated.");
   }
   
-  // Simplified model population for mock; in real app, models would be fetched based on make_id
-  function populateVehicleModelDropdown(selectedMakeId = null) {
-      const modelSelect = document.getElementById('vehicle_model_form');
-      modelSelect.innerHTML = '<option value="">Select Model</option>';
-      let relevantModels = mockVehicleModels;
-      if (selectedMakeId) {
-          relevantModels = mockVehicleModels.filter(m => m.make_id === parseInt(selectedMakeId));
-      }
-      relevantModels.forEach(model => {
-          const option = document.createElement('option');
-          option.value = model.id;
-          option.textContent = model.name;
-          modelSelect.appendChild(option);
-      });
+  function populateSelectWithOptions(selectElementId, optionsArray, valueField, textField, placeholder = "Select Option") {
+    const selectElement = document.getElementById(selectElementId);
+    if (!selectElement) { console.error(`Populate: Element '${selectElementId}' not found.`); return; }
+    
+    const currentValue = selectElement.value;
+    selectElement.innerHTML = `<option value="">${placeholder}</option>`; 
+    selectElement.disabled = !Array.isArray(optionsArray) || optionsArray.length === 0;
+
+    if (Array.isArray(optionsArray)) {
+        optionsArray.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt[valueField];
+            option.textContent = opt[textField] !== undefined ? opt[textField] : `(ID: ${opt[valueField]})`; 
+            selectElement.appendChild(option);
+        });
+        if (optionsArray.some(opt => String(opt[valueField]) === String(currentValue))) {
+            selectElement.value = currentValue;
+        }
+    }
   }
 
-
-  async function populateVehicleDropdowns() {
-    populateSelectWithOptions('vehicle_make_form', mockVehicleMakes, "Select Make");
-    // Populate models initially with all models, or based on a selected make if editing
-    // For simplicity in mock, we'll show all. A real app might fetch models based on selected make.
-    populateVehicleModelDropdown(); 
-    populateSelectWithOptions('vehicle_type_form', mockVehicleTypes, "Select Vehicle Type");
-    populateSelectWithOptions('vehicle_transmission_form', mockVehicleTransmissions, "Select Transmission");
-    populateSelectWithOptions('vehicle_fuel_type_form', mockFuelTypes, "Select Fuel Type");
+  function populateAllDropdownsInForm() {
+    populateSelectWithOptions('vehicle_make_form', vehicleMakesData, 'id', 'vehicle_make', "Select Make");
+    populateSelectWithOptions('vehicle_model_form', vehicleModelsData, 'id', 'vehicle_model', "Select Model"); 
+    populateSelectWithOptions('vehicle_type_form', vehicleTypesData, 'id', 'vehicle_type', "Select Vehicle Type");
+    populateSelectWithOptions('vehicle_transmission_form', vehicleTransmissionsData, 'id', 'vehicle_transmission', "Select Transmission");
+    populateSelectWithOptions('vehicle_fuel_type_form', fuelTypesData, 'id', 'fuel_type', "Select Fuel Type");
     
     const statusSelect = document.getElementById('vehicle_status_form');
-    statusSelect.innerHTML = ''; 
-    mockVehicleStatuses.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' '); statusSelect.appendChild(o); });
-  }
-
-  async function fetchVehicles() {
-    return new Promise(res => {
-      setTimeout(() => {
-        if (allVehicles.length === 0) {
-          const baseTime = Date.now();
-          for (let i = 1; i <= 25; i++) { 
-            const daysAgoRegistered = Math.floor(Math.random() * 365 * 3); // Up to 3 years ago
-            const registrationDate = new Date(baseTime - daysAgoRegistered * 24 * 60 * 60 * 1000);
-            const purchaseDate = new Date(registrationDate.getTime() - Math.floor(Math.random() * 30) * 24*60*60*1000); // Purchase slightly before registration
-            const make = mockVehicleMakes[Math.floor(Math.random() * mockVehicleMakes.length)];
-            const model = mockVehicleModels.filter(m => m.make_id === make.id)[Math.floor(Math.random() * mockVehicleModels.filter(m => m.make_id === make.id).length)] || mockVehicleModels[0];
-
-            allVehicles.push({
-              id: i,
-              make: make.id,
-              model: model.id,
-              year: 2015 + Math.floor(Math.random() * 9), // 2015-2023
-              plate_number: `${String.fromCharCode(65 + Math.floor(Math.random()*26))}${String.fromCharCode(65 + Math.floor(Math.random()*26))}${String.fromCharCode(65 + Math.floor(Math.random()*26))}-${Math.floor(100+Math.random()*900)}`,
-              mileage: parseFloat((Math.random() * 150000).toFixed(1)),
-              engine_size: parseFloat((1.0 + Math.random() * 3.0).toFixed(1)), // 1.0L to 4.0L
-              vehicle_type: mockVehicleTypes[Math.floor(Math.random() * mockVehicleTypes.length)].id,
-              vehicle_transmission: mockVehicleTransmissions[Math.floor(Math.random() * mockVehicleTransmissions.length)].id,
-              vehicle_fuel_type: mockFuelTypes[Math.floor(Math.random() * mockFuelTypes.length)].id,
-              vin: `VIN${Math.random().toString(36).substring(2, 15).toUpperCase()}${i}`,
-              color: ["Red", "Blue", "Black", "White", "Silver", "Gray"][Math.floor(Math.random()*6)],
-              purchase_price: parseFloat((10000 + Math.random() * 40000).toFixed(2)),
-              purchase_date: purchaseDate.toISOString(),
-              status: mockVehicleStatuses[Math.floor(Math.random() * mockVehicleStatuses.length)],
-              registration_date: registrationDate.toISOString()
-            });
-          }
-        }
-        currentVehiclePage = 1; renderVehiclesTable(); res();
-      }, 180);
+    statusSelect.innerHTML = '<option value="">Select Status</option>'; 
+    mockVehicleStatuses.forEach(s => { 
+        const o=document.createElement('option'); o.value=s; 
+        o.textContent=s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' '); statusSelect.appendChild(o); 
     });
   }
 
+  async function fetchVehicles() { 
+    // console.log("Fetching main vehicle list for table display...");
+    const searchTerm = document.getElementById('vehicleSearch').value;
+    const data = await apiRequest(`/vehicle/?limit=${vehiclesPerPage}&skip=${(currentVehiclePage - 1) * vehiclesPerPage}&search=${encodeURIComponent(searchTerm)}`); 
+    if (data) { allFetchedVehiclesFromServer = data;} else { allFetchedVehiclesFromServer = []; }
+    renderVehiclesTable();
+  }
+
   function renderVehiclesTable() {
-    let recordsToDisplay = [...allVehicles];
+    let recordsToDisplay = [...allFetchedVehiclesFromServer]; 
     if (activeVehicleDateFilter !== 'all') {
       let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? 
                   { startDate: customVehicleFilterStartDate, endDate: customVehicleFilterEndDate } : 
@@ -457,196 +540,453 @@
         });
       }
     }
-    const searchTerm = document.getElementById('vehicleSearch').value.toLowerCase();
-    if (searchTerm) {
-      recordsToDisplay = recordsToDisplay.filter(r =>
-        (r.id && r.id.toString().includes(searchTerm)) ||
-        (r.plate_number && r.plate_number.toLowerCase().includes(searchTerm)) ||
-        (r.vin && r.vin.toLowerCase().includes(searchTerm)) ||
-        (mockVehicleMakes.find(m => m.id === r.make)?.name.toLowerCase().includes(searchTerm)) ||
-        (mockVehicleModels.find(m => m.id === r.model)?.name.toLowerCase().includes(searchTerm)) ||
-        (r.year && r.year.toString().includes(searchTerm)) ||
-        (r.status && r.status.toLowerCase().includes(searchTerm))
-      );
+
+    const searchTermClient = document.getElementById('vehicleSearch').value.toLowerCase();
+    if (searchTermClient && recordsToDisplay.length > 0) { 
+        recordsToDisplay = recordsToDisplay.filter(r =>
+            (r.id && r.id.toString().includes(searchTermClient)) ||
+            (r.plate_number && r.plate_number.toLowerCase().includes(searchTermClient)) ||
+            (r.vin && r.vin.toLowerCase().includes(searchTermClient)) ||
+            (vehicleMakesData.find(m => m.id === r.make)?.vehicle_make.toLowerCase().includes(searchTermClient)) ||
+            (vehicleModelsData.find(mod => mod.id === r.model)?.vehicle_model.toLowerCase().includes(searchTermClient)) ||
+            (r.year && r.year.toString().includes(searchTermClient)) ||
+            (r.status && r.status.toLowerCase().includes(searchTermClient))
+        );
     }
 
-    const start = (currentVehiclePage - 1) * vehiclesPerPage;
-    const paginatedRecords = recordsToDisplay.slice(start, start + vehiclesPerPage);
     const vehiclesBody = document.getElementById('vehiclesBody');
-    vehiclesBody.innerHTML = paginatedRecords.length > 0 ? paginatedRecords.map(r => {
-      const makeName = mockVehicleMakes.find(m => m.id === r.make)?.name || r.make;
-      const modelName = mockVehicleModels.find(m => m.id === r.model)?.name || r.model;
-      const statusFormatted = r.status.charAt(0).toUpperCase() + r.status.slice(1).replace(/_/g, ' ');
-      const statusColor = r.status === "available" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : 
-                          r.status === "in_use" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
-                          r.status === "in_repair" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
-                          r.status === "sold" ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" :
-                          "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"; // Decommissioned or other
+    if (recordsToDisplay.length > 0) {
+        vehiclesBody.innerHTML = recordsToDisplay.map(r => {
+        const makeName = vehicleMakesData.find(m => m.id === r.make)?.vehicle_make || `MakeID ${r.make}`;
+        const modelName = vehicleModelsData.find(mod => mod.id === r.model)?.vehicle_model || `ModelID ${r.model}`;
+        const statusFormatted = r.status.charAt(0).toUpperCase() + r.status.slice(1).replace(/_/g, ' ');
+        const statusColor = r.status === "available" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : 
+                            r.status === "in_use" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                            r.status === "in_repair" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
+                            r.status === "sold" ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" :
+                            "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
 
-      return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" data-id="${r.id}">
-                <td class="py-3 px-2">${r.id}</td>
-                <td class="px-2">${makeName}</td>
-                <td class="px-2">${modelName}</td>
-                <td class="px-2">${r.year}</td>
-                <td class="px-2">${r.plate_number}</td>
-                <td class="px-2">${r.mileage.toLocaleString()}</td>
-                <td class="px-2"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${statusFormatted}</span></td>
-                <td class="px-2">${new Date(r.registration_date).toLocaleDateString()}</td>
-                <td class="px-2 text-center whitespace-nowrap">
-                  <button onclick="openViewVehicleModal(${r.id})" class="text-green-600 dark:text-green-400 hover:underline p-1" title="View Details"><i data-lucide="eye" class="w-4 h-4 inline-block"></i></button>
-                  <button onclick="openEditVehicleModal(${r.id})" class="text-blue-600 dark:text-blue-400 hover:underline p-1 ml-1" title="Edit Record"><i data-lucide="edit-2" class="w-4 h-4 inline-block"></i></button>
-                  <button onclick="openConfirmDeleteVehicleModal(${r.id})" class="text-red-600 dark:text-red-400 hover:underline p-1 ml-1" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4 inline-block"></i></button>
-                </td></tr>`;
-    }).join('') : `<tr><td colspan="9" class="text-center py-8 text-gray-500">No vehicle records found.</td></tr>`;
+        return `<tr class="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50" data-id="${r.id}">
+                    <td class="py-3 px-2">${r.id}</td> <td class="px-2">${makeName}</td> <td class="px-2">${modelName}</td>
+                    <td class="px-2">${r.year}</td> <td class="px-2">${r.plate_number}</td>
+                    <td class="px-2">${(r.mileage || 0).toLocaleString()}</td>
+                    <td class="px-2"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${statusFormatted}</span></td>
+                    <td class="px-2">${new Date(r.registration_date).toLocaleDateString()}</td>
+                    <td class="px-2 text-center whitespace-nowrap">
+                    <button onclick="openViewVehicleModal(${r.id})" class="text-green-600 dark:text-green-400 p-1" title="View"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    <button onclick="openEditVehicleModal(${r.id})" class="text-blue-600 dark:text-blue-400 p-1 ml-1" title="Edit"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                    <button onclick="openConfirmDeleteVehicleModal(${r.id})" class="text-red-600 dark:text-red-400 p-1 ml-1" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td></tr>`;
+        }).join('');
+    } else {
+        let message = "No vehicle records found.";
+        if (!getAuthToken()) { message = "Please log in to view vehicle records."; }
+        else if (getAuthToken() && allFetchedVehiclesFromServer.length === 0 && !searchTermClient ) { message = "No vehicles in the system yet. Try adding one!";}
+        else if (searchTermClient) { message = "No vehicles match your current search/filter criteria." }
+        vehiclesBody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-500">${message}</td></tr>`;
+    }
     lucide.createIcons();
-    document.getElementById('vehiclesCount').textContent = `Showing ${paginatedRecords.length > 0 ? start + 1 : 0} to ${Math.min(start + vehiclesPerPage, recordsToDisplay.length)} of ${recordsToDisplay.length} records`;
-    renderVehiclePagination(recordsToDisplay.length);
+    const displayedRecordCount = recordsToDisplay.length;
+    const estimatedStart = displayedRecordCount > 0 ? (currentVehiclePage -1) * vehiclesPerPage + 1 : 0;
+    const estimatedEnd = (currentVehiclePage -1) * vehiclesPerPage + displayedRecordCount;
+    document.getElementById('vehiclesCount').textContent = `Showing ${estimatedStart} to ${estimatedEnd} of approx. ${estimatedEnd} records (current view)`; 
+    renderVehiclePagination(allFetchedVehiclesFromServer.length);
   }
 
-  function renderVehiclePagination(totalRecords) { 
-    const tP=Math.ceil(totalRecords/vehiclesPerPage);const pC=document.getElementById('vehiclesPagination');pC.innerHTML='';if(tP<=1)return;
-    const bCls="px-3 py-1.5 text-sm rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500";const iCls="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";const aCls="bg-blue-500 text-white border border-blue-500 hover:bg-blue-600";const dCls="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
-    const pB=document.createElement('button');pB.innerHTML=`<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;pB.className=`${bCls} ${currentVehiclePage===1?dCls:iCls}`;if(currentVehiclePage>1)pB.onclick=()=>{currentVehiclePage--;renderVehiclesTable();};else pB.disabled=true;pC.appendChild(pB);
-    const pgs=[];if(tP<=5){for(let i=1;i<=tP;i++)pgs.push(i);}else{pgs.push(1);if(currentVehiclePage>3)pgs.push('...');for(let i=Math.max(2,currentVehiclePage-1);i<=Math.min(tP-1,currentVehiclePage+1);i++)if(!pgs.includes(i))pgs.push(i);if(currentVehiclePage<tP-2)pgs.push('...');if(!pgs.includes(tP))pgs.push(tP);}
-    pgs.forEach(pN=>{if(pN==='...'){const el=document.createElement('span');el.textContent='...';el.className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";pC.appendChild(el);}else{const pBtn=document.createElement('button');pBtn.textContent=pN;pBtn.className=`${bCls} ${pN===currentVehiclePage?aCls:iCls}`;pBtn.onclick=()=>{currentVehiclePage=pN;renderVehiclesTable();};pC.appendChild(pBtn);}});
-    const nB=document.createElement('button');nB.innerHTML=`Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;nB.className=`${bCls} ${currentVehiclePage===tP?dCls:iCls}`;if(currentVehiclePage<tP)nB.onclick=()=>{currentVehiclePage++;renderVehiclesTable();};else nB.disabled=true;pC.appendChild(nB);lucide.createIcons();
+  function renderVehiclePagination(currentPageRecordCount) { 
+    const paginationContainer = document.getElementById('vehiclesPagination');
+    paginationContainer.innerHTML = ''; 
+    if (currentVehiclePage === 1 && currentPageRecordCount < vehiclesPerPage) {
+        if (currentPageRecordCount === 0 && !getAuthToken()){}
+        else if (currentPageRecordCount === 0) {}
+        if (currentPageRecordCount < vehiclesPerPage && !(currentVehiclePage > 1)) return;
+    }
+
+    const buttonClasses = "px-3 py-1.5 text-sm rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-900 focus:ring-blue-500";
+    const inactiveClasses = "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";
+    const disabledClasses = "bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed";
+
+    const prevButton = document.createElement('button');
+    prevButton.innerHTML = `<i data-lucide="chevron-left" class="w-4 h-4 inline-block mr-1"></i> Prev`;
+    prevButton.className = `${buttonClasses} ${currentVehiclePage === 1 ? disabledClasses : inactiveClasses}`;
+    if (currentVehiclePage > 1) {
+        prevButton.onclick = () => { currentVehiclePage--; fetchVehicles(); };
+    } else { prevButton.disabled = true; }
+    paginationContainer.appendChild(prevButton);
+    
+    const pageInfo = document.createElement('span');
+    pageInfo.className = "px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400";
+    pageInfo.textContent = `Page ${currentVehiclePage}`;
+    paginationContainer.appendChild(pageInfo);
+
+    const nextButton = document.createElement('button');
+    nextButton.innerHTML = `Next <i data-lucide="chevron-right" class="w-4 h-4 inline-block ml-1"></i>`;
+    const hasMore = currentPageRecordCount === vehiclesPerPage; 
+    nextButton.className = `${buttonClasses} ${!hasMore ? disabledClasses : inactiveClasses}`;
+    if (hasMore) {
+        nextButton.onclick = () => { currentVehiclePage++; fetchVehicles(); };
+    } else { nextButton.disabled = true; }
+    paginationContainer.appendChild(nextButton);
+    lucide.createIcons();
   }
   
-  function openAddVehicleModal() {
-    vehicleToEditId = null; document.getElementById('addVehicleForm').reset();
+  async function openAddVehicleModal() {
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to add a vehicle.", "error"); return; }
+    vehicleToEditId = null; 
+    document.getElementById('addVehicleForm').reset();
+    await fetchAndPopulateAllDropdowns(); 
     document.getElementById('vehicleModalTitle').textContent = "Add New Vehicle";
     document.getElementById('vehicleSubmitButton').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Vehicle`;
-    populateVehicleDropdowns(); 
-    lucide.createIcons(); document.getElementById('addVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+    lucide.createIcons(); 
+    document.getElementById('addVehicleModal').classList.remove('hidden'); 
+    document.body.style.overflow = 'hidden';
   }
-  async function openEditVehicleModal(id) {
-    const r = allVehicles.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
-    vehicleToEditId = id; document.getElementById('vehicleModalTitle').textContent = "Edit Vehicle Record";
-    document.getElementById('vehicleSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
-    await populateVehicleDropdowns(); 
-    lucide.createIcons(); document.getElementById('vehicleId_form').value = r.id;
-    document.getElementById('vehicle_make_form').value = r.make;
-    populateVehicleModelDropdown(r.make); // Populate models based on selected make
-    document.getElementById('vehicle_model_form').value = r.model;
-    document.getElementById('vehicle_year_form').value = r.year;
-    document.getElementById('vehicle_plate_number_form').value = r.plate_number;
-    document.getElementById('vehicle_vin_form').value = r.vin;
-    document.getElementById('vehicle_color_form').value = r.color;
-    document.getElementById('vehicle_mileage_form').value = r.mileage;
-    document.getElementById('vehicle_engine_size_form').value = r.engine_size;
-    document.getElementById('vehicle_type_form').value = r.vehicle_type;
-    document.getElementById('vehicle_transmission_form').value = r.vehicle_transmission;
-    document.getElementById('vehicle_fuel_type_form').value = r.vehicle_fuel_type;
-    document.getElementById('vehicle_purchase_price_form').value = r.purchase_price;
-    document.getElementById('vehicle_purchase_date_form').value = new Date(r.purchase_date).toISOString().split('T')[0];
-    document.getElementById('vehicle_status_form').value = r.status;
-    document.getElementById('addVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
-  }
-  function closeAddVehicleModal() { document.getElementById('addVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; vehicleToEditId = null; }
 
-  function openViewVehicleModal(id) {
-    const r = allVehicles.find(rec => rec.id === id); if (!r) { alert("Record not found!"); return; }
-    document.getElementById('view-vehicle-id').textContent = r.id;
-    document.getElementById('view-vehicle-plate_number').textContent = r.plate_number;
-    document.getElementById('view-vehicle-make').textContent = mockVehicleMakes.find(m => m.id === r.make)?.name || 'N/A';
-    document.getElementById('view-vehicle-model').textContent = mockVehicleModels.find(m => m.id === r.model)?.name || 'N/A';
-    document.getElementById('view-vehicle-year').textContent = r.year;
-    document.getElementById('view-vehicle-vin').textContent = r.vin;
-    document.getElementById('view-vehicle-color').textContent = r.color;
-    document.getElementById('view-vehicle-mileage').textContent = r.mileage.toLocaleString();
-    document.getElementById('view-vehicle-engine_size').textContent = r.engine_size.toFixed(1);
-    document.getElementById('view-vehicle-type').textContent = mockVehicleTypes.find(vt => vt.id === r.vehicle_type)?.name || 'N/A';
-    document.getElementById('view-vehicle-transmission').textContent = mockVehicleTransmissions.find(vt => vt.id === r.vehicle_transmission)?.name || 'N/A';
-    document.getElementById('view-vehicle-fuel_type').textContent = mockFuelTypes.find(ft => ft.id === r.vehicle_fuel_type)?.name || 'N/A';
-    document.getElementById('view-vehicle-purchase_price').textContent = r.purchase_price.toFixed(2);
-    document.getElementById('view-vehicle-purchase_date').textContent = new Date(r.purchase_date).toLocaleDateString();
-    document.getElementById('view-vehicle-status').textContent = r.status.charAt(0).toUpperCase() + r.status.slice(1).replace(/_/g, ' ');
-    document.getElementById('view-vehicle-registration_date').textContent = new Date(r.registration_date).toLocaleString();
-    document.getElementById('viewVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+  async function openEditVehicleModal(id) {
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to edit a vehicle.", "error"); return; }
+    const recordToEdit = await apiRequest(`/vehicle/${id}`);
+    if (!recordToEdit) { openInfoStatusModal("Error","Could not fetch vehicle details for editing.", "error"); return; }
+    
+    vehicleToEditId = id; 
+    document.getElementById('addVehicleForm').reset(); 
+    await fetchAndPopulateAllDropdowns(); 
+
+    document.getElementById('vehicleModalTitle').textContent = "Edit Vehicle Record";
+    document.getElementById('vehicleSubmitButton').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Save Changes`;
+    
+    document.getElementById('vehicleId_form').value = recordToEdit.id;
+    document.getElementById('vehicle_make_form').value = recordToEdit.make;
+    document.getElementById('vehicle_model_form').value = recordToEdit.model;
+    document.getElementById('vehicle_year_form').value = recordToEdit.year;
+    document.getElementById('vehicle_plate_number_form').value = recordToEdit.plate_number;
+    document.getElementById('vehicle_vin_form').value = recordToEdit.vin;
+    document.getElementById('vehicle_color_form').value = recordToEdit.color;
+    document.getElementById('vehicle_mileage_form').value = recordToEdit.mileage;
+    document.getElementById('vehicle_engine_size_form').value = recordToEdit.engine_size;
+    document.getElementById('vehicle_type_form').value = recordToEdit.vehicle_type;
+    document.getElementById('vehicle_transmission_form').value = recordToEdit.vehicle_transmission;
+    document.getElementById('vehicle_fuel_type_form').value = recordToEdit.vehicle_fuel_type;
+    document.getElementById('vehicle_purchase_price_form').value = recordToEdit.purchase_price;
+    document.getElementById('vehicle_purchase_date_form').value = new Date(recordToEdit.purchase_date).toISOString().split('T')[0];
+    document.getElementById('vehicle_status_form').value = recordToEdit.status;
+    
+    lucide.createIcons(); 
+    document.getElementById('addVehicleModal').classList.remove('hidden'); 
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAddVehicleModal() { 
+    document.getElementById('addVehicleModal').classList.add('hidden'); 
+    document.body.style.overflow = ''; 
+    vehicleToEditId = null; 
+    document.getElementById('addVehicleForm').reset();
+  }
+
+  async function openViewVehicleModal(id) {
+    const record = await apiRequest(`/vehicle/${id}`); 
+    if (!record) { openInfoStatusModal("Error", "Could not fetch vehicle details for viewing.", "error"); return; }
+
+    document.getElementById('view-vehicle-id').textContent = record.id;
+    document.getElementById('view-vehicle-plate_number').textContent = record.plate_number;
+    document.getElementById('view-vehicle-make').textContent = vehicleMakesData.find(m => m.id === record.make)?.vehicle_make || `MakeID ${record.make}`;
+    document.getElementById('view-vehicle-model').textContent = vehicleModelsData.find(mod => mod.id === record.model)?.vehicle_model || `ModelID ${record.model}`;
+    document.getElementById('view-vehicle-year').textContent = record.year;
+    document.getElementById('view-vehicle-vin').textContent = record.vin;
+    document.getElementById('view-vehicle-color').textContent = record.color;
+    document.getElementById('view-vehicle-mileage').textContent = (record.mileage || 0).toLocaleString();
+    document.getElementById('view-vehicle-engine_size').textContent = (record.engine_size || 0).toFixed(1);
+    document.getElementById('view-vehicle-type').textContent = vehicleTypesData.find(vt => vt.id === record.vehicle_type)?.vehicle_type || `TypeID ${record.vehicle_type}`;
+    document.getElementById('view-vehicle-transmission').textContent = vehicleTransmissionsData.find(vt => vt.id === record.vehicle_transmission)?.vehicle_transmission || `TransID ${record.vehicle_transmission}`;
+    document.getElementById('view-vehicle-fuel_type').textContent = fuelTypesData.find(ft => ft.id === record.vehicle_fuel_type)?.fuel_type || `FuelID ${record.vehicle_fuel_type}`;
+    document.getElementById('view-vehicle-purchase_price').textContent = (record.purchase_price || 0).toFixed(2);
+    document.getElementById('view-vehicle-purchase_date').textContent = new Date(record.purchase_date).toLocaleDateString();
+    document.getElementById('view-vehicle-status').textContent = record.status.charAt(0).toUpperCase() + record.status.slice(1).replace(/_/g, ' ');
+    document.getElementById('view-vehicle-registration_date').textContent = new Date(record.registration_date).toLocaleString();
+    
+    document.getElementById('viewVehicleModal').classList.remove('hidden'); 
+    document.body.style.overflow = 'hidden'; 
+    lucide.createIcons();
   }
   function closeViewVehicleModal() { document.getElementById('viewVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; }
 
+  // --- Generic Confirmation Modal Functions ---
+  function openGenericConfirmModal(title, message, confirmButtonText, confirmButtonIcon, onConfirmCallback, actionData = null) {
+    document.getElementById('genericConfirmModalTitle').textContent = title;
+    document.getElementById('genericConfirmModalMessage').textContent = message;
+    
+    const confirmBtn = document.getElementById('genericConfirmModalConfirmBtn');
+    confirmBtn.innerHTML = `<i data-lucide="${confirmButtonIcon || 'check-circle'}" class="w-4 h-4"></i> ${confirmButtonText || 'Confirm'}`;
+    if(confirmButtonIcon === 'trash-2'){ // Make delete button red
+        confirmBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+    } else { // Default to blue
+        confirmBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        confirmBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+    }
+    lucide.createIcons(); 
+
+    currentConfirmAction = onConfirmCallback;
+    currentActionData = actionData; 
+
+    document.getElementById('genericConfirmModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeGenericConfirmModal() {
+    document.getElementById('genericConfirmModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    currentConfirmAction = null; 
+    currentActionData = null;
+  }
+
+  // --- Info/Status Modal Functions ---
+  function openInfoStatusModal(title, message, type = 'success', autoCloseDelay = 3000) {
+    const modal = document.getElementById('infoStatusModal');
+    const titleEl = document.getElementById('infoStatusModalTitle');
+    const messageEl = document.getElementById('infoStatusModalMessage');
+    const iconContainer = document.getElementById('infoStatusModalIconContainer');
+    const okButton = document.getElementById('infoStatusModalOkButton');
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    if (infoStatusModalTimeout) clearTimeout(infoStatusModalTimeout);
+
+    iconContainer.innerHTML = ''; 
+    if (type === 'success') {
+        iconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4';
+        iconContainer.innerHTML = `<i data-lucide="check" class="h-6 w-6 text-green-600"></i>`;
+        okButton.className = 'inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm';
+    } else if (type === 'error') {
+        iconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4';
+        iconContainer.innerHTML = `<i data-lucide="x-circle" class="h-6 w-6 text-red-600"></i>`;
+        okButton.className = 'inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm';
+    } else { 
+        iconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4';
+        iconContainer.innerHTML = `<i data-lucide="info" class="h-6 w-6 text-blue-600"></i>`;
+        okButton.className = 'inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm';
+    }
+    lucide.createIcons(); 
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    if (autoCloseDelay > 0) {
+        infoStatusModalTimeout = setTimeout(() => { closeInfoStatusModal(); }, autoCloseDelay);
+    }
+  }
+
+  function closeInfoStatusModal() {
+    if (infoStatusModalTimeout) { clearTimeout(infoStatusModalTimeout); infoStatusModalTimeout = null; }
+    document.getElementById('infoStatusModal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+
   async function handleVehicleFormSubmit(event) {
     event.preventDefault();
+    if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to submit the form.", "error"); return; }
+
     const purchaseDateValue = document.getElementById('vehicle_purchase_date_form').value;
-    const d = {
+    const vehicleYearValue = parseInt(document.getElementById('vehicle_year_form').value);
+    const currentYear = new Date().getFullYear();
+    const today = new Date(); today.setHours(0,0,0,0); 
+
+    if (!purchaseDateValue) { openInfoStatusModal("Validation Error", "Purchase date is required.", "error"); return; }
+    const purchaseDateObj = new Date(purchaseDateValue + "T00:00:00"); 
+
+    if (purchaseDateObj > today) { openInfoStatusModal("Validation Error", "Purchase date cannot be in the future.", "error"); return; }
+    if (vehicleYearValue > currentYear) { openInfoStatusModal("Validation Error", `Vehicle year (${vehicleYearValue}) cannot be greater than current year (${currentYear}).`, "error"); return; }
+    if (vehicleYearValue < 1900) { openInfoStatusModal("Validation Error", `Vehicle year (${vehicleYearValue}) is invalid. Please enter a valid year.`, "error"); return; }
+    
+    const vehicleData = {
       make: parseInt(document.getElementById('vehicle_make_form').value),
       model: parseInt(document.getElementById('vehicle_model_form').value),
-      year: parseInt(document.getElementById('vehicle_year_form').value),
-      plate_number: document.getElementById('vehicle_plate_number_form').value,
+      year: vehicleYearValue,
+      plate_number: document.getElementById('vehicle_plate_number_form').value.trim(),
       mileage: parseFloat(document.getElementById('vehicle_mileage_form').value) || 0.0,
       engine_size: parseFloat(document.getElementById('vehicle_engine_size_form').value),
       vehicle_type: parseInt(document.getElementById('vehicle_type_form').value),
       vehicle_transmission: parseInt(document.getElementById('vehicle_transmission_form').value),
       vehicle_fuel_type: parseInt(document.getElementById('vehicle_fuel_type_form').value),
-      vin: document.getElementById('vehicle_vin_form').value,
-      color: document.getElementById('vehicle_color_form').value,
+      vin: document.getElementById('vehicle_vin_form').value.trim(),
+      color: document.getElementById('vehicle_color_form').value.trim(),
       purchase_price: parseFloat(document.getElementById('vehicle_purchase_price_form').value),
-      purchase_date: new Date(purchaseDateValue).toISOString(),
+      purchase_date: purchaseDateObj.toISOString(), 
       status: document.getElementById('vehicle_status_form').value
     };
-    if (!d.make || !d.model || !d.year || !d.plate_number || !d.engine_size || !d.vehicle_type || !d.vehicle_transmission || !d.vehicle_fuel_type || !d.vin || !d.color || isNaN(d.purchase_price) || !d.purchase_date || !d.status) {
-      alert("Please fill all required Vehicle fields correctly."); return;
+
+     if (isNaN(vehicleData.make) || isNaN(vehicleData.model) || !vehicleData.year || !vehicleData.plate_number || 
+        isNaN(vehicleData.engine_size) || isNaN(vehicleData.vehicle_type) || isNaN(vehicleData.vehicle_transmission) || 
+        isNaN(vehicleData.vehicle_fuel_type) || !vehicleData.vin || !vehicleData.color || 
+        isNaN(vehicleData.purchase_price) || !vehicleData.purchase_date || !vehicleData.status) {
+      openInfoStatusModal("Validation Error", "Please fill all required Vehicle fields correctly. Ensure Make and Model are selected.", "error"); return;
     }
-    return new Promise(res => {
-      setTimeout(() => {
-        if (vehicleToEditId) {
-          const idx = allVehicles.findIndex(r => r.id === vehicleToEditId);
-          if (idx !== -1) allVehicles[idx] = { ...allVehicles[idx], ...d, registration_date: allVehicles[idx].registration_date }; 
-          alert('Vehicle record updated (mock)!');
-        } else {
-          const newRec = { ...d, id: allVehicles.length > 0 ? Math.max(...allVehicles.map(r => r.id)) + 1 : 1, registration_date: new Date().toISOString() };
-          allVehicles.unshift(newRec);
-          alert('Vehicle record added (mock)!');
+
+    const actionType = vehicleToEditId ? "update" : "add";
+    const confirmTitle = vehicleToEditId ? "Confirm Update" : "Confirm Add Vehicle";
+    const confirmMessage = `Are you sure you want to ${actionType} this vehicle${vehicleToEditId ? "'s details" : ""}?`;
+    const confirmBtnText = vehicleToEditId ? "Update" : "Add Vehicle";
+    const confirmBtnIcon = vehicleToEditId ? "save" : "plus-circle";
+
+    openGenericConfirmModal(
+        confirmTitle, confirmMessage, confirmBtnText, confirmBtnIcon,
+        async (dataForAction) => { 
+            let result;
+            if (vehicleToEditId) { result = await apiRequest(`/vehicle/${vehicleToEditId}`, 'PUT', dataForAction); } 
+            else { result = await apiRequest('/vehicle/', 'POST', dataForAction); }
+
+            if (result) {
+              openInfoStatusModal("Success", `Vehicle record ${vehicleToEditId ? 'updated' : 'added'} successfully!`, "success");
+              closeAddVehicleModal(); 
+              currentVehiclePage = vehicleToEditId ? currentVehiclePage : 1; 
+              await fetchVehicles(); 
+            }
+            // If result is null, apiRequest already showed an error modal
+        },
+        vehicleData 
+    );
+  }
+
+  function openConfirmDeleteVehicleModal(id) { 
+      if (!getAuthToken()) { openInfoStatusModal("Authentication Required","Please log in to delete a vehicle.", "error"); return; }
+      vehicleToDeleteId = id; 
+      
+      openGenericConfirmModal(
+        "Confirm Deletion", 
+        "Are you sure you want to permanently delete this vehicle record? This action cannot be undone.", 
+        "Delete", 
+        "trash-2", 
+        async () => { 
+            if (!vehicleToDeleteId) return;
+            const result = await apiRequest(`/vehicle/${vehicleToDeleteId}`, 'DELETE');
+            if (result) { 
+                openInfoStatusModal("Success", "Vehicle record deleted successfully!", "success");
+                if(allFetchedVehiclesFromServer.length === 1 && currentVehiclePage > 1) {
+                    currentVehiclePage--;
+                }
+                await fetchVehicles(); 
+            }
+            vehicleToDeleteId = null; 
         }
-        closeAddVehicleModal(); currentVehiclePage = 1; renderVehiclesTable(); res();
-      }, 100);
-    });
+      );
   }
 
-  function openConfirmDeleteVehicleModal(id) { vehicleToDeleteId = id; document.getElementById('confirmDeleteVehicleModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
-  function closeConfirmDeleteVehicleModal() { vehicleToDeleteId = null; document.getElementById('confirmDeleteVehicleModal').classList.add('hidden'); document.body.style.overflow = ''; }
-  async function confirmDeleteVehicle() {
-    if (!vehicleToDeleteId) return;
-    return new Promise(res => {
-      setTimeout(() => {
-        allVehicles = allVehicles.filter(r => r.id !== vehicleToDeleteId);
-        closeConfirmDeleteVehicleModal();
-        if (document.getElementById('vehiclesBody').childElementCount === 1 && currentVehiclePage > 1 && allVehicles.length > 0) { currentVehiclePage--; }
-        renderVehiclesTable(); alert('Vehicle record deleted (mock)!'); res();
-      }, 100);
-    });
+  function applyVehicleDateFilter(filterType) {
+    activeVehicleDateFilter = filterType; 
+    customVehicleFilterStartDate = null; 
+    customVehicleFilterEndDate = null;
+    document.getElementById('vehicleCustomDateRange').classList.add('hidden');
+    setActiveVehicleDateFilterButton(filterType); 
+    currentVehiclePage = 1; 
+    fetchVehicles(); 
   }
 
-  function exportVehiclesExcel() {
-    let rTD = [...allVehicles]; 
-    if (activeVehicleDateFilter !== 'all') { let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? {startDate:customVehicleFilterStartDate,endDate:customVehicleFilterEndDate} : getDateRange(activeVehicleDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordRegDate = getISODateString(new Date(r.registration_date)); return recordRegDate >= range.startDate && recordRegDate <= range.endDate; }); } }
-    const sT = document.getElementById('vehicleSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.plate_number&&r.plate_number.toLowerCase().includes(sT)) || (r.vin&&r.vin.toLowerCase().includes(sT)) || (mockVehicleMakes.find(m=>m.id===r.make)?.name.toLowerCase().includes(sT)) || (mockVehicleModels.find(m=>m.id===r.model)?.name.toLowerCase().includes(sT)) ); }
-    const wsD = rTD.map(r => ({ 
-        ID:r.id, Make:mockVehicleMakes.find(m=>m.id===r.make)?.name||r.make, Model:mockVehicleModels.find(m=>m.id===r.model)?.name||r.model, Year:r.year, 
-        'Plate #':r.plate_number, VIN: r.vin, Color: r.color, Mileage:r.mileage, 'Engine (L)':r.engine_size, Type:mockVehicleTypes.find(vt=>vt.id===r.vehicle_type)?.name||r.vehicle_type,
-        Transmission:mockVehicleTransmissions.find(vt=>vt.id===r.vehicle_transmission)?.name||r.vehicle_transmission, 'Fuel Type':mockFuelTypes.find(ft=>ft.id===r.vehicle_fuel_type)?.name||r.vehicle_fuel_type,
-        'Purchase Price':r.purchase_price, 'Purchase Date':new Date(r.purchase_date).toLocaleDateString(), Status:r.status.replace('_',' '), 'Registered At':new Date(r.registration_date).toLocaleString() 
+  function toggleVehicleCustomDateRange() {
+    document.getElementById('vehicleCustomDateRange').classList.toggle('hidden');
+    if (!document.getElementById('vehicleCustomDateRange').classList.contains('hidden')) {
+        setActiveVehicleDateFilterButton('vehicle-filter-custom-btn');
+    } else if (activeVehicleDateFilter === 'custom') { 
+        applyVehicleDateFilter('all');
+    }
+  }
+
+  function applyVehicleCustomDateFilter() {
+    const startDate = document.getElementById('vehicleCustomStartDate').value;
+    const endDate = document.getElementById('vehicleCustomEndDate').value;
+    if (!startDate || !endDate) { openInfoStatusModal("Input Error", "Please select both start and end dates.", "error"); return; }
+    if (new Date(startDate) > new Date(endDate)) { openInfoStatusModal("Input Error", "Start date cannot be after end date.", "error"); return; }
+    
+    activeVehicleDateFilter = 'custom'; 
+    customVehicleFilterStartDate = startDate; 
+    customVehicleFilterEndDate = endDate;
+    setActiveVehicleDateFilterButton('vehicle-filter-custom-btn'); 
+    currentVehiclePage = 1; 
+    fetchVehicles(); 
+  }
+  
+  function getExportData() {
+    let recordsToExport = [...allFetchedVehiclesFromServer]; 
+    if (activeVehicleDateFilter !== 'all') {
+        let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) 
+                    ? { startDate: customVehicleFilterStartDate, endDate: customVehicleFilterEndDate } 
+                    : getDateRange(activeVehicleDateFilter);
+        if (range.startDate && range.endDate) {
+            recordsToExport = recordsToExport.filter(r => {
+                const recordRegDate = getISODateString(new Date(r.registration_date));
+                return recordRegDate >= range.startDate && recordRegDate <= range.endDate;
+            });
+        }
+    }
+    const searchTerm = document.getElementById('vehicleSearch').value.toLowerCase();
+    if (searchTerm) {
+        recordsToExport = recordsToExport.filter(r =>
+            (r.id && r.id.toString().includes(searchTerm)) ||
+            (r.plate_number && r.plate_number.toLowerCase().includes(searchTerm)) ||
+            (r.vin && r.vin.toLowerCase().includes(searchTerm)) ||
+            (vehicleMakesData.find(m => m.id === r.make)?.vehicle_make.toLowerCase().includes(searchTerm)) ||
+            (vehicleModelsData.find(mod => mod.id === r.model)?.vehicle_model.toLowerCase().includes(searchTerm)) ||
+            (r.year && r.year.toString().includes(searchTerm)) ||
+            (r.status && r.status.toLowerCase().includes(searchTerm))
+        );
+    }
+    return recordsToExport;
+  }
+
+  function exportVehiclesExcel() { 
+    if (!getAuthToken() && allFetchedVehiclesFromServer.length === 0) {
+        openInfoStatusModal("Export Error", "Please log in to export vehicle data, or ensure data is loaded.", "error"); return;
+    }
+    const recordsToExport = getExportData();
+    if (recordsToExport.length === 0) { openInfoStatusModal("Export Info", "No data to export based on current filters.", "info"); return; }
+
+    const wsData = recordsToExport.map(r => ({ 
+        'ID': r.id, 
+        'Make': vehicleMakesData.find(m=>m.id===r.make)?.vehicle_make || `MakeID ${r.make}`, 
+        'Model': vehicleModelsData.find(mod=>mod.id === r.model)?.vehicle_model || `ModelID ${r.model}`, 
+        'Year': r.year, 'Plate #': r.plate_number, 'VIN': r.vin, 'Color': r.color, 
+        'Mileage': r.mileage, 'Engine (L)': r.engine_size, 
+        'Type': vehicleTypesData.find(vt=>vt.id===r.vehicle_type)?.vehicle_type || `TypeID ${r.vehicle_type}`,
+        'Transmission': vehicleTransmissionsData.find(vt=>vt.id===r.vehicle_transmission)?.vehicle_transmission || `TransID ${r.vehicle_transmission}`, 
+        'Fuel Type': fuelTypesData.find(ft=>ft.id===r.vehicle_fuel_type)?.fuel_type || `FuelID ${r.vehicle_fuel_type}`,
+        'Purchase Price': r.purchase_price, 
+        'Purchase Date': new Date(r.purchase_date).toLocaleDateString(), 
+        'Status': r.status.replace('_',' '), 
+        'Registered At': new Date(r.registration_date).toLocaleString() 
     }));
-    const ws = XLSX.utils.json_to_sheet(wsD); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Vehicles"); XLSX.writeFile(wb, "vehicles_export.xlsx");
+    const ws = XLSX.utils.json_to_sheet(wsData); 
+    const wb = XLSX.utils.book_new(); 
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicles"); 
+    XLSX.writeFile(wb, "vehicles_export.xlsx");
   }
-  function exportVehiclesPDF() {
-    const {jsPDF} = window.jspdf; const doc = new jsPDF('l'); 
+
+  function exportVehiclesPDF() { 
+    if (!getAuthToken() && allFetchedVehiclesFromServer.length === 0) {
+        openInfoStatusModal("Export Error", "Please log in to export vehicle data, or ensure data is loaded.", "error"); return;
+    }
+    const {jsPDF} = window.jspdf; 
+    const doc = new jsPDF('l'); 
     doc.setFontSize(18); doc.text('Vehicle Records', 14, 15);
-    let rTD = [...allVehicles]; 
-    if (activeVehicleDateFilter !== 'all') { let range = (activeVehicleDateFilter === 'custom' && customVehicleFilterStartDate && customVehicleFilterEndDate) ? {startDate:customVehicleFilterStartDate,endDate:customVehicleFilterEndDate} : getDateRange(activeVehicleDateFilter); if (range.startDate && range.endDate) { rTD = rTD.filter(r => { const recordRegDate = getISODateString(new Date(r.registration_date)); return recordRegDate >= range.startDate && recordRegDate <= range.endDate; }); } }
-    const sT = document.getElementById('vehicleSearch').value.toLowerCase(); if (sT) { rTD = rTD.filter(r => (r.plate_number&&r.plate_number.toLowerCase().includes(sT)) || (r.vin&&r.vin.toLowerCase().includes(sT)) || (mockVehicleMakes.find(m=>m.id===r.make)?.name.toLowerCase().includes(sT)) || (mockVehicleModels.find(m=>m.id===r.model)?.name.toLowerCase().includes(sT)) ); }
-    const hdrs = [['ID', 'Make', 'Model', 'Year', 'Plate #', 'Mileage', 'Status', 'Registered']]; // Simplified for PDF
-    const data = rTD.map(r => [r.id, mockVehicleMakes.find(m=>m.id===r.make)?.name||r.make, mockVehicleModels.find(m=>m.id===r.model)?.name||r.model, r.year, r.plate_number, r.mileage.toLocaleString(), r.status.replace('_',' '), new Date(r.registration_date).toLocaleDateString()]);
-    doc.autoTable({ head:hdrs, body:data, startY:25, theme:'grid', headStyles:{fillColor:[59,130,246],textColor:255}, 
-        columnStyles: { 0:{cellWidth:10}, 4:{cellWidth:30}, 5:{cellWidth:25}} 
+    
+    const recordsToExport = getExportData();
+    if (recordsToExport.length === 0) { openInfoStatusModal("Export Info", "No data to export based on current filters.", "info"); return; }
+
+    const headers = [['ID', 'Make', 'Model', 'Year', 'Plate #', 'Mileage', 'Status', 'Registered']];
+    const data = recordsToExport.map(r => [ 
+        r.id, 
+        vehicleMakesData.find(m=>m.id===r.make)?.vehicle_make || `MakeID ${r.make}`, 
+        vehicleModelsData.find(mod => mod.id === r.model)?.vehicle_model || `ModelID ${r.model}`, 
+        r.year, r.plate_number, (r.mileage || 0).toLocaleString(), 
+        r.status.replace('_',' '), new Date(r.registration_date).toLocaleDateString()
+    ]);
+    
+    doc.autoTable({ 
+        head: headers, body: data, startY: 25, theme:'grid', 
+        headStyles:{fillColor:[59,130,246], textColor:255}, 
+        columnStyles: { 0:{cellWidth: 10}, 4:{cellWidth: 30}, 5:{cellWidth: 25}} 
     }); 
     doc.save('vehicles_export.pdf');
   }
-  // --- End Vehicle Section ---
 </script>
 </body>
 </html>
-
-
-
