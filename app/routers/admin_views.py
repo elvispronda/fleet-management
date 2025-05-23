@@ -7,39 +7,27 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(prefix="/admin" ,
+    #dependencies=[Depends(get_current_user)],
     tags=["Admin Views"],
     # prefix="/admin" # Optional: if you want all routes here to start with /admin
 )
 
 @router.get("/loginpage", response_class=HTMLResponse, name="login_page_html")
 async def get_login_page(request: Request):
-    # Check if user is already logged in (e.g., via a cookie or by trying to get current_user)
-    # For simplicity, just serving the page. A more robust check could be added.
+  
     return templates.TemplateResponse("login.html", {"request": request})
 
 @router.get("/admin", response_class=HTMLResponse, name="admin_dashboard_html")
 async def get_admin_dashboard(request: Request):
-    # This route serves the admin.html page.
-    # The actual check for a valid token in localStorage happens client-side in admin.html's JS.
-    # If you wanted server-side protection for this HTML page itself (e.g., if it contained
-    # sensitive data rendered directly by Jinja), you would add Depends(oauth2.get_current_user) here.
-    # However, for SPAs or client-heavy pages, client-side check is common.
+  
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
-# Example of a server-side protected HTML page (alternative to client-side check)
-# from .. import oauth2, models
-# @router.get("/admin-protected", response_class=HTMLResponse)
-# async def get_admin_dashboard_protected(request: Request, current_user: models.User = Depends(oauth2.get_current_user)):
-#     return templates.TemplateResponse("admin.html", {"request": request, "user": current_user})
 
 
 @router.get("/analytics", response_class=HTMLResponse, name="analytics_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
 
-@router.get("/analytics", response_class=HTMLResponse, name="analytics_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("analytics.html", {"request": request})
 
 @router.get("/user", response_class=HTMLResponse, name="user_page_html")
 async def get_page(request: Request):
@@ -49,9 +37,6 @@ async def get_page(request: Request):
 async def get_page(request: Request):
     return templates.TemplateResponse("driver.html", {"request": request})
 
-@router.get("/copydriver", response_class=HTMLResponse, name="copydriver_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copydriver.html", {"request": request})
 
 @router.get("/vehicle", response_class=HTMLResponse, name="vehicle_page_html")
 async def get_page(request: Request):
@@ -61,49 +46,23 @@ async def get_page(request: Request):
 async def get_page(request: Request):
     return templates.TemplateResponse("maintenance.html", {"request": request})
 
-@router.get("/copymaintenance", response_class=HTMLResponse, name="copymaintenance_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copymaintenance.html", {"request": request})
 
 @router.get("/reparation", response_class=HTMLResponse, name="reparation_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("reparation.html", {"request": request})
 
 
-@router.get("/copyreparation", response_class=HTMLResponse, name="copyreparation_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copyreparation.html", {"request": request})
-
 @router.get("/panne", response_class=HTMLResponse, name="panne_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("panne.html", {"request": request})
 
-@router.get("/copypanne", response_class=HTMLResponse, name="copypanne_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copypanne.html", {"request": request})
 
 @router.get("/fuel", response_class=HTMLResponse, name="fuel_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("fuel.html", {"request": request})
 
-@router.get("/copyfuel", response_class=HTMLResponse, name="copyfuel_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copyfuel.html", {"request": request})
 
 @router.get("/trip", response_class=HTMLResponse, name="trip_page_html")
 async def get_page(request: Request):
     return templates.TemplateResponse("trip.html", {"request": request})
 
-@router.get("/copytrip", response_class=HTMLResponse, name="copytrip_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copytrip.html", {"request": request})
-
-
-@router.get("/copyuser", response_class=HTMLResponse, name="copyuser_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copyuser.html", {"request": request})
-
-
-@router.get("/copyvehicle", response_class=HTMLResponse, name="copyvehicle_page_html")
-async def get_page(request: Request):
-    return templates.TemplateResponse("copyvehicle.html", {"request": request})
