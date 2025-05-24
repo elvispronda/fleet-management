@@ -24,8 +24,8 @@ def get_panne_categories(db:Session = Depends(get_db),limit : int = 20, skip : i
               
   
     ##filter all panne categories at the same time
-    users = db.query(models.CategoryPanne).filter(models.CategoryPanne.panne_name.contains(search)).limit(limit).offset(skip).all()
-    return users 
+    pannes = db.query(models.CategoryPanne).filter(models.CategoryPanne.panne_name.contains(search)).limit(limit).offset(skip).all()
+    return pannes
 ############################################################################################################################
 
 @router.get("/{id}", response_model=schemas.CategoryPanneOut)
